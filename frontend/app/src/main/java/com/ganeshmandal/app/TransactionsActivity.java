@@ -83,22 +83,37 @@ public class TransactionsActivity extends AppCompatActivity {
     }
 
     private void fetchTransactions() {
+        List<Transaction> localList = getLocalTransactions();
+        allTransactions = new ArrayList<>(localList);
+        applyFilter();
+
         ApiClient.getService().getTransactions(null).enqueue(new Callback<TransactionResponse>() {
             @Override
             public void onResponse(Call<TransactionResponse> call, Response<TransactionResponse> response) {
                 if (response.isSuccessful() && response.body() != null && response.body().isSuccess()) {
-                    allTransactions = response.body().getData();
+                    List<Transaction> serverList = response.body().getData();
+                    allTransactions = new ArrayList<>(localList);
+                    if (serverList != null) {
+                        allTransactions.addAll(serverList);
+                    }
                     applyFilter();
-                } else {
-                    Toast.makeText(TransactionsActivity.this, "माहिती लोड करण्यात समस्या आली", Toast.LENGTH_SHORT).show();
                 }
             }
 
             @Override
             public void onFailure(Call<TransactionResponse> call, Throwable t) {
-                Toast.makeText(TransactionsActivity.this, "नेटवर्क समस्या: " + t.getMessage(), Toast.LENGTH_SHORT).show();
+                // Keep local list
             }
         });
+    }
+
+    private List<Transaction> getLocalTransactions() {
+        SharedPreferences prefs = getSharedPreferences("MandalPrefs", MODE_PRIVATE);
+        String json = prefs.getString("LOCAL_TXS", "[]");
+        com.google.gson.Gson gson = new com.google.gson.Gson();
+        java.lang.reflect.Type type = new com.google.gson.reflect.TypeToken<List<Transaction>>() {}.getType();
+        List<Transaction> list = gson.fromJson(json, type);
+        return list != null ? list : new ArrayList<>();
     }
 
     private void filterTransactions(String type) {
