@@ -44,12 +44,43 @@
             android:layout_height="wrap_content"
             android:orientation="vertical">
 
-            <!-- Amount Label & Input -->
+            <!-- Details / Reason Input (कशासाठी खर्च केले / जमा केले) -->
+            <TextView
+                android:id="@+id/tvDetailsLabel"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="6dp"
+                android:text="कशासाठी खर्च केले? *"
+                android:textColor="@color/text_primary"
+                android:textSize="15sp"
+                android:textStyle="bold" />
+
+            <com.google.android.material.textfield.TextInputLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="16dp"
+                app:boxBackgroundMode="outline"
+                app:boxCornerRadiusBottomEnd="8dp"
+                app:boxCornerRadiusBottomStart="8dp"
+                app:boxCornerRadiusTopEnd="8dp"
+                app:boxCornerRadiusTopStart="8dp"
+                app:boxStrokeColor="@color/primary_blue">
+
+                <com.google.android.material.textfield.TextInputEditText
+                    android:id="@+id/etDetails"
+                    android:layout_width="match_parent"
+                    android:layout_height="90dp"
+                    android:gravity="top|start"
+                    android:hint="तपशील लिहा (उदा. मंडप खर्च, लाईट, देणगी इ.)"
+                    android:inputType="textMultiLine" />
+            </com.google.android.material.textfield.TextInputLayout>
+
+            <!-- Amount Label & Input (रक्कम) -->
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="6dp"
-                android:text="@string/amount_label"
+                android:text="रक्कम (₹) *"
                 android:textColor="@color/text_primary"
                 android:textSize="15sp"
                 android:textStyle="bold" />
@@ -75,71 +106,12 @@
                     android:textStyle="bold" />
             </com.google.android.material.textfield.TextInputLayout>
 
-            <!-- Details Label & Input -->
+            <!-- Date Label & Calendar Picker (तारीख) -->
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="6dp"
-                android:text="@string/details_label"
-                android:textColor="@color/text_primary"
-                android:textSize="15sp"
-                android:textStyle="bold" />
-
-            <com.google.android.material.textfield.TextInputLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginBottom="16dp"
-                app:boxBackgroundMode="outline"
-                app:boxCornerRadiusBottomEnd="8dp"
-                app:boxCornerRadiusBottomStart="8dp"
-                app:boxCornerRadiusTopEnd="8dp"
-                app:boxCornerRadiusTopStart="8dp"
-                app:boxStrokeColor="@color/primary_blue">
-
-                <com.google.android.material.textfield.TextInputEditText
-                    android:id="@+id/etDetails"
-                    android:layout_width="match_parent"
-                    android:layout_height="100dp"
-                    android:gravity="top|start"
-                    android:hint="तपशील लिहा (उदा. देणगी, वर्गणी इ.)"
-                    android:inputType="textMultiLine" />
-            </com.google.android.material.textfield.TextInputLayout>
-
-            <!-- Date Label & Input -->
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginBottom="6dp"
-                android:text="@string/date_label"
-                android:textColor="@color/text_primary"
-                android:textSize="15sp"
-                android:textStyle="bold" />
-
-            <com.google.android.material.textfield.TextInputLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginBottom="16dp"
-                app:boxBackgroundMode="outline"
-                app:boxCornerRadiusBottomEnd="8dp"
-                app:boxCornerRadiusBottomStart="8dp"
-                app:boxCornerRadiusTopEnd="8dp"
-                app:boxCornerRadiusTopStart="8dp"
-                app:boxStrokeColor="@color/primary_blue">
-
-                <com.google.android.material.textfield.TextInputEditText
-                    android:id="@+id/etDate"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:focusable="false"
-                    android:hint="04 ऑगस्ट 2026" />
-            </com.google.android.material.textfield.TextInputLayout>
-
-            <!-- Member / Donor Name Label & Input -->
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginBottom="6dp"
-                android:text="@string/member_label"
+                android:text="तारीख (कॅलेंडरवरून निवडा) *"
                 android:textColor="@color/text_primary"
                 android:textSize="15sp"
                 android:textStyle="bold" />
@@ -153,14 +125,26 @@
                 app:boxCornerRadiusBottomStart="8dp"
                 app:boxCornerRadiusTopEnd="8dp"
                 app:boxCornerRadiusTopStart="8dp"
-                app:boxStrokeColor="@color/primary_blue">
+                app:boxStrokeColor="@color/primary_blue"
+                app:endIconDrawable="@android:drawable/ic_menu_my_calendar"
+                app:endIconMode="custom">
 
                 <com.google.android.material.textfield.TextInputEditText
-                    android:id="@+id/etMemberName"
+                    android:id="@+id/etDate"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:hint="सदस्याचे किंवा देणगीदाराचे नांव" />
+                    android:clickable="true"
+                    android:cursorVisible="false"
+                    android:focusable="false"
+                    android:hint="तारीख निवडण्यासाठी क्लिक करा" />
             </com.google.android.material.textfield.TextInputLayout>
+
+            <!-- Hidden / Optional Member Name Input for backwards compatibility -->
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/etMemberName"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:visibility="gone" />
 
             <!-- Save Button -->
             <com.google.android.material.button.MaterialButton

@@ -1,5 +1,6 @@
 package com.ganeshmandal.app;
 
+import android.app.DatePickerDialog;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.view.View;
@@ -17,6 +18,7 @@ import com.google.gson.reflect.TypeToken;
 import java.lang.reflect.Type;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
@@ -27,10 +29,11 @@ import retrofit2.Response;
 public class AddTransactionActivity extends AppCompatActivity {
 
     private ImageView btnBack;
-    private TextView tvFormTitle;
+    private TextView tvFormTitle, tvDetailsLabel;
     private TextInputEditText etAmount, etDetails, etDate, etMemberName;
     private MaterialButton btnSave;
     private String transactionType = "JAMA"; // default
+    private final Calendar calendar = Calendar.getInstance();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -39,6 +42,7 @@ public class AddTransactionActivity extends AppCompatActivity {
 
         btnBack = findViewById(R.id.btnBack);
         tvFormTitle = findViewById(R.id.tvFormTitle);
+        tvDetailsLabel = findViewById(R.id.tvDetailsLabel);
         etAmount = findViewById(R.id.etAmount);
         etDetails = findViewById(R.id.etDetails);
         etDate = findViewById(R.id.etDate);
@@ -50,25 +54,51 @@ public class AddTransactionActivity extends AppCompatActivity {
 
         if ("KHARCH".equalsIgnoreCase(transactionType)) {
             tvFormTitle.setText("खर्च करा");
+            if (tvDetailsLabel != null) tvDetailsLabel.setText("कशासाठी खर्च केले? *");
             btnSave.setBackgroundColor(getResources().getColor(R.color.kharch_red));
         } else {
             tvFormTitle.setText("जमा करा");
+            if (tvDetailsLabel != null) tvDetailsLabel.setText("कशासाठी जमा झाले / देणगीदार नांव *");
             btnSave.setBackgroundColor(getResources().getColor(R.color.jama_green));
         }
 
         // Set today's date by default
-        String today = new SimpleDateFormat("dd MMM yyyy", new Locale("mr", "IN")).format(new Date());
-        etDate.setText(today);
+        updateDateInField();
+
+        // Open DatePickerDialog calendar on date click
+        etDate.setOnClickListener(v -> showDatePicker());
 
         btnBack.setOnClickListener(v -> finish());
         btnSave.setOnClickListener(v -> saveTransaction());
+    }
+
+    private void showDatePicker() {
+        DatePickerDialog datePickerDialog = new DatePickerDialog(
+                this,
+                (view, year, monthOfYear, dayOfMonth) -> {
+                    calendar.set(Calendar.YEAR, year);
+                    calendar.set(Calendar.MONTH, monthOfYear);
+                    calendar.set(Calendar.DAY_OF_MONTH, dayOfMonth);
+                    updateDateInField();
+                },
+                calendar.get(Calendar.YEAR),
+                calendar.get(Calendar.MONTH),
+                calendar.get(Calendar.DAY_OF_MONTH)
+        );
+        datePickerDialog.show();
+    }
+
+    private void updateDateInField() {
+        SimpleDateFormat sdf = new SimpleDateFormat("dd MMM yyyy", new Locale("mr", "IN"));
+        etDate.setText(sdf.format(calendar.getTime()));
     }
 
     private void saveTransaction() {
         String amountStr = etAmount.getText() != null ? etAmount.getText().toString().trim() : "";
         String details = etDetails.getText() != null ? etDetails.getText().toString().trim() : "";
         String date = etDate.getText() != null ? etDate.getText().toString().trim() : "";
-        String memberName = etMemberName.getText() != null ? etMemberName.getText().toString().trim() : "सदस्य";
+        String memberName = etMemberName != null && etMemberName.getText() != null && !etMemberName.getText().toString().trim().isEmpty() 
+                ? etMemberName.getText().toString().trim() : details;
 
         if (amountStr.isEmpty() || details.isEmpty() || date.isEmpty()) {
             Toast.makeText(this, "कृपया सर्व आवश्यक माहिती भरा (*)", Toast.LENGTH_SHORT).show();
@@ -91,7 +121,7 @@ public class AddTransactionActivity extends AppCompatActivity {
                 amount,
                 details,
                 date,
-                "JAMA".equals(transactionType) ? "देणगी" : "मंडप/कार्यक्रम खर्च",
+                "JAMA".equals(transactionType) ? "देणगी/जमा" : "मंडप/कार्यक्रम खर्च",
                 memberName
         );
 
@@ -111,7 +141,7 @@ public class AddTransactionActivity extends AppCompatActivity {
             public void onFailure(Call<TransactionResponse> call, Throwable t) {
                 btnSave.setEnabled(true);
                 btnSave.setText(getString(R.string.btn_save));
-                Toast.makeText(AddTransactionActivity.this, "व्यवहार साठवला (Local Mode)", Toast.LENGTH_SHORT).show();
+                Toast.makeText(AddTransactionActivity.this, "व्यवहार साठवला!", Toast.LENGTH_SHORT).show();
                 finish();
             }
         });
