@@ -44,13 +44,48 @@
             android:layout_height="wrap_content"
             android:orientation="vertical">
 
-            <!-- Details / Reason Input (कशासाठी खर्च केले / जमा केले) -->
+            <!-- Member / Donor Name Section (Used for JAMA) -->
+            <LinearLayout
+                android:id="@+id/layoutMemberName"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="6dp"
+                    android:text="सदस्याचे किंवा देणगीदाराचे नांव *"
+                    android:textColor="@color/text_primary"
+                    android:textSize="15sp"
+                    android:textStyle="bold" />
+
+                <com.google.android.material.textfield.TextInputLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="16dp"
+                    app:boxBackgroundMode="outline"
+                    app:boxCornerRadiusBottomEnd="8dp"
+                    app:boxCornerRadiusBottomStart="8dp"
+                    app:boxCornerRadiusTopEnd="8dp"
+                    app:boxCornerRadiusTopStart="8dp"
+                    app:boxStrokeColor="@color/primary_blue">
+
+                    <com.google.android.material.textfield.TextInputEditText
+                        android:id="@+id/etMemberName"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:hint="नांव टाका (उदा. राम पाटील)" />
+                </com.google.android.material.textfield.TextInputLayout>
+            </LinearLayout>
+
+            <!-- Details / Reason Input -->
             <TextView
                 android:id="@+id/tvDetailsLabel"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="6dp"
-                android:text="कशासाठी खर्च केले? *"
+                android:text="तपशील *"
                 android:textColor="@color/text_primary"
                 android:textSize="15sp"
                 android:textStyle="bold" />
@@ -69,13 +104,13 @@
                 <com.google.android.material.textfield.TextInputEditText
                     android:id="@+id/etDetails"
                     android:layout_width="match_parent"
-                    android:layout_height="90dp"
+                    android:layout_height="80dp"
                     android:gravity="top|start"
-                    android:hint="तपशील लिहा (उदा. मंडप खर्च, लाईट, देणगी इ.)"
+                    android:hint="तपशील लिहा (उदा. वर्गणी, देणगी इ.)"
                     android:inputType="textMultiLine" />
             </com.google.android.material.textfield.TextInputLayout>
 
-            <!-- Amount Label & Input (रक्कम) -->
+            <!-- Amount Label & Input -->
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
@@ -106,7 +141,7 @@
                     android:textStyle="bold" />
             </com.google.android.material.textfield.TextInputLayout>
 
-            <!-- Date Label & Calendar Picker (तारीख) -->
+            <!-- Date Label & Calendar Picker -->
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
@@ -138,13 +173,6 @@
                     android:focusable="false"
                     android:hint="तारीख निवडण्यासाठी क्लिक करा" />
             </com.google.android.material.textfield.TextInputLayout>
-
-            <!-- Hidden / Optional Member Name Input for backwards compatibility -->
-            <com.google.android.material.textfield.TextInputEditText
-                android:id="@+id/etMemberName"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:visibility="gone" />
 
             <!-- Save Button -->
             <com.google.android.material.button.MaterialButton

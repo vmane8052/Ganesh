@@ -5,6 +5,7 @@ import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 import androidx.appcompat.app.AppCompatActivity;
@@ -30,6 +31,7 @@ public class AddTransactionActivity extends AppCompatActivity {
 
     private ImageView btnBack;
     private TextView tvFormTitle, tvDetailsLabel;
+    private LinearLayout layoutMemberName;
     private TextInputEditText etAmount, etDetails, etDate, etMemberName;
     private MaterialButton btnSave;
     private String transactionType = "JAMA"; // default
@@ -43,6 +45,7 @@ public class AddTransactionActivity extends AppCompatActivity {
         btnBack = findViewById(R.id.btnBack);
         tvFormTitle = findViewById(R.id.tvFormTitle);
         tvDetailsLabel = findViewById(R.id.tvDetailsLabel);
+        layoutMemberName = findViewById(R.id.layoutMemberName);
         etAmount = findViewById(R.id.etAmount);
         etDetails = findViewById(R.id.etDetails);
         etDate = findViewById(R.id.etDate);
@@ -55,10 +58,12 @@ public class AddTransactionActivity extends AppCompatActivity {
         if ("KHARCH".equalsIgnoreCase(transactionType)) {
             tvFormTitle.setText("खर्च करा");
             if (tvDetailsLabel != null) tvDetailsLabel.setText("कशासाठी खर्च केले? *");
+            if (layoutMemberName != null) layoutMemberName.setVisibility(View.GONE);
             btnSave.setBackgroundColor(getResources().getColor(R.color.kharch_red));
         } else {
             tvFormTitle.setText("जमा करा");
-            if (tvDetailsLabel != null) tvDetailsLabel.setText("कशासाठी जमा झाले / देणगीदार नांव *");
+            if (tvDetailsLabel != null) tvDetailsLabel.setText("तपशील (उदा. देणगी, वर्गणी इ.) *");
+            if (layoutMemberName != null) layoutMemberName.setVisibility(View.VISIBLE);
             btnSave.setBackgroundColor(getResources().getColor(R.color.jama_green));
         }
 
@@ -97,11 +102,16 @@ public class AddTransactionActivity extends AppCompatActivity {
         String amountStr = etAmount.getText() != null ? etAmount.getText().toString().trim() : "";
         String details = etDetails.getText() != null ? etDetails.getText().toString().trim() : "";
         String date = etDate.getText() != null ? etDate.getText().toString().trim() : "";
-        String memberName = etMemberName != null && etMemberName.getText() != null && !etMemberName.getText().toString().trim().isEmpty() 
-                ? etMemberName.getText().toString().trim() : details;
+        String memberName = etMemberName != null && etMemberName.getText() != null && !etMemberName.getText().toString().trim().isEmpty()
+                ? etMemberName.getText().toString().trim() : ("KHARCH".equals(transactionType) ? "मंडळ खर्च" : "सदस्य");
 
         if (amountStr.isEmpty() || details.isEmpty() || date.isEmpty()) {
             Toast.makeText(this, "कृपया सर्व आवश्यक माहिती भरा (*)", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        if ("JAMA".equals(transactionType) && (etMemberName == null || etMemberName.getText() == null || etMemberName.getText().toString().trim().isEmpty())) {
+            Toast.makeText(this, "कृपया सदस्याचे / देणगीदाराचे नांव टाका (*)", Toast.LENGTH_SHORT).show();
             return;
         }
 
@@ -121,7 +131,7 @@ public class AddTransactionActivity extends AppCompatActivity {
                 amount,
                 details,
                 date,
-                "JAMA".equals(transactionType) ? "देणगी/जमा" : "मंडप/कार्यक्रम खर्च",
+                "JAMA".equals(transactionType) ? "देणगी/वर्गणी" : "मंडप/कार्यक्रम खर्च",
                 memberName
         );
 
