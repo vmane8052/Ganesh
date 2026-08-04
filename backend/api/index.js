@@ -4,6 +4,9 @@ const cors = require('cors');
 const mongoose = require('mongoose');
 const { User, Transaction, Member, Event, Donation, Gallery } = require('../models');
 
+const dns = require('dns');
+try { dns.setServers(['8.8.8.8', '8.8.4.4']); } catch(e){}
+
 const app = express();
 app.use(cors());
 app.use(express.json());
@@ -12,7 +15,7 @@ app.use(express.json());
 let isConnected = false;
 async function connectDB() {
   if (isConnected) return;
-  const mongoURI = process.env.MONGODB_URI || 'mongodb://127.0.0.1:27017/ganesh_mandal';
+  const mongoURI = process.env.MONGODB_URI || 'mongodb+srv://vmane8052_db_user:TkcXsv15P0Ry2GWk@cluster0.t9mz6dx.mongodb.net/ganesh_mandal?retryWrites=true&w=majority';
   try {
     const db = await mongoose.connect(mongoURI, {
       useNewUrlParser: true,
