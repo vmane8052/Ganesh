@@ -8,7 +8,7 @@ import retrofit2.converter.gson.GsonConverterFactory;
 public class ApiClient {
     // For local emulator testing use http://10.0.2.2:5000/
     // When deployed to Vercel, replace with your Vercel HTTPS URL (e.g., https://ganesh-mandal.vercel.app/)
-    private static final String BASE_URL = "http://10.0.2.2:5000/";
+    private static final String BASE_URL = "https://ganesh-vmane8052s-projects.vercel.app/api/";
     private static Retrofit retrofit = null;
 
     public static ApiService getService() {
