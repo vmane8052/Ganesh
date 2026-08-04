@@ -19,4 +19,7 @@ public interface ApiService {
 
     @POST("api/transactions")
     Call<TransactionResponse> addTransaction(@Body Transaction transaction);
+
+    @retrofit2.http.DELETE("api/transactions/{id}")
+    Call<Void> deleteTransaction(@retrofit2.http.Path("id") String id);
 }

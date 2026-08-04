@@ -47,13 +47,26 @@
             android:textColor="@color/text_secondary"
             android:textSize="13sp" />
 
+        <!-- Admin Delete Button -->
+        <ImageView
+            android:id="@+id/btnDelete"
+            android:layout_width="28dp"
+            android:layout_height="28dp"
+            android:layout_alignParentEnd="true"
+            android:layout_centerVertical="true"
+            android:padding="4dp"
+            android:src="@android:drawable/ic_menu_delete"
+            android:visibility="gone"
+            app:tint="@color/kharch_red" />
+
         <!-- Amount (Right aligned) -->
         <TextView
             android:id="@+id/tvAmount"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_alignParentEnd="true"
+            android:layout_toStartOf="@id/btnDelete"
             android:layout_centerVertical="true"
+            android:layout_marginEnd="8dp"
             android:text="₹ 1,100"
             android:textColor="@color/jama_green"
             android:textSize="18sp"

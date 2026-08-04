@@ -61,6 +61,18 @@ public class TransactionsActivity extends AppCompatActivity {
 
         // CRITICAL REQUIREMENT: Show bottom Jama/Kharch buttons ONLY IF ADMIN
         layoutAdminActions.setVisibility(isAdmin ? View.VISIBLE : View.GONE);
+        adapter.setAdmin(isAdmin);
+
+        adapter.setListener((tx, pos) -> {
+            new androidx.appcompat.app.AlertDialog.Builder(TransactionsActivity.this)
+                    .setTitle("व्यवहार हटवा")
+                    .setMessage("तुम्हाला नक्की हा व्यवहार हटवायचा आहे का?")
+                    .setPositiveButton("हटवा", (dialog, which) -> {
+                        deleteTransactionLocalAndRemote(tx, pos);
+                    })
+                    .setNegativeButton("रद्द करा", null)
+                    .show();
+        });
 
         btnBack.setOnClickListener(v -> finish());
 
@@ -160,5 +172,36 @@ public class TransactionsActivity extends AppCompatActivity {
         tvTotalJama.setText(String.format(Locale.getDefault(), "₹ %.0f", totalJama));
         tvTotalKharch.setText(String.format(Locale.getDefault(), "₹ %.0f", totalKharch));
         tvBalance.setText(String.format(Locale.getDefault(), "₹ %.0f", balance));
+    }
+
+    private void deleteTransactionLocalAndRemote(Transaction tx, int pos) {
+        allTransactions.remove(tx);
+
+        SharedPreferences prefs = getSharedPreferences("MandalPrefs", MODE_PRIVATE);
+        String json = prefs.getString("LOCAL_TXS", "[]");
+        com.google.gson.Gson gson = new com.google.gson.Gson();
+        java.lang.reflect.Type type = new com.google.gson.reflect.TypeToken<List<Transaction>>() {}.getType();
+        List<Transaction> list = gson.fromJson(json, type);
+        if (list != null) {
+            List<Transaction> toKeep = new ArrayList<>();
+            for (Transaction item : list) {
+                if (!(item.getAmount() == tx.getAmount() && item.getDetails().equals(tx.getDetails()) && item.getDate().equals(tx.getDate()))) {
+                    toKeep.add(item);
+                }
+            }
+            prefs.edit().putString("LOCAL_TXS", gson.toJson(toKeep)).apply();
+        }
+
+        applyFilter();
+        Toast.makeText(this, "व्यवहार हटवला!", Toast.LENGTH_SHORT).show();
+
+        if (tx.getId() != null && !tx.getId().isEmpty()) {
+            ApiClient.getService().deleteTransaction(tx.getId()).enqueue(new Callback<Void>() {
+                @Override
+                public void onResponse(Call<Void> call, Response<Void> response) {}
+                @Override
+                public void onFailure(Call<Void> call, Throwable t) {}
+            });
+        }
     }
 }

@@ -99,6 +99,26 @@ app.post('/api/transactions', async (req, res) => {
   }
 });
 
+app.put('/api/transactions/:id', async (req, res) => {
+  try {
+    const { id } = req.params;
+    const updatedTx = await Transaction.findByIdAndUpdate(id, req.body, { new: true });
+    res.json({ success: true, data: updatedTx });
+  } catch (err) {
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
+
+app.delete('/api/transactions/:id', async (req, res) => {
+  try {
+    const { id } = req.params;
+    await Transaction.findByIdAndDelete(id);
+    res.json({ success: true, message: 'व्यवहार यशस्वीरीत्या हटवला' });
+  } catch (err) {
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
+
 // --- SUMMARY (एकूण जमा, खर्च आणि शिल्लक) ---
 app.get('/api/summary', async (req, res) => {
   try {
