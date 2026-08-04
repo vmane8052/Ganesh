@@ -1,13 +1,13 @@
 package com.ganeshmandal.app.api;
 
+import java.util.concurrent.TimeUnit;
 import okhttp3.OkHttpClient;
 import okhttp3.logging.HttpLoggingInterceptor;
 import retrofit2.Retrofit;
 import retrofit2.converter.gson.GsonConverterFactory;
 
 public class ApiClient {
-    // For local emulator testing use http://10.0.2.2:5000/
-    // When deployed to Vercel, replace with your Vercel HTTPS URL (e.g., https://ganesh-mandal.vercel.app/)
+    // When deployed to Vercel production
     private static final String BASE_URL = "https://ganesh-vmane8052s-projects.vercel.app/api/";
     private static Retrofit retrofit = null;
 
@@ -15,7 +15,12 @@ public class ApiClient {
         if (retrofit == null) {
             HttpLoggingInterceptor interceptor = new HttpLoggingInterceptor();
             interceptor.setLevel(HttpLoggingInterceptor.Level.BODY);
+
             OkHttpClient client = new OkHttpClient.Builder()
+                    .connectTimeout(10, TimeUnit.SECONDS)
+                    .readTimeout(10, TimeUnit.SECONDS)
+                    .writeTimeout(10, TimeUnit.SECONDS)
+                    .followRedirects(true)
                     .addInterceptor(interceptor)
                     .build();
 
