@@ -1,0 +1,21 @@
+# Node.js
+node_modules/
+.env
+npm-debug.log
+yarn-error.log
+.vercel/
+
+# Android Studio / Gradle
+*.iml
+.gradle/
+local.properties
+.idea/
+.DS_Store
+build/
+frontend/build/
+frontend/app/build/
+*.apk
+*.aab
+*.dex
+*.class
+*.log

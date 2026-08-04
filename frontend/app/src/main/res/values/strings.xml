@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">श्री गणेश मित्र मंडळ</string>
+    <string name="mandal_subtitle">माने/ देरे वस्ती</string>
+    <string name="ganapati_slogan">- || गणपती बाप्पा मोरया || -</string>
+
+    <string name="login_title">मंडळ लॉगिन</string>
+    <string name="phone_hint">मोबाईल नंबर (उदा. 9999999999)</string>
+    <string name="pin_hint">पिन (PIN - 4 अंकी)</string>
+    <string name="btn_login">लॉगिन करा</string>
+
+    <string name="menu_add_member">सदस्य ॲड करा</string>
+    <string name="menu_add_event">कार्यक्रम ॲड करा</string>
+    <string name="menu_add_donation_rate">देणगी दर व रक्कम</string>
+    <string name="menu_upload_photo">फोटो अपलोड करा</string>
+    <string name="menu_logout">लॉगआऊट</string>
+
+    <string name="grid_paise_vyavahar">पैसे व्यवहार</string>
+    <string name="grid_sadasya">सदस्य</string>
+    <string name="grid_karyakram">कार्यक्रम</string>
+    <string name="grid_denagi">देणगी</string>
+
+    <string name="nav_dashboard">डॅशबोर्ड</string>
+    <string name="nav_vyavahar">व्यवहार</string>
+    <string name="nav_sadasya">सदस्य</string>
+    <string name="nav_profile">प्रोफाईल</string>
+
+    <string name="tab_jama">⬇ जमा</string>
+    <string name="tab_kharch">⬆ खर्च</string>
+    <string name="btn_jama_kara">⬇ जमा करा</string>
+    <string name="btn_kharch_kara">⬆ खर्च करा</string>
+
+    <string name="form_title_jama">जमा करा</string>
+    <string name="form_title_kharch">खर्च करा</string>
+    <string name="amount_label">रक्कम *</string>
+    <string name="details_label">तपशील *</string>
+    <string name="date_label">दिनांक *</string>
+    <string name="member_label">सदस्य / नांव *</string>
+    <string name="btn_save">💾 साठवा</string>
+</resources>

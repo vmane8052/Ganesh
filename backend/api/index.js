@@ -1,0 +1,209 @@
+require('dotenv').config();
+const express = require('express');
+const cors = require('cors');
+const mongoose = require('mongoose');
+const { User, Transaction, Member, Event, Donation, Gallery } = require('../models');
+
+const app = express();
+app.use(cors());
+app.use(express.json());
+
+// MongoDB connection with caching for serverless environments (Vercel)
+let isConnected = false;
+async function connectDB() {
+  if (isConnected) return;
+  const mongoURI = process.env.MONGODB_URI || 'mongodb://127.0.0.1:27017/ganesh_mandal';
+  try {
+    const db = await mongoose.connect(mongoURI, {
+      useNewUrlParser: true,
+      useUnifiedTopology: true,
+    });
+    isConnected = db.connections[0].readyState;
+    console.log('Connected to MongoDB');
+
+    // Seed default Admin & User for testing
+    const adminExists = await User.findOne({ phone: '9999999999' });
+    if (!adminExists) {
+      await User.create({ name: 'मुख्य व्यवस्थापक (Admin)', phone: '9999999999', pin: '1234', role: 'ADMIN' });
+      await User.create({ name: 'सामान्य सदस्य (User)', phone: '8888888888', pin: '1234', role: 'USER' });
+      console.log('Seeded default Admin (9999999999 / PIN: 1234) and User (8888888888 / PIN: 1234)');
+    }
+  } catch (err) {
+    console.error('MongoDB connection error:', err);
+  }
+}
+
+// Middleware to ensure DB connection before route handling
+app.use(async (req, res, next) => {
+  await connectDB();
+  next();
+});
+
+// Health check endpoint
+app.get('/api/health', (req, res) => {
+  res.json({ status: 'OK', message: 'श्री गणेश मित्र मंडळ API is running smoothly!' });
+});
+
+// --- AUTH / LOGIN ---
+app.post('/api/login', async (req, res) => {
+  try {
+    const { phone, pin } = req.body;
+    if (!phone || !pin) {
+      return res.status(400).json({ success: false, message: 'कृपया मोबाईल नंबर आणि पिन टाका' });
+    }
+    const user = await User.findOne({ phone, pin });
+    if (!user) {
+      return res.status(401).json({ success: false, message: 'चुकीचा मोबाईल नंबर किंवा पिन' });
+    }
+    res.json({
+      success: true,
+      user: {
+        id: user._id,
+        name: user.name,
+        phone: user.phone,
+        role: user.role
+      }
+    });
+  } catch (err) {
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
+
+// --- TRANSACTIONS (जमा-खर्च) ---
+app.get('/api/transactions', async (req, res) => {
+  try {
+    const { type } = req.query; // optional filter by JAMA or KHARCH
+    const query = type ? { type } : {};
+    const transactions = await Transaction.find(query).sort({ createdAt: -1 });
+    res.json({ success: true, data: transactions });
+  } catch (err) {
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
+
+app.post('/api/transactions', async (req, res) => {
+  try {
+    const { type, amount, details, date, category, memberName, addedBy } = req.body;
+    if (!type || !amount || !details || !date) {
+      return res.status(400).json({ success: false, message: 'सर्व आवश्यक माहिती भरा' });
+    }
+    const newTx = await Transaction.create({
+      type, amount, details, date, category, memberName, addedBy
+    });
+    res.status(201).json({ success: true, data: newTx });
+  } catch (err) {
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
+
+// --- SUMMARY (एकूण जमा, खर्च आणि शिल्लक) ---
+app.get('/api/summary', async (req, res) => {
+  try {
+    const all = await Transaction.find();
+    let totalJama = 0;
+    let totalKharch = 0;
+    all.forEach(tx => {
+      if (tx.type === 'JAMA') totalJama += Number(tx.amount);
+      if (tx.type === 'KHARCH') totalKharch += Number(tx.amount);
+    });
+    res.json({
+      success: true,
+      summary: {
+        totalJama,
+        totalKharch,
+        balance: totalJama - totalKharch
+      }
+    });
+  } catch (err) {
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
+
+// --- MEMBERS (सदस्य) ---
+app.get('/api/members', async (req, res) => {
+  try {
+    const members = await Member.find().sort({ createdAt: -1 });
+    res.json({ success: true, data: members });
+  } catch (err) {
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
+
+app.post('/api/members', async (req, res) => {
+  try {
+    const { name, roleInMandal, phone, photoUrl } = req.body;
+    const member = await Member.create({ name, roleInMandal, phone, photoUrl });
+    res.status(201).json({ success: true, data: member });
+  } catch (err) {
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
+
+// --- EVENTS (कार्यक्रम) ---
+app.get('/api/events', async (req, res) => {
+  try {
+    const events = await Event.find().sort({ createdAt: -1 });
+    res.json({ success: true, data: events });
+  } catch (err) {
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
+
+app.post('/api/events', async (req, res) => {
+  try {
+    const { title, date, description, expenseAmount } = req.body;
+    const event = await Event.create({ title, date, description, expenseAmount });
+    res.status(201).json({ success: true, data: event });
+  } catch (err) {
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
+
+// --- DONATIONS (देणगी) ---
+app.get('/api/donations', async (req, res) => {
+  try {
+    const donations = await Donation.find().sort({ createdAt: -1 });
+    res.json({ success: true, data: donations });
+  } catch (err) {
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
+
+app.post('/api/donations', async (req, res) => {
+  try {
+    const { donorName, amount, date, details } = req.body;
+    const donation = await Donation.create({ donorName, amount, date, details });
+    res.status(201).json({ success: true, data: donation });
+  } catch (err) {
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
+
+// --- GALLERY (फोटो) ---
+app.get('/api/gallery', async (req, res) => {
+  try {
+    const photos = await Gallery.find().sort({ createdAt: -1 });
+    res.json({ success: true, data: photos });
+  } catch (err) {
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
+
+app.post('/api/gallery', async (req, res) => {
+  try {
+    const { title, imageUrl, uploadedBy } = req.body;
+    const photo = await Gallery.create({ title, imageUrl, uploadedBy });
+    res.status(201).json({ success: true, data: photo });
+  } catch (err) {
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
+
+const PORT = process.env.PORT || 5000;
+if (process.env.NODE_ENV !== 'production') {
+  app.listen(PORT, () => {
+    console.log(`Server listening on port ${PORT}`);
+  });
+}
+
+module.exports = app;

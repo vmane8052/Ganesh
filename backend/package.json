@@ -1,0 +1,22 @@
+{
+  "name": "ganesh-mandal-backend",
+  "version": "1.0.0",
+  "description": "Backend API for Shri Ganesh Mitra Mandal App (Vercel + MongoDB)",
+  "main": "api/index.js",
+  "scripts": {
+    "start": "node api/index.js",
+    "dev": "nodemon api/index.js"
+  },
+  "dependencies": {
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.5",
+    "express": "^4.19.2",
+    "mongoose": "^8.3.4"
+  },
+  "devDependencies": {
+    "nodemon": "^3.1.0"
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}

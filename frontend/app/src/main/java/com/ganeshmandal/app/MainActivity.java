@@ -1,0 +1,105 @@
+package com.ganeshmandal.app;
+
+import android.content.Intent;
+import android.content.SharedPreferences;
+import android.os.Bundle;
+import android.view.View;
+import android.widget.ImageView;
+import android.widget.TextView;
+import android.widget.Toast;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.cardview.widget.CardView;
+import androidx.core.view.GravityCompat;
+import androidx.drawerlayout.widget.DrawerLayout;
+
+public class MainActivity extends AppCompatActivity {
+
+    private DrawerLayout drawerLayout;
+    private ImageView btnMenu;
+    private CardView cardTransactions, cardMembers, cardEvents, cardDonations;
+    private TextView tvRoleTitle, menuAddMember, menuAddEvent, menuAddDonationRate, menuUploadPhoto, menuLogout;
+
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_main);
+
+        drawerLayout = findViewById(R.id.drawerLayout);
+        btnMenu = findViewById(R.id.btnMenu);
+
+        cardTransactions = findViewById(R.id.cardTransactions);
+        cardMembers = findViewById(R.id.cardMembers);
+        cardEvents = findViewById(R.id.cardEvents);
+        cardDonations = findViewById(R.id.cardDonations);
+
+        tvRoleTitle = findViewById(R.id.tvRoleTitle);
+        menuAddMember = findViewById(R.id.menuAddMember);
+        menuAddEvent = findViewById(R.id.menuAddEvent);
+        menuAddDonationRate = findViewById(R.id.menuAddDonationRate);
+        menuUploadPhoto = findViewById(R.id.menuUploadPhoto);
+        menuLogout = findViewById(R.id.menuLogout);
+
+        // Check user role from SharedPreferences
+        SharedPreferences prefs = getSharedPreferences("MandalPrefs", MODE_PRIVATE);
+        String role = prefs.getString("USER_ROLE", "USER");
+        String name = prefs.getString("USER_NAME", "सदस्य");
+
+        boolean isAdmin = "ADMIN".equalsIgnoreCase(role);
+
+        if (isAdmin) {
+            tvRoleTitle.setText("व्यवस्थापक (Admin)\n" + name);
+            menuAddMember.setVisibility(View.VISIBLE);
+            menuAddEvent.setVisibility(View.VISIBLE);
+            menuAddDonationRate.setVisibility(View.VISIBLE);
+            menuUploadPhoto.setVisibility(View.VISIBLE);
+        } else {
+            tvRoleTitle.setText("सामान्य सदस्य (User)\n" + name);
+            // Hide admin-only menu items for normal user
+            menuAddMember.setVisibility(View.GONE);
+            menuAddEvent.setVisibility(View.GONE);
+            menuAddDonationRate.setVisibility(View.GONE);
+            menuUploadPhoto.setVisibility(View.GONE);
+        }
+
+        // Open sidebar on menu click
+        btnMenu.setOnClickListener(v -> drawerLayout.openDrawer(GravityCompat.START));
+
+        // Navigation to Transactions list
+        cardTransactions.setOnClickListener(v -> {
+            Intent intent = new Intent(MainActivity.this, TransactionsActivity.class);
+            startActivity(intent);
+        });
+
+        cardMembers.setOnClickListener(v -> Toast.makeText(this, "सदस्य यादी लवकरच येत आहे", Toast.LENGTH_SHORT).show());
+        cardEvents.setOnClickListener(v -> Toast.makeText(this, "कार्यक्रम यादी लवकरच येत आहे", Toast.LENGTH_SHORT).show());
+        cardDonations.setOnClickListener(v -> Toast.makeText(this, "देणगी यादी लवकरच येत आहे", Toast.LENGTH_SHORT).show());
+
+        // Sidebar Actions
+        menuAddMember.setOnClickListener(v -> {
+            drawerLayout.closeDrawer(GravityCompat.START);
+            Toast.makeText(this, "नवीन सदस्य ॲड करा फॉर्म उघडत आहे...", Toast.LENGTH_SHORT).show();
+        });
+
+        menuAddEvent.setOnClickListener(v -> {
+            drawerLayout.closeDrawer(GravityCompat.START);
+            Toast.makeText(this, "नवीन कार्यक्रम ॲड करा फॉर्म उघडत आहे...", Toast.LENGTH_SHORT).show();
+        });
+
+        menuAddDonationRate.setOnClickListener(v -> {
+            drawerLayout.closeDrawer(GravityCompat.START);
+            Toast.makeText(this, "देणगी दर आणि रक्कम फॉर्म उघडत आहे...", Toast.LENGTH_SHORT).show();
+        });
+
+        menuUploadPhoto.setOnClickListener(v -> {
+            drawerLayout.closeDrawer(GravityCompat.START);
+            Toast.makeText(this, "फोटो अपलोड करा...", Toast.LENGTH_SHORT).show();
+        });
+
+        menuLogout.setOnClickListener(v -> {
+            prefs.edit().clear().apply();
+            Intent intent = new Intent(MainActivity.this, LoginActivity.class);
+            startActivity(intent);
+            finish();
+        });
+    }
+}
