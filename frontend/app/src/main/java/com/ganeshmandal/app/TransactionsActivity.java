@@ -24,6 +24,7 @@ import retrofit2.Response;
 public class TransactionsActivity extends AppCompatActivity {
 
     private ImageView btnBack, btnFilter;
+    private TextView tvTotalJama, tvTotalKharch, tvBalance;
     private MaterialButton tabJama, tabKharch, btnJamaKara, btnKharchKara;
     private RecyclerView rvTransactions;
     private LinearLayout layoutAdminActions;
@@ -38,6 +39,9 @@ public class TransactionsActivity extends AppCompatActivity {
 
         btnBack = findViewById(R.id.btnBack);
         btnFilter = findViewById(R.id.btnFilter);
+        tvTotalJama = findViewById(R.id.tvTotalJama);
+        tvTotalKharch = findViewById(R.id.tvTotalKharch);
+        tvBalance = findViewById(R.id.tvBalance);
         tabJama = findViewById(R.id.tabJama);
         tabKharch = findViewById(R.id.tabKharch);
         rvTransactions = findViewById(R.id.rvTransactions);
@@ -126,6 +130,7 @@ public class TransactionsActivity extends AppCompatActivity {
     }
 
     private void applyFilter() {
+        updateSummary();
         if (currentFilter == null) {
             adapter.setTransactions(allTransactions);
         } else {
@@ -137,5 +142,21 @@ public class TransactionsActivity extends AppCompatActivity {
             }
             adapter.setTransactions(filtered);
         }
+    }
+
+    private void updateSummary() {
+        double totalJama = 0;
+        double totalKharch = 0;
+        for (Transaction tx : allTransactions) {
+            if ("JAMA".equalsIgnoreCase(tx.getType())) {
+                totalJama += tx.getAmount();
+            } else if ("KHARCH".equalsIgnoreCase(tx.getType())) {
+                totalKharch += tx.getAmount();
+            }
+        }
+        double balance = totalJama - totalKharch;
+        tvTotalJama.setText(String.format(Locale.getDefault(), "₹ %.0f", totalJama));
+        tvTotalKharch.setText(String.format(Locale.getDefault(), "₹ %.0f", totalKharch));
+        tvBalance.setText(String.format(Locale.getDefault(), "₹ %.0f", balance));
     }
 }
