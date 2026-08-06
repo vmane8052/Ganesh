@@ -64,9 +64,55 @@ app.post('/api/login', async (req, res) => {
         id: user._id,
         name: user.name,
         phone: user.phone,
-        role: user.role
+        role: user.role,
+        roleInMandal: user.roleInMandal || (user.role === 'ADMIN' ? 'मुख्य व्यवस्थापक' : 'सामान्य सदस्य'),
+        photoUrl: user.photoUrl || ''
       }
     });
+  } catch (err) {
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
+
+// --- USERS / MEMBERS (सदस्य ॲड करणे) ---
+app.post('/api/users', async (req, res) => {
+  try {
+    const { name, phone, pin, role, roleInMandal, photoUrl } = req.body;
+    if (!name || !phone || !pin) {
+      return res.status(400).json({ success: false, message: 'नाव, मोबाईल नंबर आणि पासवर्ड आवश्यक आहेत' });
+    }
+    const existing = await User.findOne({ phone });
+    if (existing) {
+      return res.status(400).json({ success: false, message: 'हा मोबाईल नंबर आधीच नोंदणीकृत आहे' });
+    }
+    const newUser = await User.create({
+      name,
+      phone,
+      pin,
+      role: role || 'USER',
+      roleInMandal: roleInMandal || 'सदस्य',
+      photoUrl: photoUrl || ''
+    });
+    res.status(201).json({
+      success: true,
+      user: {
+        id: newUser._id,
+        name: newUser.name,
+        phone: newUser.phone,
+        role: newUser.role,
+        roleInMandal: newUser.roleInMandal,
+        photoUrl: newUser.photoUrl
+      }
+    });
+  } catch (err) {
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
+
+app.get('/api/users', async (req, res) => {
+  try {
+    const users = await User.find().sort({ createdAt: -1 });
+    res.json({ success: true, data: users });
   } catch (err) {
     res.status(500).json({ success: false, error: err.message });
   }

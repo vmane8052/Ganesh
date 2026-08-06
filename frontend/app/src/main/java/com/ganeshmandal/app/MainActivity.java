@@ -5,6 +5,7 @@ import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 import androidx.appcompat.app.AppCompatActivity;
@@ -18,6 +19,7 @@ public class MainActivity extends AppCompatActivity {
     private ImageView btnMenu;
     private CardView cardTransactions, cardMembers, cardEvents, cardDonations;
     private TextView tvRoleTitle, menuAddMember, menuAddEvent, menuAddDonationRate, menuUploadPhoto, menuLogout;
+    private LinearLayout navVyavahar, navSadasya, navProfile;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -39,6 +41,10 @@ public class MainActivity extends AppCompatActivity {
         menuUploadPhoto = findViewById(R.id.menuUploadPhoto);
         menuLogout = findViewById(R.id.menuLogout);
 
+        navVyavahar = findViewById(R.id.navVyavahar);
+        navSadasya = findViewById(R.id.navSadasya);
+        navProfile = findViewById(R.id.navProfile);
+
         // Check user role from SharedPreferences
         SharedPreferences prefs = getSharedPreferences("MandalPrefs", MODE_PRIVATE);
         String role = prefs.getString("USER_ROLE", "USER");
@@ -54,7 +60,6 @@ public class MainActivity extends AppCompatActivity {
             menuUploadPhoto.setVisibility(View.VISIBLE);
         } else {
             tvRoleTitle.setText("सामान्य सदस्य (User)\n" + name);
-            // Hide admin-only menu items for normal user
             menuAddMember.setVisibility(View.GONE);
             menuAddEvent.setVisibility(View.GONE);
             menuAddDonationRate.setVisibility(View.GONE);
@@ -70,34 +75,66 @@ public class MainActivity extends AppCompatActivity {
             startActivity(intent);
         });
 
-        cardMembers.setOnClickListener(v -> Toast.makeText(this, "सदस्य यादी लवकरच येत आहे", Toast.LENGTH_SHORT).show());
+        if (navVyavahar != null) {
+            navVyavahar.setOnClickListener(v -> {
+                Intent intent = new Intent(MainActivity.this, TransactionsActivity.class);
+                startActivity(intent);
+            });
+        }
+
+        cardMembers.setOnClickListener(v -> {
+            if (isAdmin) {
+                Intent intent = new Intent(MainActivity.this, AddMemberActivity.class);
+                startActivity(intent);
+            } else {
+                Intent intent = new Intent(MainActivity.this, ProfileActivity.class);
+                startActivity(intent);
+            }
+        });
+
+        if (navSadasya != null) {
+            navSadasya.setOnClickListener(v -> {
+                Intent intent = new Intent(MainActivity.this, ProfileActivity.class);
+                startActivity(intent);
+            });
+        }
+
+        if (navProfile != null) {
+            navProfile.setOnClickListener(v -> {
+                Intent intent = new Intent(MainActivity.this, ProfileActivity.class);
+                startActivity(intent);
+            });
+        }
+
         cardEvents.setOnClickListener(v -> Toast.makeText(this, "कार्यक्रम यादी लवकरच येत आहे", Toast.LENGTH_SHORT).show());
         cardDonations.setOnClickListener(v -> Toast.makeText(this, "देणगी यादी लवकरच येत आहे", Toast.LENGTH_SHORT).show());
 
         // Sidebar Actions
         menuAddMember.setOnClickListener(v -> {
             drawerLayout.closeDrawer(GravityCompat.START);
-            Toast.makeText(this, "नवीन सदस्य ॲड करा फॉर्म उघडत आहे...", Toast.LENGTH_SHORT).show();
+            Intent intent = new Intent(MainActivity.this, AddMemberActivity.class);
+            startActivity(intent);
         });
 
         menuAddEvent.setOnClickListener(v -> {
             drawerLayout.closeDrawer(GravityCompat.START);
-            Toast.makeText(this, "नवीन कार्यक्रम ॲड करा फॉर्म उघडत आहे...", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, "नवीन कार्यक्रम ॲड करा फॉर्म लवकरच येत आहे...", Toast.LENGTH_SHORT).show();
         });
 
         menuAddDonationRate.setOnClickListener(v -> {
             drawerLayout.closeDrawer(GravityCompat.START);
-            Toast.makeText(this, "देणगी दर आणि रक्कम फॉर्म उघडत आहे...", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, "देणगी दर आणि रक्कम फॉर्म लवकरच येत आहे...", Toast.LENGTH_SHORT).show();
         });
 
         menuUploadPhoto.setOnClickListener(v -> {
             drawerLayout.closeDrawer(GravityCompat.START);
-            Toast.makeText(this, "फोटो अपलोड करा...", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, "फोटो अपलोड करा लवकरच येत आहे...", Toast.LENGTH_SHORT).show();
         });
 
         menuLogout.setOnClickListener(v -> {
             prefs.edit().clear().apply();
             Intent intent = new Intent(MainActivity.this, LoginActivity.class);
+            intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
             startActivity(intent);
             finish();
         });

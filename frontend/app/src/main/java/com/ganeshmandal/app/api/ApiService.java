@@ -22,4 +22,10 @@ public interface ApiService {
 
     @retrofit2.http.DELETE("api/transactions/{id}")
     Call<Void> deleteTransaction(@retrofit2.http.Path("id") String id);
+
+    @POST("api/users")
+    Call<LoginResponse> addUser(@Body com.ganeshmandal.app.models.User user);
+
+    @GET("api/users")
+    Call<java.util.List<com.ganeshmandal.app.models.User>> getUsers();
 }
