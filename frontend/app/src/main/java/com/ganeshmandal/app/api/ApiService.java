@@ -27,5 +27,5 @@ public interface ApiService {
     Call<LoginResponse> addUser(@Body com.ganeshmandal.app.models.User user);
 
     @GET("api/users")
-    Call<java.util.List<com.ganeshmandal.app.models.User>> getUsers();
+    Call<com.ganeshmandal.app.models.UserListResponse> getUsers();
 }

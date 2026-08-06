@@ -82,19 +82,15 @@ public class MainActivity extends AppCompatActivity {
             });
         }
 
+        // Members List - Opens for BOTH Admin and Normal User
         cardMembers.setOnClickListener(v -> {
-            if (isAdmin) {
-                Intent intent = new Intent(MainActivity.this, AddMemberActivity.class);
-                startActivity(intent);
-            } else {
-                Intent intent = new Intent(MainActivity.this, ProfileActivity.class);
-                startActivity(intent);
-            }
+            Intent intent = new Intent(MainActivity.this, MembersActivity.class);
+            startActivity(intent);
         });
 
         if (navSadasya != null) {
             navSadasya.setOnClickListener(v -> {
-                Intent intent = new Intent(MainActivity.this, ProfileActivity.class);
+                Intent intent = new Intent(MainActivity.this, MembersActivity.class);
                 startActivity(intent);
             });
         }
