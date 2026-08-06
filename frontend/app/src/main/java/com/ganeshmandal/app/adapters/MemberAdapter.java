@@ -102,6 +102,18 @@ public class MemberAdapter extends RecyclerView.Adapter<MemberAdapter.MemberView
                 context.startActivity(intent);
             }
         });
+
+        // Open MemberDetailActivity on clicking item card
+        holder.itemView.setOnClickListener(v -> {
+            Intent intent = new Intent(context, com.ganeshmandal.app.MemberDetailActivity.class);
+            intent.putExtra("MEMBER_NAME", user.getName());
+            intent.putExtra("MEMBER_PHONE", user.getPhone());
+            intent.putExtra("MEMBER_PIN", user.getPin());
+            intent.putExtra("MEMBER_ROLE", user.getRole());
+            intent.putExtra("MEMBER_ROLE_IN_MANDAL", user.getRoleInMandal());
+            intent.putExtra("MEMBER_PHOTO_URL", user.getPhotoUrl());
+            context.startActivity(intent);
+        });
     }
 
     @Override

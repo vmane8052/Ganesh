@@ -118,6 +118,37 @@ app.get('/api/users', async (req, res) => {
   }
 });
 
+app.put('/api/users/phone/:phone', async (req, res) => {
+  try {
+    const { phone } = req.params;
+    const { name, pin, role, roleInMandal, photoUrl } = req.body;
+    const updatedUser = await User.findOneAndUpdate(
+      { phone },
+      { name, pin, role, roleInMandal, photoUrl },
+      { new: true }
+    );
+    if (!updatedUser) {
+      return res.status(404).json({ success: false, message: 'सदस्य सापडला नाही' });
+    }
+    res.json({ success: true, user: updatedUser });
+  } catch (err) {
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
+
+app.delete('/api/users/phone/:phone', async (req, res) => {
+  try {
+    const { phone } = req.params;
+    const deletedUser = await User.findOneAndDelete({ phone });
+    if (!deletedUser) {
+      return res.status(404).json({ success: false, message: 'सदस्य सापडला नाही' });
+    }
+    res.json({ success: true, message: 'सदस्य यशस्वीरित्या हटवला' });
+  } catch (err) {
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
+
 // --- TRANSACTIONS (जमा-खर्च) ---
 app.get('/api/transactions', async (req, res) => {
   try {

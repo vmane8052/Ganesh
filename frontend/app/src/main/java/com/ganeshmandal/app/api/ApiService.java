@@ -28,4 +28,10 @@ public interface ApiService {
 
     @GET("api/users")
     Call<com.ganeshmandal.app.models.UserListResponse> getUsers();
+
+    @retrofit2.http.PUT("api/users/phone/{phone}")
+    Call<LoginResponse> updateUser(@retrofit2.http.Path("phone") String phone, @Body com.ganeshmandal.app.models.User user);
+
+    @retrofit2.http.DELETE("api/users/phone/{phone}")
+    Call<Void> deleteUser(@retrofit2.http.Path("phone") String phone);
 }
