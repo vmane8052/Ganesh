@@ -8,23 +8,20 @@
     android:orientation="vertical"
     android:padding="24dp">
 
-    <!-- Header Banner -->
+    <!-- Header Banner Logo -->
     <androidx.cardview.widget.CardView
-        android:layout_width="100dp"
-        android:layout_height="100dp"
+        android:layout_width="110dp"
+        android:layout_height="110dp"
         android:layout_marginBottom="16dp"
-        app:cardBackgroundColor="@color/primary_blue"
-        app:cardCornerRadius="50dp"
+        app:cardBackgroundColor="@color/white"
+        app:cardCornerRadius="55dp"
         app:cardElevation="6dp">
 
-        <TextView
+        <ImageView
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:gravity="center"
-            android:text="ॐ"
-            android:textColor="@color/accent_orange"
-            android:textSize="54sp"
-            android:textStyle="bold" />
+            android:scaleType="centerCrop"
+            android:src="@drawable/app_logo" />
     </androidx.cardview.widget.CardView>
 
     <TextView
