@@ -22,8 +22,10 @@ import com.google.gson.reflect.TypeToken;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
@@ -96,25 +98,31 @@ public class MembersActivity extends AppCompatActivity {
     }
 
     private void loadMembers() {
+        SharedPreferences prefs = getSharedPreferences("MandalPrefs", MODE_PRIVATE);
+        Set<String> deletedPhones = prefs.getStringSet("DELETED_PHONES", new HashSet<>());
+
         Map<String, User> userMap = new HashMap<>();
 
-        // 1. Add Default Admin
-        User admin = new User("मुख्य व्यवस्थापक (Admin)", "9999999999", "1234", "ADMIN", "मुख्य व्यवस्थापक", "");
-        userMap.put("9999999999", admin);
+        // 1. Add Default Admin if not deleted
+        if (!deletedPhones.contains("9999999999")) {
+            User admin = new User("मुख्य व्यवस्थापक (Admin)", "9999999999", "1234", "ADMIN", "मुख्य व्यवस्थापक", "");
+            userMap.put("9999999999", admin);
+        }
 
-        // 2. Add Default User
-        User defaultUser = new User("गणेश विठ्ठल माने", "8888888888", "1234", "USER", "उपाध्यक्ष", "");
-        userMap.put("8888888888", defaultUser);
+        // 2. Add Default User if not deleted
+        if (!deletedPhones.contains("8888888888")) {
+            User defaultUser = new User("गणेश विठ्ठल माने", "8888888888", "1234", "USER", "उपाध्यक्ष", "");
+            userMap.put("8888888888", defaultUser);
+        }
 
-        // 3. Load locally saved members added by Admin from SharedPreferences
-        SharedPreferences prefs = getSharedPreferences("MandalPrefs", MODE_PRIVATE);
+        // 3. Load locally saved / updated members from SharedPreferences
         String localJson = prefs.getString("REGISTERED_USERS", "[]");
         Gson gson = new Gson();
         Type type = new TypeToken<List<User>>() {}.getType();
         List<User> localUsers = gson.fromJson(localJson, type);
         if (localUsers != null) {
             for (User u : localUsers) {
-                if (u.getPhone() != null && !u.getPhone().isEmpty()) {
+                if (u.getPhone() != null && !u.getPhone().isEmpty() && !deletedPhones.contains(u.getPhone())) {
                     userMap.put(u.getPhone(), u);
                 }
             }
@@ -130,8 +138,11 @@ public class MembersActivity extends AppCompatActivity {
                 if (response.isSuccessful() && response.body() != null && response.body().getData() != null) {
                     List<User> remoteUsers = response.body().getData();
                     for (User u : remoteUsers) {
-                        if (u.getPhone() != null && !u.getPhone().isEmpty()) {
-                            userMap.put(u.getPhone(), u);
+                        if (u.getPhone() != null && !u.getPhone().isEmpty() && !deletedPhones.contains(u.getPhone())) {
+                            // Local updates take priority over stale remote objects
+                            if (!userMap.containsKey(u.getPhone())) {
+                                userMap.put(u.getPhone(), u);
+                            }
                         }
                     }
                     allMembersList = new ArrayList<>(userMap.values());

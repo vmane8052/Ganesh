@@ -24,7 +24,9 @@ import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
@@ -156,23 +158,19 @@ public class MemberDetailActivity extends AppCompatActivity {
 
                     User updatedUser = new User(name, phone, pin, role, roleInMandal, photoUrl);
 
-                    // Update locally in SharedPreferences REGISTERED_USERS
+                    // 1. Update locally in SharedPreferences for guaranteed instant persistence
                     updateUserLocally(oldPhone, updatedUser);
+                    updateUi();
+                    Toast.makeText(MemberDetailActivity.this, "सदस्याची माहिती यशस्वीरित्या अपडेट झाली!", Toast.LENGTH_SHORT).show();
 
-                    // Sync update with MongoDB Atlas via API
+                    // 2. Sync update with MongoDB Atlas via API
                     ApiClient.getService().updateUser(oldPhone, updatedUser).enqueue(new Callback<LoginResponse>() {
                         @Override
-                        public void onResponse(Call<LoginResponse> call, Response<LoginResponse> response) {
-                            Toast.makeText(MemberDetailActivity.this, "सदस्याची माहिती यशस्वीरित्या अपडेट झाली!", Toast.LENGTH_SHORT).show();
-                        }
+                        public void onResponse(Call<LoginResponse> call, Response<LoginResponse> response) {}
 
                         @Override
-                        public void onFailure(Call<LoginResponse> call, Throwable t) {
-                            Toast.makeText(MemberDetailActivity.this, "माहिती अपडेट झाली (Local)", Toast.LENGTH_SHORT).show();
-                        }
+                        public void onFailure(Call<LoginResponse> call, Throwable t) {}
                     });
-
-                    updateUi();
                 })
                 .setNegativeButton("रद्द करा", null)
                 .show();
@@ -190,27 +188,33 @@ public class MemberDetailActivity extends AppCompatActivity {
     private void deleteMember() {
         String phoneToDelete = phone;
 
-        // Delete from local SharedPreferences REGISTERED_USERS
+        // 1. Mark user as deleted locally in SharedPreferences immediately
         deleteUserLocally(phoneToDelete);
 
-        // Delete from MongoDB Atlas cloud database
+        Toast.makeText(MemberDetailActivity.this, "सदस्य यशस्वीरित्या हटवला!", Toast.LENGTH_SHORT).show();
+
+        // 2. Sync deletion with MongoDB Atlas cloud database in background
         ApiClient.getService().deleteUser(phoneToDelete).enqueue(new Callback<Void>() {
             @Override
-            public void onResponse(Call<Void> call, Response<Void> response) {
-                Toast.makeText(MemberDetailActivity.this, "सदस्य यशस्वीरित्या हटवला!", Toast.LENGTH_SHORT).show();
-                finish();
-            }
+            public void onResponse(Call<Void> call, Response<Void> response) {}
 
             @Override
-            public void onFailure(Call<Void> call, Throwable t) {
-                Toast.makeText(MemberDetailActivity.this, "सदस्य हटवला (Local)", Toast.LENGTH_SHORT).show();
-                finish();
-            }
+            public void onFailure(Call<Void> call, Throwable t) {}
         });
+
+        finish();
     }
 
     private void updateUserLocally(String oldPhone, User updatedUser) {
         SharedPreferences prefs = getSharedPreferences("MandalPrefs", MODE_PRIVATE);
+
+        // Remove oldPhone from DELETED_PHONES if re-added/updated
+        Set<String> deletedSet = new HashSet<>(prefs.getStringSet("DELETED_PHONES", new HashSet<>()));
+        if (deletedSet.contains(oldPhone)) {
+            deletedSet.remove(oldPhone);
+            prefs.edit().putStringSet("DELETED_PHONES", deletedSet).apply();
+        }
+
         String json = prefs.getString("REGISTERED_USERS", "[]");
         Gson gson = new Gson();
         Type type = new TypeToken<List<User>>() {}.getType();
@@ -218,18 +222,30 @@ public class MemberDetailActivity extends AppCompatActivity {
         if (list == null) list = new ArrayList<>();
 
         List<User> updatedList = new ArrayList<>();
+        boolean found = false;
         for (User u : list) {
             if (u.getPhone() != null && u.getPhone().equals(oldPhone)) {
                 updatedList.add(updatedUser);
+                found = true;
             } else {
                 updatedList.add(u);
             }
+        }
+        if (!found) {
+            updatedList.add(0, updatedUser);
         }
         prefs.edit().putString("REGISTERED_USERS", gson.toJson(updatedList)).apply();
     }
 
     private void deleteUserLocally(String phoneToDelete) {
         SharedPreferences prefs = getSharedPreferences("MandalPrefs", MODE_PRIVATE);
+
+        // Add phone to DELETED_PHONES set
+        Set<String> deletedSet = new HashSet<>(prefs.getStringSet("DELETED_PHONES", new HashSet<>()));
+        deletedSet.add(phoneToDelete);
+        prefs.edit().putStringSet("DELETED_PHONES", deletedSet).apply();
+
+        // Remove from REGISTERED_USERS list
         String json = prefs.getString("REGISTERED_USERS", "[]");
         Gson gson = new Gson();
         Type type = new TypeToken<List<User>>() {}.getType();
