@@ -175,32 +175,33 @@
                     android:maxLength="6" />
             </com.google.android.material.textfield.TextInputLayout>
 
-            <!-- Role in Mandal Input -->
+            <!-- Role in Mandal Dropdown Input -->
             <TextView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="6dp"
-                android:text="मंडळातील पद / भूमिका"
+                android:text="मंडळातील पद / भूमिका *"
                 android:textColor="@color/text_primary"
                 android:textSize="15sp"
                 android:textStyle="bold" />
 
             <com.google.android.material.textfield.TextInputLayout
+                style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.ExposedDropdownMenu"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="32dp"
-                app:boxBackgroundMode="outline"
                 app:boxCornerRadiusBottomEnd="8dp"
                 app:boxCornerRadiusBottomStart="8dp"
                 app:boxCornerRadiusTopEnd="8dp"
                 app:boxCornerRadiusTopStart="8dp"
                 app:boxStrokeColor="@color/primary_blue">
 
-                <com.google.android.material.textfield.TextInputEditText
-                    android:id="@+id/etRoleInMandal"
+                <AutoCompleteTextView
+                    android:id="@+id/actvRoleInMandal"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:hint="उदा. सामान्य सदस्य / उपाध्यक्ष / कार्यकर्ते" />
+                    android:hint="पद निवडा (अध्यक्ष, उपाध्यक्ष...)"
+                    android:inputType="none" />
             </com.google.android.material.textfield.TextInputLayout>
 
             <!-- Save Member Button -->

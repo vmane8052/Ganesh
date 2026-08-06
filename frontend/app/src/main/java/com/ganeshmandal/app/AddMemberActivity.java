@@ -6,6 +6,8 @@ import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.os.Bundle;
 import android.util.Base64;
+import android.widget.ArrayAdapter;
+import android.widget.AutoCompleteTextView;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -32,9 +34,19 @@ public class AddMemberActivity extends AppCompatActivity {
 
     private ImageView btnBack, ivProfilePhoto;
     private TextView btnSelectPhoto;
-    private TextInputEditText etName, etPhone, etPin, etRoleInMandal;
+    private TextInputEditText etName, etPhone, etPin;
+    private AutoCompleteTextView actvRoleInMandal;
     private MaterialButton btnSaveMember;
     private String selectedPhotoBase64 = "";
+
+    private static final String[] MANDAL_ROLES = new String[] {
+            "अध्यक्ष",
+            "उपाध्यक्ष",
+            "सचिव",
+            "खजिनदार",
+            "कार्यकर्ते",
+            "सामान्य सदस्य"
+    };
 
     private final ActivityResultLauncher<String> photoPickerLauncher =
             registerForActivityResult(new ActivityResultContracts.GetContent(), uri -> {
@@ -67,8 +79,13 @@ public class AddMemberActivity extends AppCompatActivity {
         etName = findViewById(R.id.etName);
         etPhone = findViewById(R.id.etPhone);
         etPin = findViewById(R.id.etPin);
-        etRoleInMandal = findViewById(R.id.etRoleInMandal);
+        actvRoleInMandal = findViewById(R.id.actvRoleInMandal);
         btnSaveMember = findViewById(R.id.btnSaveMember);
+
+        // Populate Mandal Roles Dropdown
+        ArrayAdapter<String> adapter = new ArrayAdapter<>(this, android.R.layout.simple_dropdown_item_1line, MANDAL_ROLES);
+        actvRoleInMandal.setAdapter(adapter);
+        actvRoleInMandal.setText(MANDAL_ROLES[5], false); // Default: "सामान्य सदस्य"
 
         btnBack.setOnClickListener(v -> finish());
 
@@ -82,7 +99,7 @@ public class AddMemberActivity extends AppCompatActivity {
         String name = etName.getText() != null ? etName.getText().toString().trim() : "";
         String phone = etPhone.getText() != null ? etPhone.getText().toString().trim() : "";
         String pin = etPin.getText() != null ? etPin.getText().toString().trim() : "";
-        String roleInMandal = etRoleInMandal.getText() != null ? etRoleInMandal.getText().toString().trim() : "सामान्य सदस्य";
+        String roleInMandal = actvRoleInMandal.getText() != null ? actvRoleInMandal.getText().toString().trim() : "सामान्य सदस्य";
 
         if (name.isEmpty() || phone.isEmpty() || pin.isEmpty()) {
             Toast.makeText(this, "कृपया नाव, मोबाईल नंबर आणि पासवर्ड भरा (*)", Toast.LENGTH_SHORT).show();

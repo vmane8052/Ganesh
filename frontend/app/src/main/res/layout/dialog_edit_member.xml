@@ -89,7 +89,7 @@
                 android:maxLength="6" />
         </com.google.android.material.textfield.TextInputLayout>
 
-        <!-- Role in Mandal Input -->
+        <!-- Role in Mandal Dropdown Input -->
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -100,15 +100,17 @@
             android:textStyle="bold" />
 
         <com.google.android.material.textfield.TextInputLayout
+            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.ExposedDropdownMenu"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginBottom="16dp"
-            app:boxBackgroundMode="outline">
+            android:layout_marginBottom="16dp">
 
-            <com.google.android.material.textfield.TextInputEditText
-                android:id="@+id/etEditRoleInMandal"
+            <AutoCompleteTextView
+                android:id="@+id/actvEditRoleInMandal"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content" />
+                android:layout_height="wrap_content"
+                android:hint="पद निवडा (अध्यक्ष, उपाध्यक्ष...)"
+                android:inputType="none" />
         </com.google.android.material.textfield.TextInputLayout>
 
     </LinearLayout>

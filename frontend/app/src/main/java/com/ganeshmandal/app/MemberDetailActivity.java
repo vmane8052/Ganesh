@@ -9,6 +9,8 @@ import android.os.Bundle;
 import android.util.Base64;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.widget.ArrayAdapter;
+import android.widget.AutoCompleteTextView;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
@@ -40,6 +42,15 @@ public class MemberDetailActivity extends AppCompatActivity {
 
     private String name, phone, pin, role, roleInMandal, photoUrl;
     private boolean isAdmin = false;
+
+    private static final String[] MANDAL_ROLES = new String[] {
+            "अध्यक्ष",
+            "उपाध्यक्ष",
+            "सचिव",
+            "खजिनदार",
+            "कार्यकर्ते",
+            "सामान्य सदस्य"
+    };
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -129,12 +140,15 @@ public class MemberDetailActivity extends AppCompatActivity {
         TextInputEditText etEditName = dialogView.findViewById(R.id.etEditName);
         TextInputEditText etEditPhone = dialogView.findViewById(R.id.etEditPhone);
         TextInputEditText etEditPin = dialogView.findViewById(R.id.etEditPin);
-        TextInputEditText etEditRoleInMandal = dialogView.findViewById(R.id.etEditRoleInMandal);
+        AutoCompleteTextView actvEditRoleInMandal = dialogView.findViewById(R.id.actvEditRoleInMandal);
 
         etEditName.setText(name);
         etEditPhone.setText(phone);
         etEditPin.setText(pin);
-        etEditRoleInMandal.setText(roleInMandal);
+
+        ArrayAdapter<String> adapter = new ArrayAdapter<>(this, android.R.layout.simple_dropdown_item_1line, MANDAL_ROLES);
+        actvEditRoleInMandal.setAdapter(adapter);
+        actvEditRoleInMandal.setText(roleInMandal, false);
 
         new AlertDialog.Builder(this)
                 .setTitle("सदस्य माहिती अपडेट करा")
@@ -143,7 +157,7 @@ public class MemberDetailActivity extends AppCompatActivity {
                     String newName = etEditName.getText() != null ? etEditName.getText().toString().trim() : name;
                     String newPhone = etEditPhone.getText() != null ? etEditPhone.getText().toString().trim() : phone;
                     String newPin = etEditPin.getText() != null ? etEditPin.getText().toString().trim() : pin;
-                    String newRoleInMandal = etEditRoleInMandal.getText() != null ? etEditRoleInMandal.getText().toString().trim() : roleInMandal;
+                    String newRoleInMandal = actvEditRoleInMandal.getText() != null ? actvEditRoleInMandal.getText().toString().trim() : roleInMandal;
 
                     if (newName.isEmpty() || newPhone.isEmpty() || newPin.isEmpty()) {
                         Toast.makeText(this, "कृपया आवश्यक माहिती भरा", Toast.LENGTH_SHORT).show();
