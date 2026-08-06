@@ -1,13 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.cardview.widget.CardView
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.cardview.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:layout_marginHorizontal="12dp"
     android:layout_marginVertical="6dp"
     app:cardBackgroundColor="@color/card_bg"
-    app:cardCornerRadius="12dp"
+    app:cardCornerRadius="14dp"
     app:cardElevation="3dp">
 
     <RelativeLayout
@@ -15,62 +14,85 @@
         android:layout_height="wrap_content"
         android:padding="16dp">
 
-        <!-- Date / Time Subtitle -->
-        <TextView
-            android:id="@+id/tvDate"
+        <!-- Right Container (Amount & Delete Button - Right Aligned) -->
+        <LinearLayout
+            android:id="@+id/layoutRight"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="03 ऑगस्ट 2025 | 10:33 AM"
-            android:textColor="@color/text_secondary"
-            android:textSize="12sp" />
-
-        <!-- Member / Transaction Title -->
-        <TextView
-            android:id="@+id/tvTitle"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_below="@id/tvDate"
-            android:layout_marginTop="4dp"
-            android:text="राकेश पाटील"
-            android:textColor="@color/text_primary"
-            android:textSize="16sp"
-            android:textStyle="bold" />
-
-        <!-- Details / Category -->
-        <TextView
-            android:id="@+id/tvDetails"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_below="@id/tvTitle"
-            android:layout_marginTop="2dp"
-            android:text="देणगी"
-            android:textColor="@color/text_secondary"
-            android:textSize="13sp" />
-
-        <!-- Admin Delete Button -->
-        <ImageView
-            android:id="@+id/btnDelete"
-            android:layout_width="28dp"
-            android:layout_height="28dp"
             android:layout_alignParentEnd="true"
             android:layout_centerVertical="true"
-            android:padding="4dp"
-            android:src="@android:drawable/ic_menu_delete"
-            android:visibility="gone"
-            app:tint="@color/kharch_red" />
+            android:gravity="center_vertical|end"
+            android:orientation="horizontal">
 
-        <!-- Amount (Right aligned) -->
-        <TextView
-            android:id="@+id/tvAmount"
-            android:layout_width="wrap_content"
+            <!-- Amount Text -->
+            <TextView
+                android:id="@+id/tvAmount"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginEnd="6dp"
+                android:text="₹ 1,100"
+                android:textColor="@color/jama_green"
+                android:textSize="18sp"
+                android:textStyle="bold" />
+
+            <!-- Admin Delete Button -->
+            <ImageView
+                android:id="@+id/btnDelete"
+                android:layout_width="32dp"
+                android:layout_height="32dp"
+                android:background="?attr/selectableItemBackgroundBorderless"
+                android:padding="5dp"
+                android:src="@android:drawable/ic_menu_delete"
+                android:visibility="gone"
+                app:tint="@color/kharch_red" />
+        </LinearLayout>
+
+        <!-- Left Container (Date, Title, Details) -->
+        <LinearLayout
+            android:id="@+id/layoutLeft"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_toStartOf="@id/btnDelete"
+            android:layout_alignParentStart="true"
             android:layout_centerVertical="true"
-            android:layout_marginEnd="8dp"
-            android:text="₹ 1,100"
-            android:textColor="@color/jama_green"
-            android:textSize="18sp"
-            android:textStyle="bold" />
+            android:layout_toStartOf="@id/layoutRight"
+            android:layout_marginEnd="12dp"
+            android:orientation="vertical">
+
+            <!-- Date / Time -->
+            <TextView
+                android:id="@+id/tvDate"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="03 ऑगस्ट 2025"
+                android:textColor="@color/text_secondary"
+                android:textSize="12sp" />
+
+            <!-- Member / Title -->
+            <TextView
+                android:id="@+id/tvTitle"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="3dp"
+                android:ellipsize="end"
+                android:maxLines="2"
+                android:text="राकेश पाटील"
+                android:textColor="@color/text_primary"
+                android:textSize="16sp"
+                android:textStyle="bold" />
+
+            <!-- Details / Category -->
+            <TextView
+                android:id="@+id/tvDetails"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="2dp"
+                android:ellipsize="end"
+                android:maxLines="2"
+                android:text="देणगी"
+                android:textColor="@color/text_secondary"
+                android:textSize="13sp" />
+
+        </LinearLayout>
 
     </RelativeLayout>
 </androidx.cardview.widget.CardView>
