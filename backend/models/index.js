@@ -4,7 +4,9 @@ const userSchema = new mongoose.Schema({
   name: { type: String, required: true },
   phone: { type: String, required: true, unique: true },
   pin: { type: String, required: true }, // Simple 4-digit PIN for login
-  role: { type: String, enum: ['ADMIN', 'USER'], default: 'USER' }
+  role: { type: String, enum: ['ADMIN', 'USER'], default: 'USER' },
+  roleInMandal: { type: String, default: 'सामान्य सदस्य' },
+  photoUrl: { type: String, default: '' }
 }, { timestamps: true });
 
 const transactionSchema = new mongoose.Schema({

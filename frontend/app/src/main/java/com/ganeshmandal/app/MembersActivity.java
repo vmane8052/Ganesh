@@ -21,9 +21,9 @@ import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
-import java.util.HashSet;
+import java.util.HashMap;
 import java.util.List;
-import java.util.Set;
+import java.util.Map;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
@@ -96,20 +96,17 @@ public class MembersActivity extends AppCompatActivity {
     }
 
     private void loadMembers() {
-        allMembersList.clear();
-        Set<String> addedPhones = new HashSet<>();
+        Map<String, User> userMap = new HashMap<>();
 
         // 1. Add Default Admin
         User admin = new User("मुख्य व्यवस्थापक (Admin)", "9999999999", "1234", "ADMIN", "मुख्य व्यवस्थापक", "");
-        allMembersList.add(admin);
-        addedPhones.add("9999999999");
+        userMap.put("9999999999", admin);
 
         // 2. Add Default User
         User defaultUser = new User("गणेश विठ्ठल माने", "8888888888", "1234", "USER", "उपाध्यक्ष", "");
-        allMembersList.add(defaultUser);
-        addedPhones.add("8888888888");
+        userMap.put("8888888888", defaultUser);
 
-        // 3. Load locally added members from SharedPreferences
+        // 3. Load locally saved members added by Admin from SharedPreferences
         SharedPreferences prefs = getSharedPreferences("MandalPrefs", MODE_PRIVATE);
         String localJson = prefs.getString("REGISTERED_USERS", "[]");
         Gson gson = new Gson();
@@ -117,34 +114,34 @@ public class MembersActivity extends AppCompatActivity {
         List<User> localUsers = gson.fromJson(localJson, type);
         if (localUsers != null) {
             for (User u : localUsers) {
-                if (u.getPhone() != null && !addedPhones.contains(u.getPhone())) {
-                    allMembersList.add(u);
-                    addedPhones.add(u.getPhone());
+                if (u.getPhone() != null && !u.getPhone().isEmpty()) {
+                    userMap.put(u.getPhone(), u);
                 }
             }
         }
 
+        allMembersList = new ArrayList<>(userMap.values());
         updateListAndCount();
 
-        // 4. Fetch online cloud members from backend API
+        // 4. Fetch dynamic cloud database members from MongoDB Atlas via API
         ApiClient.getService().getUsers().enqueue(new Callback<UserListResponse>() {
             @Override
             public void onResponse(Call<UserListResponse> call, Response<UserListResponse> response) {
                 if (response.isSuccessful() && response.body() != null && response.body().getData() != null) {
                     List<User> remoteUsers = response.body().getData();
                     for (User u : remoteUsers) {
-                        if (u.getPhone() != null && !addedPhones.contains(u.getPhone())) {
-                            allMembersList.add(u);
-                            addedPhones.add(u.getPhone());
+                        if (u.getPhone() != null && !u.getPhone().isEmpty()) {
+                            userMap.put(u.getPhone(), u);
                         }
                     }
+                    allMembersList = new ArrayList<>(userMap.values());
                     updateListAndCount();
                 }
             }
 
             @Override
             public void onFailure(Call<UserListResponse> call, Throwable t) {
-                // Silently keep local list loaded
+                // Silently retain current list
             }
         });
     }
