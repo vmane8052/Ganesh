@@ -8,6 +8,7 @@ import android.text.TextWatcher;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -17,14 +18,9 @@ import com.ganeshmandal.app.models.User;
 import com.ganeshmandal.app.models.UserListResponse;
 import com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton;
 import com.google.android.material.textfield.TextInputEditText;
-import com.google.gson.Gson;
-import com.google.gson.reflect.TypeToken;
-import java.lang.reflect.Type;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -101,59 +97,28 @@ public class MembersActivity extends AppCompatActivity {
         SharedPreferences prefs = getSharedPreferences("MandalPrefs", MODE_PRIVATE);
         Set<String> deletedPhones = prefs.getStringSet("DELETED_PHONES", new HashSet<>());
 
-        Map<String, User> userMap = new HashMap<>();
-
-        // 1. Add Default Admin if not deleted
-        if (!deletedPhones.contains("9999999999")) {
-            User admin = new User("मुख्य व्यवस्थापक (Admin)", "9999999999", "1234", "ADMIN", "मुख्य व्यवस्थापक", "");
-            userMap.put("9999999999", admin);
-        }
-
-        // 2. Add Default User if not deleted
-        if (!deletedPhones.contains("8888888888")) {
-            User defaultUser = new User("गणेश विठ्ठल माने", "8888888888", "1234", "USER", "उपाध्यक्ष", "");
-            userMap.put("8888888888", defaultUser);
-        }
-
-        // 3. Load locally saved / updated members from SharedPreferences
-        String localJson = prefs.getString("REGISTERED_USERS", "[]");
-        Gson gson = new Gson();
-        Type type = new TypeToken<List<User>>() {}.getType();
-        List<User> localUsers = gson.fromJson(localJson, type);
-        if (localUsers != null) {
-            for (User u : localUsers) {
-                if (u.getPhone() != null && !u.getPhone().isEmpty() && !deletedPhones.contains(u.getPhone())) {
-                    userMap.put(u.getPhone(), u);
-                }
-            }
-        }
-
-        allMembersList = new ArrayList<>(userMap.values());
-        updateListAndCount();
-
-        // 4. Fetch dynamic cloud database members from MongoDB Atlas via API
+        // 100% Strict Real-Time Fetch directly from MongoDB Atlas Cloud API
         ApiClient.getService().getUsers().enqueue(new Callback<UserListResponse>() {
             @Override
             public void onResponse(Call<UserListResponse> call, Response<UserListResponse> response) {
                 if (response.isSuccessful() && response.body() != null && response.body().getData() != null) {
                     List<User> remoteUsers = response.body().getData();
+                    List<User> filteredList = new ArrayList<>();
                     for (User u : remoteUsers) {
                         if (u.getPhone() != null && !u.getPhone().isEmpty() && !deletedPhones.contains(u.getPhone())) {
-                            User existingLocal = userMap.get(u.getPhone());
-                            if (existingLocal != null && (u.getPhotoUrl() == null || u.getPhotoUrl().isEmpty())) {
-                                u.setPhotoUrl(existingLocal.getPhotoUrl());
-                            }
-                            userMap.put(u.getPhone(), u);
+                            filteredList.add(u);
                         }
                     }
-                    allMembersList = new ArrayList<>(userMap.values());
+                    allMembersList = filteredList;
                     updateListAndCount();
+                } else {
+                    Toast.makeText(MembersActivity.this, "MongoDB डेटाबेसमधून माहिती लोड करू शकलो नाही", Toast.LENGTH_SHORT).show();
                 }
             }
 
             @Override
             public void onFailure(Call<UserListResponse> call, Throwable t) {
-                // Retain currently loaded local list
+                Toast.makeText(MembersActivity.this, "डेटाबेस नेटवर्क एरर: " + t.getMessage(), Toast.LENGTH_SHORT).show();
             }
         });
     }

@@ -22,13 +22,6 @@ import com.ganeshmandal.app.models.LoginResponse;
 import com.ganeshmandal.app.models.User;
 import com.google.android.material.button.MaterialButton;
 import com.google.android.material.textfield.TextInputEditText;
-import com.google.gson.Gson;
-import com.google.gson.reflect.TypeToken;
-import java.lang.reflect.Type;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
@@ -172,18 +165,22 @@ public class MemberDetailActivity extends AppCompatActivity {
 
                     User updatedUser = new User(name, phone, pin, role, roleInMandal, photoUrl);
 
-                    // 1. Update locally in SharedPreferences for guaranteed instant persistence
-                    updateUserLocally(oldPhone, updatedUser);
-                    updateUi();
-                    Toast.makeText(MemberDetailActivity.this, "सदस्याची माहिती यशस्वीरित्या अपडेट झाली!", Toast.LENGTH_SHORT).show();
-
-                    // 2. Sync update with MongoDB Atlas via API
+                    // Sync update directly with MongoDB Atlas via API
                     ApiClient.getService().updateUser(oldPhone, updatedUser).enqueue(new Callback<LoginResponse>() {
                         @Override
-                        public void onResponse(Call<LoginResponse> call, Response<LoginResponse> response) {}
+                        public void onResponse(Call<LoginResponse> call, Response<LoginResponse> response) {
+                            if (response.isSuccessful() && response.body() != null && response.body().isSuccess()) {
+                                updateUi();
+                                Toast.makeText(MemberDetailActivity.this, "डेटाबेसमध्ये माहिती यशस्वीरित्या अपडेट झाली!", Toast.LENGTH_SHORT).show();
+                            } else {
+                                Toast.makeText(MemberDetailActivity.this, "डेटाबेस अपडेट करण्यात अडचण आली", Toast.LENGTH_SHORT).show();
+                            }
+                        }
 
                         @Override
-                        public void onFailure(Call<LoginResponse> call, Throwable t) {}
+                        public void onFailure(Call<LoginResponse> call, Throwable t) {
+                            Toast.makeText(MemberDetailActivity.this, "नेटवर्क एरर: " + t.getMessage(), Toast.LENGTH_SHORT).show();
+                        }
                     });
                 })
                 .setNegativeButton("रद्द करा", null)
@@ -193,7 +190,7 @@ public class MemberDetailActivity extends AppCompatActivity {
     private void confirmDeleteMember() {
         new AlertDialog.Builder(this)
                 .setTitle("सदस्य हटवा")
-                .setMessage("तुम्हाला नक्की " + name + " या सदस्याला हटवायचे आहे का?")
+                .setMessage("तुम्हाला नक्की " + name + " या सदस्याला डेटाबेसमधून हटवायचे आहे का?")
                 .setPositiveButton("हटवा", (dialog, which) -> deleteMember())
                 .setNegativeButton("रद्द करा", null)
                 .show();
@@ -202,76 +199,18 @@ public class MemberDetailActivity extends AppCompatActivity {
     private void deleteMember() {
         String phoneToDelete = phone;
 
-        // 1. Mark user as deleted locally in SharedPreferences immediately
-        deleteUserLocally(phoneToDelete);
-
-        Toast.makeText(MemberDetailActivity.this, "सदस्य यशस्वीरित्या हटवला!", Toast.LENGTH_SHORT).show();
-
-        // 2. Sync deletion with MongoDB Atlas cloud database in background
+        // Sync deletion directly with MongoDB Atlas cloud database via API
         ApiClient.getService().deleteUser(phoneToDelete).enqueue(new Callback<Void>() {
             @Override
-            public void onResponse(Call<Void> call, Response<Void> response) {}
+            public void onResponse(Call<Void> call, Response<Void> response) {
+                Toast.makeText(MemberDetailActivity.this, "सदस्य डेटाबेसमधून हटवला!", Toast.LENGTH_SHORT).show();
+                finish();
+            }
 
             @Override
-            public void onFailure(Call<Void> call, Throwable t) {}
+            public void onFailure(Call<Void> call, Throwable t) {
+                Toast.makeText(MemberDetailActivity.this, "डेटाबेस डिलीट एरर: " + t.getMessage(), Toast.LENGTH_SHORT).show();
+            }
         });
-
-        finish();
-    }
-
-    private void updateUserLocally(String oldPhone, User updatedUser) {
-        SharedPreferences prefs = getSharedPreferences("MandalPrefs", MODE_PRIVATE);
-
-        // Remove oldPhone from DELETED_PHONES if re-added/updated
-        Set<String> deletedSet = new HashSet<>(prefs.getStringSet("DELETED_PHONES", new HashSet<>()));
-        if (deletedSet.contains(oldPhone)) {
-            deletedSet.remove(oldPhone);
-            prefs.edit().putStringSet("DELETED_PHONES", deletedSet).apply();
-        }
-
-        String json = prefs.getString("REGISTERED_USERS", "[]");
-        Gson gson = new Gson();
-        Type type = new TypeToken<List<User>>() {}.getType();
-        List<User> list = gson.fromJson(json, type);
-        if (list == null) list = new ArrayList<>();
-
-        List<User> updatedList = new ArrayList<>();
-        boolean found = false;
-        for (User u : list) {
-            if (u.getPhone() != null && u.getPhone().equals(oldPhone)) {
-                updatedList.add(updatedUser);
-                found = true;
-            } else {
-                updatedList.add(u);
-            }
-        }
-        if (!found) {
-            updatedList.add(0, updatedUser);
-        }
-        prefs.edit().putString("REGISTERED_USERS", gson.toJson(updatedList)).apply();
-    }
-
-    private void deleteUserLocally(String phoneToDelete) {
-        SharedPreferences prefs = getSharedPreferences("MandalPrefs", MODE_PRIVATE);
-
-        // Add phone to DELETED_PHONES set
-        Set<String> deletedSet = new HashSet<>(prefs.getStringSet("DELETED_PHONES", new HashSet<>()));
-        deletedSet.add(phoneToDelete);
-        prefs.edit().putStringSet("DELETED_PHONES", deletedSet).apply();
-
-        // Remove from REGISTERED_USERS list
-        String json = prefs.getString("REGISTERED_USERS", "[]");
-        Gson gson = new Gson();
-        Type type = new TypeToken<List<User>>() {}.getType();
-        List<User> list = gson.fromJson(json, type);
-        if (list == null) return;
-
-        List<User> updatedList = new ArrayList<>();
-        for (User u : list) {
-            if (u.getPhone() == null || !u.getPhone().equals(phoneToDelete)) {
-                updatedList.add(u);
-            }
-        }
-        prefs.edit().putString("REGISTERED_USERS", gson.toJson(updatedList)).apply();
     }
 }

@@ -1,6 +1,5 @@
 package com.ganeshmandal.app;
 
-import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.net.Uri;
@@ -19,13 +18,8 @@ import com.ganeshmandal.app.models.LoginResponse;
 import com.ganeshmandal.app.models.User;
 import com.google.android.material.button.MaterialButton;
 import com.google.android.material.textfield.TextInputEditText;
-import com.google.gson.Gson;
-import com.google.gson.reflect.TypeToken;
 import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
-import java.lang.reflect.Type;
-import java.util.ArrayList;
-import java.util.List;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
@@ -121,49 +115,31 @@ public class AddMemberActivity extends AppCompatActivity {
         }
 
         btnSaveMember.setEnabled(false);
-        btnSaveMember.setText("साठवत आहे...");
+        btnSaveMember.setText("डेटाबेसमध्ये साठवत आहे...");
 
         User newUser = new User(name, phone, pin, "USER", roleInMandal, selectedPhotoBase64);
 
-        // 1. Save user locally in SharedPreferences REGISTERED_USERS list for guaranteed instant login
-        saveUserLocally(newUser);
-
-        // 2. Call backend API to sync with cloud MongoDB
+        // Send directly to MongoDB Atlas Cloud API (100% Strict Cloud Saving)
         ApiClient.getService().addUser(newUser).enqueue(new Callback<LoginResponse>() {
             @Override
             public void onResponse(Call<LoginResponse> call, Response<LoginResponse> response) {
                 btnSaveMember.setEnabled(true);
                 btnSaveMember.setText("सदस्य साठवा");
-                Toast.makeText(AddMemberActivity.this, "सदस्य यशस्वीरित्या ॲड झाला!", Toast.LENGTH_LONG).show();
-                finish();
+                if (response.isSuccessful() && response.body() != null && response.body().isSuccess()) {
+                    Toast.makeText(AddMemberActivity.this, "सदस्य MongoDB डेटाबेसमध्ये साठवला गेला!", Toast.LENGTH_LONG).show();
+                    finish();
+                } else {
+                    String msg = (response.body() != null && response.body().getMessage() != null) ? response.body().getMessage() : "डेटाबेस एरर";
+                    Toast.makeText(AddMemberActivity.this, "एरर: " + msg, Toast.LENGTH_LONG).show();
+                }
             }
 
             @Override
             public void onFailure(Call<LoginResponse> call, Throwable t) {
                 btnSaveMember.setEnabled(true);
                 btnSaveMember.setText("सदस्य साठवा");
-                Toast.makeText(AddMemberActivity.this, "सदस्य ॲड झाला (Local Mode)", Toast.LENGTH_LONG).show();
-                finish();
+                Toast.makeText(AddMemberActivity.this, "नेटवर्क / डेटाबेस कनेक्ट होऊ शकले नाही: " + t.getMessage(), Toast.LENGTH_LONG).show();
             }
         });
-    }
-
-    private void saveUserLocally(User user) {
-        SharedPreferences prefs = getSharedPreferences("MandalPrefs", MODE_PRIVATE);
-        String existingJson = prefs.getString("REGISTERED_USERS", "[]");
-        Gson gson = new Gson();
-        Type type = new TypeToken<List<User>>() {}.getType();
-        List<User> list = gson.fromJson(existingJson, type);
-        if (list == null) list = new ArrayList<>();
-
-        // Remove duplicates if phone already exists
-        List<User> filtered = new ArrayList<>();
-        for (User u : list) {
-            if (!u.getPhone().equals(user.getPhone())) {
-                filtered.add(u);
-            }
-        }
-        filtered.add(0, user);
-        prefs.edit().putString("REGISTERED_USERS", gson.toJson(filtered)).apply();
     }
 }
