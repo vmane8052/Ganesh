@@ -139,10 +139,11 @@ public class MembersActivity extends AppCompatActivity {
                     List<User> remoteUsers = response.body().getData();
                     for (User u : remoteUsers) {
                         if (u.getPhone() != null && !u.getPhone().isEmpty() && !deletedPhones.contains(u.getPhone())) {
-                            // Local updates take priority over stale remote objects
-                            if (!userMap.containsKey(u.getPhone())) {
-                                userMap.put(u.getPhone(), u);
+                            User existingLocal = userMap.get(u.getPhone());
+                            if (existingLocal != null && (u.getPhotoUrl() == null || u.getPhotoUrl().isEmpty())) {
+                                u.setPhotoUrl(existingLocal.getPhotoUrl());
                             }
+                            userMap.put(u.getPhone(), u);
                         }
                     }
                     allMembersList = new ArrayList<>(userMap.values());
@@ -152,7 +153,7 @@ public class MembersActivity extends AppCompatActivity {
 
             @Override
             public void onFailure(Call<UserListResponse> call, Throwable t) {
-                // Silently retain current list
+                // Retain currently loaded local list
             }
         });
     }
