@@ -13,16 +13,15 @@ app.use(express.json({ limit: '50mb' }));
 app.use(express.urlencoded({ limit: '50mb', extended: true }));
 
 // MongoDB connection with caching for serverless environments (Vercel)
-let isConnected = false;
 async function connectDB() {
-  if (isConnected) return;
+  if (mongoose.connection.readyState === 1) return;
   const mongoURI = process.env.MONGODB_URI || 'mongodb+srv://vmane8052_db_user:TkcXsv15P0Ry2GWk@cluster0.t9mz6dx.mongodb.net/ganesh_mandal?retryWrites=true&w=majority';
   try {
-    const db = await mongoose.connect(mongoURI, {
+    await mongoose.connect(mongoURI, {
       useNewUrlParser: true,
       useUnifiedTopology: true,
+      serverSelectionTimeoutMS: 5000,
     });
-    isConnected = db.connections[0].readyState;
     console.log('Connected to MongoDB');
 
     // Seed default Admin & User for testing
