@@ -13,33 +13,43 @@ app.use(express.json({ limit: '50mb' }));
 app.use(express.urlencoded({ limit: '50mb', extended: true }));
 
 // MongoDB connection with caching for serverless environments (Vercel)
+let cachedPromise = null;
 async function connectDB() {
-  if (mongoose.connection.readyState === 1) return;
-  const mongoURI = process.env.MONGODB_URI || 'mongodb+srv://vmane8052_db_user:TkcXsv15P0Ry2GWk@cluster0.t9mz6dx.mongodb.net/ganesh_mandal?retryWrites=true&w=majority';
   try {
-    await mongoose.connect(mongoURI, {
+    dns.setServers(['8.8.8.8', '8.8.4.4']);
+  } catch (e) {}
+
+  if (mongoose.connection.readyState === 1) {
+    return;
+  }
+
+  if (!cachedPromise) {
+    const mongoURI = process.env.MONGODB_URI || 'mongodb+srv://vmane8052_db_user:TkcXsv15P0Ry2GWk@cluster0.t9mz6dx.mongodb.net/ganesh_mandal?retryWrites=true&w=majority';
+    cachedPromise = mongoose.connect(mongoURI, {
       useNewUrlParser: true,
       useUnifiedTopology: true,
-      serverSelectionTimeoutMS: 5000,
+      serverSelectionTimeoutMS: 8000,
+    }).then(async (db) => {
+      console.log('Connected to MongoDB Atlas successfully');
+      return db;
+    }).catch(err => {
+      cachedPromise = null;
+      console.error('MongoDB connection error:', err);
+      throw err;
     });
-    console.log('Connected to MongoDB');
-
-    // Seed default Admin & User for testing
-    const adminExists = await User.findOne({ phone: '9999999999' });
-    if (!adminExists) {
-      await User.create({ name: 'मुख्य व्यवस्थापक (Admin)', phone: '9999999999', pin: '1234', role: 'ADMIN' });
-      await User.create({ name: 'सामान्य सदस्य (User)', phone: '8888888888', pin: '1234', role: 'USER' });
-      console.log('Seeded default Admin (9999999999 / PIN: 1234) and User (8888888888 / PIN: 1234)');
-    }
-  } catch (err) {
-    console.error('MongoDB connection error:', err);
   }
+  
+  await cachedPromise;
 }
 
 // Middleware to ensure DB connection before route handling
 app.use(async (req, res, next) => {
-  await connectDB();
-  next();
+  try {
+    await connectDB();
+    next();
+  } catch (err) {
+    res.status(500).json({ success: false, error: 'Database Connection Error: ' + err.message });
+  }
 });
 
 // Health check endpoint
