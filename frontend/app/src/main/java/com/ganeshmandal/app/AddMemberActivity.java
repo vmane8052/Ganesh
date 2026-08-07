@@ -56,6 +56,15 @@ public class AddMemberActivity extends AppCompatActivity {
                         InputStream is = getContentResolver().openInputStream(uri);
                         Bitmap bitmap = BitmapFactory.decodeStream(is);
                         if (bitmap != null) {
+                            int maxDimension = 500;
+                            int width = bitmap.getWidth();
+                            int height = bitmap.getHeight();
+                            if (width > maxDimension || height > maxDimension) {
+                                float ratio = Math.min((float) maxDimension / width, (float) maxDimension / height);
+                                width = Math.round(ratio * width);
+                                height = Math.round(ratio * height);
+                                bitmap = Bitmap.createScaledBitmap(bitmap, width, height, true);
+                            }
                             ByteArrayOutputStream baos = new ByteArrayOutputStream();
                             bitmap.compress(Bitmap.CompressFormat.JPEG, 70, baos);
                             byte[] bytes = baos.toByteArray();

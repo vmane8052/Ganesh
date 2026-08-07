@@ -9,7 +9,8 @@ try { dns.setServers(['8.8.8.8', '8.8.4.4']); } catch(e){}
 
 const app = express();
 app.use(cors());
-app.use(express.json());
+app.use(express.json({ limit: '50mb' }));
+app.use(express.urlencoded({ limit: '50mb', extended: true }));
 
 // MongoDB connection with caching for serverless environments (Vercel)
 let isConnected = false;
@@ -81,27 +82,28 @@ app.post('/api/users', async (req, res) => {
     if (!name || !phone || !pin) {
       return res.status(400).json({ success: false, message: 'नाव, मोबाईल नंबर आणि पासवर्ड आवश्यक आहेत' });
     }
-    const existing = await User.findOne({ phone });
-    if (existing) {
-      return res.status(400).json({ success: false, message: 'हा मोबाईल नंबर आधीच नोंदणीकृत आहे' });
-    }
-    const newUser = await User.create({
-      name,
-      phone,
-      pin,
-      role: role || 'USER',
-      roleInMandal: roleInMandal || 'सदस्य',
-      photoUrl: photoUrl || ''
-    });
+    const user = await User.findOneAndUpdate(
+      { phone },
+      {
+        name,
+        phone,
+        pin,
+        role: role || 'USER',
+        roleInMandal: roleInMandal || 'सामान्य सदस्य',
+        photoUrl: photoUrl || ''
+      },
+      { upsert: true, new: true, setDefaultsOnInsert: true }
+    );
     res.status(201).json({
       success: true,
       user: {
-        id: newUser._id,
-        name: newUser.name,
-        phone: newUser.phone,
-        role: newUser.role,
-        roleInMandal: newUser.roleInMandal,
-        photoUrl: newUser.photoUrl
+        id: user._id,
+        name: user.name,
+        phone: user.phone,
+        pin: user.pin,
+        role: user.role,
+        roleInMandal: user.roleInMandal,
+        photoUrl: user.photoUrl
       }
     });
   } catch (err) {
