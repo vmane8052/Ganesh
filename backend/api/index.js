@@ -28,6 +28,7 @@ async function connectDB() {
     cachedPromise = mongoose.connect(mongoURI, {
       useNewUrlParser: true,
       useUnifiedTopology: true,
+      family: 4,
       serverSelectionTimeoutMS: 8000,
     }).then(async (db) => {
       console.log('Connected to MongoDB Atlas successfully');
