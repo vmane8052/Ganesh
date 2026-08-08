@@ -61,13 +61,18 @@ app.get('/api/health', (req, res) => {
 // --- AUTH / LOGIN ---
 app.post('/api/login', async (req, res) => {
   try {
-    const { phone, pin } = req.body;
-    if (!phone || !pin) {
-      return res.status(400).json({ success: false, message: 'कृपया मोबाईल नंबर आणि पिन टाका' });
-    }
-    const user = await User.findOne({ phone, pin });
+    const cleanPhone = String(phone).trim();
+    const cleanPin = String(pin).trim();
+    const user = await User.findOne({
+      $or: [
+        { phone: cleanPhone },
+        { phone: cleanPhone.length === 9 ? cleanPhone + cleanPhone.slice(-1) : cleanPhone },
+        { phone: cleanPhone.length === 10 ? cleanPhone.slice(0, 9) : cleanPhone }
+      ],
+      pin: cleanPin
+    });
     if (!user) {
-      return res.status(401).json({ success: false, message: 'चुकीचा मोबाईल नंबर किंवा पिन' });
+      return res.status(401).json({ success: false, message: 'चुकीचा मोबाईल नंबर किंवा पिन (१० अंकी मोबाईल नंबर टाका)' });
     }
     res.json({
       success: true,
