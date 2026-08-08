@@ -106,7 +106,11 @@ public class MainActivity extends AppCompatActivity {
             Intent intent = new Intent(MainActivity.this, EventsActivity.class);
             startActivity(intent);
         });
-        cardDonations.setOnClickListener(v -> Toast.makeText(this, "देणगी यादी लवकरच येत आहे", Toast.LENGTH_SHORT).show());
+
+        cardDonations.setOnClickListener(v -> {
+            Intent intent = new Intent(MainActivity.this, DonationsActivity.class);
+            startActivity(intent);
+        });
 
         // Sidebar Actions
         menuAddMember.setOnClickListener(v -> {
@@ -123,7 +127,8 @@ public class MainActivity extends AppCompatActivity {
 
         menuAddDonationRate.setOnClickListener(v -> {
             drawerLayout.closeDrawer(GravityCompat.START);
-            Toast.makeText(this, "देणगी दर आणि रक्कम फॉर्म लवकरच येत आहे...", Toast.LENGTH_SHORT).show();
+            Intent intent = new Intent(MainActivity.this, AddDonationActivity.class);
+            startActivity(intent);
         });
 
         menuUploadPhoto.setOnClickListener(v -> {

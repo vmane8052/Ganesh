@@ -316,7 +316,7 @@ app.delete('/api/events/:id', async (req, res) => {
   }
 });
 
-// --- DONATIONS (देणगी) ---
+// --- DONATIONS (देणगी व्यवस्थापन - रोख रक्कम व वस्तू देणगी) ---
 app.get('/api/donations', async (req, res) => {
   try {
     const donations = await Donation.find().sort({ createdAt: -1 });
@@ -328,9 +328,44 @@ app.get('/api/donations', async (req, res) => {
 
 app.post('/api/donations', async (req, res) => {
   try {
-    const { donorName, amount, date, details } = req.body;
-    const donation = await Donation.create({ donorName, amount, date, details });
-    res.status(201).json({ success: true, data: donation });
+    const { donorName, donorPhone, donationType, amount, itemDetails, date, address, receiptNo } = req.body;
+    if (!donorName || !date) {
+      return res.status(400).json({ success: false, message: 'देणगीदाराचे नाव आणि तारीख आवश्यक आहे' });
+    }
+    const donation = await Donation.create({
+      donorName,
+      donorPhone: donorPhone || '',
+      donationType: donationType || 'CASH',
+      amount: amount || 0,
+      itemDetails: itemDetails || '',
+      date,
+      address: address || '',
+      receiptNo: receiptNo || ''
+    });
+    res.status(201).json({ success: true, message: 'देणगी यशस्वीरीत्या नोंदवली गेली', data: donation });
+  } catch (err) {
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
+
+app.put('/api/donations/:id', async (req, res) => {
+  try {
+    const { id } = req.params;
+    const updated = await Donation.findByIdAndUpdate(id, req.body, { new: true });
+    if (!updated) {
+      return res.status(404).json({ success: false, message: 'देणगी नोंद सापडली नाही' });
+    }
+    res.json({ success: true, message: 'देणगी यशस्वीरीत्या अपडेट केली', data: updated });
+  } catch (err) {
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
+
+app.delete('/api/donations/:id', async (req, res) => {
+  try {
+    const { id } = req.params;
+    await Donation.findByIdAndDelete(id);
+    res.json({ success: true, message: 'देणगी यशस्वीरीत्या हटवली गेली' });
   } catch (err) {
     res.status(500).json({ success: false, error: err.message });
   }

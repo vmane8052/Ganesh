@@ -1,8 +1,11 @@
 package com.ganeshmandal.app.api;
 
+import com.ganeshmandal.app.models.Donation;
+import com.ganeshmandal.app.models.DonationListResponse;
 import com.ganeshmandal.app.models.EventListResponse;
 import com.ganeshmandal.app.models.LoginResponse;
 import com.ganeshmandal.app.models.MandalEvent;
+import com.ganeshmandal.app.models.SingleDonationResponse;
 import com.ganeshmandal.app.models.SingleEventResponse;
 import com.ganeshmandal.app.models.SingleTransactionResponse;
 import com.ganeshmandal.app.models.Transaction;
@@ -56,4 +59,17 @@ public interface ApiService {
 
     @DELETE("api/events/{id}")
     Call<Void> deleteEvent(@Path("id") String id);
+
+    // --- Donations (देणगीदार - रोख व वस्तू देणगी) ---
+    @GET("api/donations")
+    Call<DonationListResponse> getDonations();
+
+    @POST("api/donations")
+    Call<SingleDonationResponse> addDonation(@Body Donation donation);
+
+    @PUT("api/donations/{id}")
+    Call<SingleDonationResponse> updateDonation(@Path("id") String id, @Body Donation donation);
+
+    @DELETE("api/donations/{id}")
+    Call<Void> deleteDonation(@Path("id") String id);
 }

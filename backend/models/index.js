@@ -5,7 +5,7 @@ const userSchema = new mongoose.Schema({
   phone: { type: String, required: true, unique: true },
   pin: { type: String, required: true },
   role: { type: String, enum: ['ADMIN', 'USER'], default: 'USER' },
-  roleInMandal: { type: String, default: 'सामान्य सदस्य' }, // अध्यक्ष, उपाध्यक्ष, सचिव, खजिनदार, कार्यकर्ते, सामान्य सदस्य
+  roleInMandal: { type: String, default: 'सामान्य सदस्य' },
   photoUrl: { type: String, default: '' }
 }, { timestamps: true });
 
@@ -27,21 +27,25 @@ const memberSchema = new mongoose.Schema({
 }, { timestamps: true });
 
 const eventSchema = new mongoose.Schema({
-  dayTitle: { type: String, required: true }, // दिवस १ (श्री गणेश प्रतिष्ठापना), दिवस २, दिवस ५ (गौरी आगमन)...
-  date: { type: String, required: true },     // ०८ सप्टेंबर २०२६
-  morningAarti: { type: String, default: '' }, // सकाळची आरती (नाव / यजमान)
-  eveningAarti: { type: String, default: '' }, // संध्याकाळची आरती (नाव / यजमान)
-  lunchHost: { type: String, default: '' },    // महाप्रसाद / जेवणाचा मान (नाव / यजमान)
-  modakHost: { type: String, default: '' },    // मोदकाचा मान (नाव / यजमान)
-  culturalProgram: { type: String, default: '' }, // सांस्कृतिक कार्यक्रम / भजन / पूजा
-  specialNotes: { type: String, default: '' }  // विशेष सूचना / टीप
+  dayTitle: { type: String, required: true },
+  date: { type: String, required: true },
+  morningAarti: { type: String, default: '' },
+  eveningAarti: { type: String, default: '' },
+  lunchHost: { type: String, default: '' },
+  modakHost: { type: String, default: '' },
+  culturalProgram: { type: String, default: '' },
+  specialNotes: { type: String, default: '' }
 }, { timestamps: true });
 
 const donationSchema = new mongoose.Schema({
-  donorName: { type: String, required: true },
-  amount: { type: Number, required: true },
-  date: { type: String, required: true },
-  details: { type: String }
+  donorName: { type: String, required: true }, // देणगीदाराचे नाव
+  donorPhone: { type: String, default: '' },    // मोबाईल नंबर
+  donationType: { type: String, enum: ['CASH', 'ITEM', 'ONLINE'], default: 'CASH' }, // CASH (रोख रक्कम), ITEM (वस्तू देणगी), ONLINE (ऑनलाइन/UPI)
+  amount: { type: Number, default: 0 },          // रोख/ऑनलाइन रक्कम (उदा. ₹ ५००१)
+  itemDetails: { type: String, default: '' },   // वस्तू देणगीचे नाव व तपशील (उदा. २१ चांदीचे मोदक, ५० किलो धान्य, साऊंड सिस्टीम, चांदीचा मुकुट)
+  date: { type: String, required: true },       // तारीख
+  address: { type: String, default: '' },       // गाव / पत्ता
+  receiptNo: { type: String, default: '' }      // पावती क्रमांक
 }, { timestamps: true });
 
 const gallerySchema = new mongoose.Schema({
