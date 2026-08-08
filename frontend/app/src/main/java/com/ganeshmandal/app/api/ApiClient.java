@@ -8,7 +8,7 @@ import retrofit2.converter.gson.GsonConverterFactory;
 
 public class ApiClient {
     // When deployed to Vercel production
-    private static final String BASE_URL = "https://ganesh-vmane8052s-projects.vercel.app/api/";
+    private static final String BASE_URL = "https://ganesh-vmane8052s-projects.vercel.app/";
     private static Retrofit retrofit = null;
 
     public static ApiService getService() {
@@ -17,9 +17,9 @@ public class ApiClient {
             interceptor.setLevel(HttpLoggingInterceptor.Level.BODY);
 
             OkHttpClient client = new OkHttpClient.Builder()
-                    .connectTimeout(10, TimeUnit.SECONDS)
-                    .readTimeout(10, TimeUnit.SECONDS)
-                    .writeTimeout(10, TimeUnit.SECONDS)
+                    .connectTimeout(15, TimeUnit.SECONDS)
+                    .readTimeout(15, TimeUnit.SECONDS)
+                    .writeTimeout(15, TimeUnit.SECONDS)
                     .followRedirects(true)
                     .addInterceptor(interceptor)
                     .build();
