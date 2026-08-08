@@ -54,13 +54,21 @@ public class TransactionAdapter extends RecyclerView.Adapter<TransactionAdapter.
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
         Transaction tx = transactionList.get(position);
         holder.tvDate.setText(tx.getDate());
-        holder.tvTitle.setText(tx.getMemberName() != null && !tx.getMemberName().isEmpty() ? tx.getMemberName() : "सदस्य");
-        holder.tvDetails.setText(tx.getDetails() + " (" + tx.getCategory() + ")");
 
         if (tx.isJama()) {
+            // JAMA: Title = Member/Donor Name, Subtitle = Details (वर्गणी/देणगी)
+            String name = tx.getMemberName() != null && !tx.getMemberName().trim().isEmpty() ? tx.getMemberName() : "देणगीदार";
+            holder.tvTitle.setText(name);
+            holder.tvDetails.setText(tx.getDetails() != null ? tx.getDetails() : "जमा");
+
             holder.tvAmount.setText("+ ₹ " + tx.getAmount());
             holder.tvAmount.setTextColor(Color.parseColor("#2E7D32")); // Green
         } else {
+            // KHARCH: Title in BOLD = Exact reason for expense (कशासाठी खर्च केला उदा. मंडप, लाईट, प्रसाद)
+            String expenseReason = tx.getDetails() != null && !tx.getDetails().trim().isEmpty() ? tx.getDetails() : "मंडळ खर्च";
+            holder.tvTitle.setText(expenseReason);
+            holder.tvDetails.setText("मंडळ खर्च • " + tx.getDate());
+
             holder.tvAmount.setText("- ₹ " + tx.getAmount());
             holder.tvAmount.setTextColor(Color.parseColor("#C62828")); // Red
         }

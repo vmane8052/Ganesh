@@ -75,39 +75,42 @@
                         android:id="@+id/etMemberName"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:hint="नांव टाका (उदा. राम पाटील)" />
+                        android:hint="नांव टाका (उदा. राम पाटील)"
+                        android:textColor="@color/text_primary" />
                 </com.google.android.material.textfield.TextInputLayout>
             </LinearLayout>
 
-            <!-- Details / Reason Input -->
+            <!-- Details / Dropdown Input (वर्गणी, देणगी इ.) -->
             <TextView
                 android:id="@+id/tvDetailsLabel"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="6dp"
-                android:text="तपशील *"
+                android:text="तपशील (वर्गणी / देणगी) *"
                 android:textColor="@color/text_primary"
                 android:textSize="15sp"
                 android:textStyle="bold" />
 
             <com.google.android.material.textfield.TextInputLayout
+                style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.ExposedDropdownMenu"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="16dp"
-                app:boxBackgroundMode="outline"
                 app:boxCornerRadiusBottomEnd="8dp"
                 app:boxCornerRadiusBottomStart="8dp"
                 app:boxCornerRadiusTopEnd="8dp"
                 app:boxCornerRadiusTopStart="8dp"
                 app:boxStrokeColor="@color/primary_blue">
 
-                <com.google.android.material.textfield.TextInputEditText
+                <AutoCompleteTextView
                     android:id="@+id/etDetails"
                     android:layout_width="match_parent"
-                    android:layout_height="80dp"
-                    android:gravity="top|start"
-                    android:hint="तपशील लिहा (उदा. वर्गणी, देणगी इ.)"
-                    android:inputType="textMultiLine" />
+                    android:layout_height="wrap_content"
+                    android:hint="तपशील निवडा किंवा लिहा (उदा. वर्गणी, देणगी)"
+                    android:inputType="text"
+                    android:paddingVertical="14dp"
+                    android:textColor="@color/text_primary"
+                    android:textSize="16sp" />
             </com.google.android.material.textfield.TextInputLayout>
 
             <!-- Amount Label & Input -->
@@ -137,6 +140,7 @@
                     android:layout_height="wrap_content"
                     android:hint="₹ 0"
                     android:inputType="numberDecimal"
+                    android:textColor="@color/text_primary"
                     android:textSize="18sp"
                     android:textStyle="bold" />
             </com.google.android.material.textfield.TextInputLayout>
@@ -171,7 +175,8 @@
                     android:clickable="true"
                     android:cursorVisible="false"
                     android:focusable="false"
-                    android:hint="तारीख निवडण्यासाठी क्लिक करा" />
+                    android:hint="तारीख निवडण्यासाठी क्लिक करा"
+                    android:textColor="@color/text_primary" />
             </com.google.android.material.textfield.TextInputLayout>
 
             <!-- Save Button -->

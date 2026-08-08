@@ -3,6 +3,8 @@ package com.ganeshmandal.app;
 import android.app.DatePickerDialog;
 import android.os.Bundle;
 import android.view.View;
+import android.widget.ArrayAdapter;
+import android.widget.AutoCompleteTextView;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
@@ -25,10 +27,30 @@ public class AddTransactionActivity extends AppCompatActivity {
     private ImageView btnBack;
     private TextView tvFormTitle, tvDetailsLabel;
     private LinearLayout layoutMemberName;
-    private TextInputEditText etAmount, etDetails, etDate, etMemberName;
+    private TextInputEditText etAmount, etDate, etMemberName;
+    private AutoCompleteTextView etDetails;
     private MaterialButton btnSave;
     private String transactionType = "JAMA"; // default
     private final Calendar calendar = Calendar.getInstance();
+
+    private static final String[] JAMA_OPTIONS = new String[]{
+            "वर्गणी",
+            "देणगी",
+            "आरती देणगी",
+            "महाप्रसाद देणगी",
+            "इतर देणगी"
+    };
+
+    private static final String[] KHARCH_OPTIONS = new String[]{
+            "मंडप व डेकोरेशन",
+            "लाईट व विद्युत रोषणाई",
+            "ध्वनीक्षेपक (साउंड/स्पीकर)",
+            "महाप्रसाद व भोजन",
+            "पूजा साहित्य व हार-फुले",
+            "फटाके व आतषबाजी",
+            "वाहतूक खर्च",
+            "इतर मंडळ खर्च"
+    };
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -50,14 +72,22 @@ public class AddTransactionActivity extends AppCompatActivity {
 
         if ("KHARCH".equalsIgnoreCase(transactionType)) {
             tvFormTitle.setText("खर्च करा");
-            if (tvDetailsLabel != null) tvDetailsLabel.setText("कशासाठी खर्च केले? *");
+            if (tvDetailsLabel != null) tvDetailsLabel.setText("कशासाठी खर्च केला? (तपशील निवडा किंवा लिहा) *");
             if (layoutMemberName != null) layoutMemberName.setVisibility(View.GONE);
             btnSave.setBackgroundColor(getResources().getColor(R.color.kharch_red));
+            etDetails.setHint("खर्चाचा तपशील निवडा (उदा. लाईट, मंडप)");
+
+            ArrayAdapter<String> adapter = new ArrayAdapter<>(this, android.R.layout.simple_dropdown_item_1line, KHARCH_OPTIONS);
+            etDetails.setAdapter(adapter);
         } else {
             tvFormTitle.setText("जमा करा");
-            if (tvDetailsLabel != null) tvDetailsLabel.setText("तपशील (उदा. देणगी, वर्गणी इ.) *");
+            if (tvDetailsLabel != null) tvDetailsLabel.setText("तपशील (वर्गणी / देणगी निवडा किंवा लिहा) *");
             if (layoutMemberName != null) layoutMemberName.setVisibility(View.VISIBLE);
             btnSave.setBackgroundColor(getResources().getColor(R.color.jama_green));
+            etDetails.setHint("वर्गणी / देणगी निवडा");
+
+            ArrayAdapter<String> adapter = new ArrayAdapter<>(this, android.R.layout.simple_dropdown_item_1line, JAMA_OPTIONS);
+            etDetails.setAdapter(adapter);
         }
 
         // Set today's date by default
@@ -124,7 +154,7 @@ public class AddTransactionActivity extends AppCompatActivity {
                 amount,
                 details,
                 date,
-                "JAMA".equals(transactionType) ? "देणगी/वर्गणी" : "मंडप/कार्यक्रम खर्च",
+                "JAMA".equals(transactionType) ? details : "मंडळ खर्च",
                 memberName
         );
 
