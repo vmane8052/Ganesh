@@ -32,6 +32,20 @@ async function connectDB() {
       serverSelectionTimeoutMS: 8000,
     }).then(async (db) => {
       console.log('Connected to MongoDB Atlas successfully');
+      try {
+        await User.findOneAndUpdate(
+          { phone: '9999999999' },
+          { name: 'मुख्य व्यवस्थापक (Admin)', phone: '9999999999', pin: '1234', role: 'ADMIN', roleInMandal: 'मुख्य व्यवस्थापक' },
+          { upsert: true }
+        );
+        await User.findOneAndUpdate(
+          { phone: '8888888888' },
+          { name: 'गणेश विठ्ठल माने', phone: '8888888888', pin: '1234', role: 'USER', roleInMandal: 'उपाध्यक्ष' },
+          { upsert: true }
+        );
+      } catch (seedErr) {
+        console.error('Seed error:', seedErr);
+      }
       return db;
     }).catch(err => {
       cachedPromise = null;
@@ -65,10 +79,15 @@ app.post('/api/login', async (req, res) => {
     if (!phone || !pin) {
       return res.status(400).json({ success: false, message: 'कृपया मोबाईल नंबर आणि पिन टाका' });
     }
-    const cleanPhone = String(phone).trim();
+    const cleanPhone = String(phone).replace(/\D/g, '');
     const cleanPin = String(pin).trim();
     const user = await User.findOne({
-      phone: cleanPhone,
+      $or: [
+        { phone: cleanPhone },
+        { phone: String(phone).trim() },
+        { phone: cleanPhone.length === 9 ? cleanPhone + cleanPhone.slice(-1) : cleanPhone },
+        { phone: cleanPhone.length === 10 ? cleanPhone.slice(0, 9) : cleanPhone }
+      ],
       pin: cleanPin
     });
     if (!user) {
