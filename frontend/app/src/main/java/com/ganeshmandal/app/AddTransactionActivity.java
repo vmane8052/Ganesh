@@ -1,7 +1,6 @@
 package com.ganeshmandal.app;
 
 import android.app.DatePickerDialog;
-import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.ImageView;
@@ -14,14 +13,8 @@ import com.ganeshmandal.app.models.Transaction;
 import com.ganeshmandal.app.models.TransactionResponse;
 import com.google.android.material.button.MaterialButton;
 import com.google.android.material.textfield.TextInputEditText;
-import com.google.gson.Gson;
-import com.google.gson.reflect.TypeToken;
-import java.lang.reflect.Type;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
 import java.util.Calendar;
-import java.util.Date;
-import java.util.List;
 import java.util.Locale;
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -124,7 +117,7 @@ public class AddTransactionActivity extends AppCompatActivity {
         }
 
         btnSave.setEnabled(false);
-        btnSave.setText("साठवत आहे...");
+        btnSave.setText("डेटाबेसमध्ये साठवत आहे...");
 
         Transaction tx = new Transaction(
                 transactionType,
@@ -135,36 +128,26 @@ public class AddTransactionActivity extends AppCompatActivity {
                 memberName
         );
 
-        // Save locally first for 100% instant reliability
-        saveLocally(tx);
-
+        // Send directly to MongoDB Atlas Cloud API (100% Strict Cloud Saving)
         ApiClient.getService().addTransaction(tx).enqueue(new Callback<TransactionResponse>() {
             @Override
             public void onResponse(Call<TransactionResponse> call, Response<TransactionResponse> response) {
                 btnSave.setEnabled(true);
                 btnSave.setText(getString(R.string.btn_save));
-                Toast.makeText(AddTransactionActivity.this, "व्यवहार यशस्वीरित्या साठवला!", Toast.LENGTH_LONG).show();
-                finish();
+                if (response.isSuccessful() && response.body() != null && response.body().isSuccess()) {
+                    Toast.makeText(AddTransactionActivity.this, "व्यवहार MongoDB डेटाबेसमध्ये साठवला गेला!", Toast.LENGTH_LONG).show();
+                    finish();
+                } else {
+                    Toast.makeText(AddTransactionActivity.this, "डेटाबेस एरर: व्यवहार साठवता आला नाही", Toast.LENGTH_SHORT).show();
+                }
             }
 
             @Override
             public void onFailure(Call<TransactionResponse> call, Throwable t) {
                 btnSave.setEnabled(true);
                 btnSave.setText(getString(R.string.btn_save));
-                Toast.makeText(AddTransactionActivity.this, "व्यवहार साठवला!", Toast.LENGTH_SHORT).show();
-                finish();
+                Toast.makeText(AddTransactionActivity.this, "डेटाबेस नेटवर्क एरर: " + t.getMessage(), Toast.LENGTH_LONG).show();
             }
         });
-    }
-
-    private void saveLocally(Transaction tx) {
-        SharedPreferences prefs = getSharedPreferences("MandalPrefs", MODE_PRIVATE);
-        String existingJson = prefs.getString("LOCAL_TXS", "[]");
-        Gson gson = new Gson();
-        Type type = new TypeToken<List<Transaction>>() {}.getType();
-        List<Transaction> list = gson.fromJson(existingJson, type);
-        if (list == null) list = new ArrayList<>();
-        list.add(0, tx);
-        prefs.edit().putString("LOCAL_TXS", gson.toJson(list)).apply();
     }
 }

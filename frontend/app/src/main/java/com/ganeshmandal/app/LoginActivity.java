@@ -3,7 +3,6 @@ package com.ganeshmandal.app;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
-import android.view.View;
 import android.widget.Toast;
 import androidx.appcompat.app.AppCompatActivity;
 import com.ganeshmandal.app.api.ApiClient;
@@ -11,11 +10,7 @@ import com.ganeshmandal.app.models.LoginResponse;
 import com.ganeshmandal.app.models.User;
 import com.google.android.material.button.MaterialButton;
 import com.google.android.material.textfield.TextInputEditText;
-import com.google.gson.Gson;
-import com.google.gson.reflect.TypeToken;
-import java.lang.reflect.Type;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -48,12 +43,13 @@ public class LoginActivity extends AppCompatActivity {
         }
 
         btnLogin.setEnabled(false);
-        btnLogin.setText("लॉगिन करत आहे...");
+        btnLogin.setText("डेटाबेसमध्ये तपासत आहे...");
 
         Map<String, String> creds = new HashMap<>();
         creds.put("phone", phone);
         creds.put("pin", pin);
 
+        // 100% Strict Real-Time MongoDB Atlas Authentication
         ApiClient.getService().login(creds).enqueue(new Callback<LoginResponse>() {
             @Override
             public void onResponse(Call<LoginResponse> call, Response<LoginResponse> response) {
@@ -78,8 +74,8 @@ public class LoginActivity extends AppCompatActivity {
                     startActivity(intent);
                     finish();
                 } else {
-                    if (handleFallbackLogin(phone, pin)) return;
-                    Toast.makeText(LoginActivity.this, "चुकीचा मोबाईल नंबर किंवा पिन (9999999999 / 1234 वापरा)", Toast.LENGTH_LONG).show();
+                    String msg = (response.body() != null && response.body().getMessage() != null) ? response.body().getMessage() : "चुकीचा मोबाईल नंबर किंवा पिन";
+                    Toast.makeText(LoginActivity.this, msg, Toast.LENGTH_LONG).show();
                 }
             }
 
@@ -87,75 +83,8 @@ public class LoginActivity extends AppCompatActivity {
             public void onFailure(Call<LoginResponse> call, Throwable t) {
                 btnLogin.setEnabled(true);
                 btnLogin.setText(getString(R.string.btn_login));
-                if (handleFallbackLogin(phone, pin)) return;
-                Toast.makeText(LoginActivity.this, "सर्व्हरशी संपर्क होऊ शकला नाही: " + t.getMessage(), Toast.LENGTH_LONG).show();
+                Toast.makeText(LoginActivity.this, "डेटाबेस नेटवर्क एरर: " + t.getMessage(), Toast.LENGTH_LONG).show();
             }
         });
-    }
-
-    private boolean handleFallbackLogin(String phone, String pin) {
-        SharedPreferences prefs = getSharedPreferences("MandalPrefs", MODE_PRIVATE);
-
-        // 1. Check default Admin
-        if (("9999999999".equals(phone) || "999999999".equals(phone)) && "1234".equals(pin)) {
-            prefs.edit()
-                    .putString("USER_ROLE", "ADMIN")
-                    .putString("USER_NAME", "मुख्य व्यवस्थापक (Admin)")
-                    .putString("USER_PHONE", phone)
-                    .putString("USER_ROLE_IN_MANDAL", "मुख्य व्यवस्थापक")
-                    .putString("USER_PHOTO_URL", "")
-                    .apply();
-
-            Toast.makeText(this, "स्वागत आहे, मुख्य व्यवस्थापक (Admin)", Toast.LENGTH_LONG).show();
-            Intent intent = new Intent(this, MainActivity.class);
-            startActivity(intent);
-            finish();
-            return true;
-        }
-
-        // 2. Check default User
-        if (("8888888888".equals(phone) || "888888888".equals(phone)) && "1234".equals(pin)) {
-            prefs.edit()
-                    .putString("USER_ROLE", "USER")
-                    .putString("USER_NAME", "सामान्य सदस्य (User)")
-                    .putString("USER_PHONE", phone)
-                    .putString("USER_ROLE_IN_MANDAL", "सामान्य सदस्य")
-                    .putString("USER_PHOTO_URL", "")
-                    .apply();
-
-            Toast.makeText(this, "स्वागत आहे, सामान्य सदस्य (User)", Toast.LENGTH_LONG).show();
-            Intent intent = new Intent(this, MainActivity.class);
-            startActivity(intent);
-            finish();
-            return true;
-        }
-
-        // 3. Check dynamically registered members added via Admin Add Member form
-        String json = prefs.getString("REGISTERED_USERS", "[]");
-        Gson gson = new Gson();
-        Type type = new TypeToken<List<User>>() {}.getType();
-        List<User> list = gson.fromJson(json, type);
-        if (list != null) {
-            for (User u : list) {
-                if (u.getPhone() != null && u.getPhone().equals(phone) && u.getPin() != null && u.getPin().equals(pin)) {
-                    prefs.edit()
-                            .putString("USER_ROLE", u.getRole() != null ? u.getRole() : "USER")
-                            .putString("USER_NAME", u.getName())
-                            .putString("USER_PHONE", u.getPhone())
-                            .putString("USER_ROLE_IN_MANDAL", u.getRoleInMandal())
-                            .putString("USER_PHOTO_URL", u.getPhotoUrl() != null ? u.getPhotoUrl() : "")
-                            .apply();
-
-                    String welcome = "स्वागत आहे, " + u.getName();
-                    Toast.makeText(this, welcome, Toast.LENGTH_LONG).show();
-                    Intent intent = new Intent(this, MainActivity.class);
-                    startActivity(intent);
-                    finish();
-                    return true;
-                }
-            }
-        }
-
-        return false;
     }
 }

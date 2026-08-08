@@ -59,16 +59,15 @@ public class TransactionsActivity extends AppCompatActivity {
         SharedPreferences prefs = getSharedPreferences("MandalPrefs", MODE_PRIVATE);
         boolean isAdmin = "ADMIN".equalsIgnoreCase(prefs.getString("USER_ROLE", "USER"));
 
-        // CRITICAL REQUIREMENT: Show bottom Jama/Kharch buttons ONLY IF ADMIN
         layoutAdminActions.setVisibility(isAdmin ? View.VISIBLE : View.GONE);
         adapter.setAdmin(isAdmin);
 
         adapter.setListener((tx, pos) -> {
             new androidx.appcompat.app.AlertDialog.Builder(TransactionsActivity.this)
                     .setTitle("व्यवहार हटवा")
-                    .setMessage("तुम्हाला नक्की हा व्यवहार हटवायचा आहे का?")
+                    .setMessage("तुम्हाला नक्की हा व्यवहार डेटाबेसमधून हटवायचा आहे का?")
                     .setPositiveButton("हटवा", (dialog, which) -> {
-                        deleteTransactionLocalAndRemote(tx, pos);
+                        deleteTransactionRemote(tx, pos);
                     })
                     .setNegativeButton("रद्द करा", null)
                     .show();
@@ -101,37 +100,24 @@ public class TransactionsActivity extends AppCompatActivity {
     }
 
     private void fetchTransactions() {
-        List<Transaction> localList = getLocalTransactions();
-        allTransactions = new ArrayList<>(localList);
-        applyFilter();
-
+        // 100% Strict Real-Time Fetch directly from MongoDB Atlas Cloud API
         ApiClient.getService().getTransactions(null).enqueue(new Callback<TransactionResponse>() {
             @Override
             public void onResponse(Call<TransactionResponse> call, Response<TransactionResponse> response) {
                 if (response.isSuccessful() && response.body() != null && response.body().isSuccess()) {
                     List<Transaction> serverList = response.body().getData();
-                    allTransactions = new ArrayList<>(localList);
-                    if (serverList != null) {
-                        allTransactions.addAll(serverList);
-                    }
+                    allTransactions = serverList != null ? serverList : new ArrayList<>();
                     applyFilter();
+                } else {
+                    Toast.makeText(TransactionsActivity.this, "डेटाबेसमधून व्यवहार लोड करू शकलो नाही", Toast.LENGTH_SHORT).show();
                 }
             }
 
             @Override
             public void onFailure(Call<TransactionResponse> call, Throwable t) {
-                // Keep local list
+                Toast.makeText(TransactionsActivity.this, "डेटाबेस नेटवर्क एरर: " + t.getMessage(), Toast.LENGTH_SHORT).show();
             }
         });
-    }
-
-    private List<Transaction> getLocalTransactions() {
-        SharedPreferences prefs = getSharedPreferences("MandalPrefs", MODE_PRIVATE);
-        String json = prefs.getString("LOCAL_TXS", "[]");
-        com.google.gson.Gson gson = new com.google.gson.Gson();
-        java.lang.reflect.Type type = new com.google.gson.reflect.TypeToken<List<Transaction>>() {}.getType();
-        List<Transaction> list = gson.fromJson(json, type);
-        return list != null ? list : new ArrayList<>();
     }
 
     private void filterTransactions(String type) {
@@ -174,33 +160,20 @@ public class TransactionsActivity extends AppCompatActivity {
         tvBalance.setText(String.format(Locale.getDefault(), "₹ %.0f", balance));
     }
 
-    private void deleteTransactionLocalAndRemote(Transaction tx, int pos) {
-        allTransactions.remove(tx);
-
-        SharedPreferences prefs = getSharedPreferences("MandalPrefs", MODE_PRIVATE);
-        String json = prefs.getString("LOCAL_TXS", "[]");
-        com.google.gson.Gson gson = new com.google.gson.Gson();
-        java.lang.reflect.Type type = new com.google.gson.reflect.TypeToken<List<Transaction>>() {}.getType();
-        List<Transaction> list = gson.fromJson(json, type);
-        if (list != null) {
-            List<Transaction> toKeep = new ArrayList<>();
-            for (Transaction item : list) {
-                if (!(item.getAmount() == tx.getAmount() && item.getDetails().equals(tx.getDetails()) && item.getDate().equals(tx.getDate()))) {
-                    toKeep.add(item);
-                }
-            }
-            prefs.edit().putString("LOCAL_TXS", gson.toJson(toKeep)).apply();
-        }
-
-        applyFilter();
-        Toast.makeText(this, "व्यवहार हटवला!", Toast.LENGTH_SHORT).show();
-
+    private void deleteTransactionRemote(Transaction tx, int pos) {
         if (tx.getId() != null && !tx.getId().isEmpty()) {
             ApiClient.getService().deleteTransaction(tx.getId()).enqueue(new Callback<Void>() {
                 @Override
-                public void onResponse(Call<Void> call, Response<Void> response) {}
+                public void onResponse(Call<Void> call, Response<Void> response) {
+                    allTransactions.remove(tx);
+                    applyFilter();
+                    Toast.makeText(TransactionsActivity.this, "व्यवहार डेटाबेसमधून हटवला!", Toast.LENGTH_SHORT).show();
+                }
+
                 @Override
-                public void onFailure(Call<Void> call, Throwable t) {}
+                public void onFailure(Call<Void> call, Throwable t) {
+                    Toast.makeText(TransactionsActivity.this, "डेटाबेस डिलीट एरर: " + t.getMessage(), Toast.LENGTH_SHORT).show();
+                }
             });
         }
     }
