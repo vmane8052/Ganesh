@@ -24,6 +24,19 @@ public class LoginActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        // Check if user is already logged in - Auto-login session!
+        SharedPreferences prefs = getSharedPreferences("MandalPrefs", MODE_PRIVATE);
+        boolean isLoggedIn = prefs.getBoolean("IS_LOGGED_IN", false);
+        String savedPhone = prefs.getString("USER_PHONE", null);
+
+        if (isLoggedIn && savedPhone != null && !savedPhone.trim().isEmpty()) {
+            Intent intent = new Intent(this, MainActivity.class);
+            startActivity(intent);
+            finish();
+            return;
+        }
+
         setContentView(R.layout.activity_login);
 
         etPhone = findViewById(R.id.etPhone);
@@ -60,6 +73,7 @@ public class LoginActivity extends AppCompatActivity {
                     User u = response.body().getUser();
                     SharedPreferences prefs = getSharedPreferences("MandalPrefs", MODE_PRIVATE);
                     prefs.edit()
+                            .putBoolean("IS_LOGGED_IN", true) // Session active until logout
                             .putString("USER_ROLE", u.getRole())
                             .putString("USER_NAME", u.getName())
                             .putString("USER_PHONE", u.getPhone())
