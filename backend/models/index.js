@@ -38,14 +38,14 @@ const eventSchema = new mongoose.Schema({
 }, { timestamps: true });
 
 const donationSchema = new mongoose.Schema({
-  donorName: { type: String, required: true }, // देणगीदाराचे नाव
-  donorPhone: { type: String, default: '' },    // मोबाईल नंबर
-  donationType: { type: String, enum: ['CASH', 'ITEM', 'ONLINE'], default: 'CASH' }, // CASH (रोख रक्कम), ITEM (वस्तू देणगी), ONLINE (ऑनलाइन/UPI)
-  amount: { type: Number, default: 0 },          // रोख/ऑनलाइन रक्कम (उदा. ₹ ५००१)
-  itemDetails: { type: String, default: '' },   // वस्तू देणगीचे नाव व तपशील (उदा. २१ चांदीचे मोदक, ५० किलो धान्य, साऊंड सिस्टीम, चांदीचा मुकुट)
-  date: { type: String, required: true },       // तारीख
-  address: { type: String, default: '' },       // गाव / पत्ता
-  receiptNo: { type: String, default: '' }      // पावती क्रमांक
+  donorName: { type: String, required: true },
+  donorPhone: { type: String, default: '' },
+  donationType: { type: String, default: 'CASH' },
+  amount: { type: Number, default: 0 },
+  itemDetails: { type: String, default: '' },
+  date: { type: String, required: true },
+  address: { type: String, default: '' },
+  receiptNo: { type: String, default: '' }
 }, { timestamps: true });
 
 const gallerySchema = new mongoose.Schema({
@@ -55,10 +55,10 @@ const gallerySchema = new mongoose.Schema({
 }, { timestamps: true });
 
 module.exports = {
-  User: mongoose.model('User', userSchema),
-  Transaction: mongoose.model('Transaction', transactionSchema),
-  Member: mongoose.model('Member', memberSchema),
-  Event: mongoose.model('Event', eventSchema),
-  Donation: mongoose.model('Donation', donationSchema),
-  Gallery: mongoose.model('Gallery', gallerySchema)
+  User: mongoose.models.User || mongoose.model('User', userSchema),
+  Transaction: mongoose.models.Transaction || mongoose.model('Transaction', transactionSchema),
+  Member: mongoose.models.Member || mongoose.model('Member', memberSchema),
+  Event: mongoose.models.Event || mongoose.model('Event', eventSchema),
+  Donation: mongoose.models.Donation || mongoose.model('Donation', donationSchema),
+  Gallery: mongoose.models.Gallery || mongoose.model('Gallery', gallerySchema)
 };
