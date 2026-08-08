@@ -1,13 +1,19 @@
 package com.ganeshmandal.app.api;
 
 import com.ganeshmandal.app.models.LoginResponse;
+import com.ganeshmandal.app.models.SingleTransactionResponse;
 import com.ganeshmandal.app.models.Transaction;
 import com.ganeshmandal.app.models.TransactionResponse;
+import com.ganeshmandal.app.models.User;
+import com.ganeshmandal.app.models.UserListResponse;
 import java.util.Map;
 import retrofit2.Call;
 import retrofit2.http.Body;
+import retrofit2.http.DELETE;
 import retrofit2.http.GET;
 import retrofit2.http.POST;
+import retrofit2.http.PUT;
+import retrofit2.http.Path;
 import retrofit2.http.Query;
 
 public interface ApiService {
@@ -18,20 +24,20 @@ public interface ApiService {
     Call<TransactionResponse> getTransactions(@Query("type") String type);
 
     @POST("api/transactions")
-    Call<TransactionResponse> addTransaction(@Body Transaction transaction);
+    Call<SingleTransactionResponse> addTransaction(@Body Transaction transaction);
 
-    @retrofit2.http.DELETE("api/transactions/{id}")
-    Call<Void> deleteTransaction(@retrofit2.http.Path("id") String id);
+    @DELETE("api/transactions/{id}")
+    Call<Void> deleteTransaction(@Path("id") String id);
 
     @POST("api/users")
-    Call<LoginResponse> addUser(@Body com.ganeshmandal.app.models.User user);
+    Call<LoginResponse> addUser(@Body User user);
 
     @GET("api/users")
-    Call<com.ganeshmandal.app.models.UserListResponse> getUsers();
+    Call<UserListResponse> getUsers();
 
-    @retrofit2.http.PUT("api/users/phone/{phone}")
-    Call<LoginResponse> updateUser(@retrofit2.http.Path("phone") String phone, @Body com.ganeshmandal.app.models.User user);
+    @PUT("api/users/phone/{phone}")
+    Call<LoginResponse> updateUser(@Path("phone") String phone, @Body User user);
 
-    @retrofit2.http.DELETE("api/users/phone/{phone}")
-    Call<Void> deleteUser(@retrofit2.http.Path("phone") String phone);
+    @DELETE("api/users/phone/{phone}")
+    Call<Void> deleteUser(@Path("phone") String phone);
 }

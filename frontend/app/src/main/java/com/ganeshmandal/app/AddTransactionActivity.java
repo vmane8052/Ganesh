@@ -9,8 +9,8 @@ import android.widget.TextView;
 import android.widget.Toast;
 import androidx.appcompat.app.AppCompatActivity;
 import com.ganeshmandal.app.api.ApiClient;
+import com.ganeshmandal.app.models.SingleTransactionResponse;
 import com.ganeshmandal.app.models.Transaction;
-import com.ganeshmandal.app.models.TransactionResponse;
 import com.google.android.material.button.MaterialButton;
 import com.google.android.material.textfield.TextInputEditText;
 import java.text.SimpleDateFormat;
@@ -129,9 +129,9 @@ public class AddTransactionActivity extends AppCompatActivity {
         );
 
         // Send directly to MongoDB Atlas Cloud API (100% Strict Cloud Saving)
-        ApiClient.getService().addTransaction(tx).enqueue(new Callback<TransactionResponse>() {
+        ApiClient.getService().addTransaction(tx).enqueue(new Callback<SingleTransactionResponse>() {
             @Override
-            public void onResponse(Call<TransactionResponse> call, Response<TransactionResponse> response) {
+            public void onResponse(Call<SingleTransactionResponse> call, Response<SingleTransactionResponse> response) {
                 btnSave.setEnabled(true);
                 btnSave.setText(getString(R.string.btn_save));
                 if (response.isSuccessful() && response.body() != null && response.body().isSuccess()) {
@@ -143,7 +143,7 @@ public class AddTransactionActivity extends AppCompatActivity {
             }
 
             @Override
-            public void onFailure(Call<TransactionResponse> call, Throwable t) {
+            public void onFailure(Call<SingleTransactionResponse> call, Throwable t) {
                 btnSave.setEnabled(true);
                 btnSave.setText(getString(R.string.btn_save));
                 Toast.makeText(AddTransactionActivity.this, "डेटाबेस नेटवर्क एरर: " + t.getMessage(), Toast.LENGTH_LONG).show();
