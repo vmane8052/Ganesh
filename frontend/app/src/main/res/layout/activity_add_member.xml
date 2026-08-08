@@ -110,7 +110,7 @@
                     android:id="@+id/etName"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:hint="उदा. गणेश विठ्ठल माने"
+                    android:hint=""
                     android:inputType="textPersonName" />
             </com.google.android.material.textfield.TextInputLayout>
 
@@ -139,7 +139,7 @@
                     android:id="@+id/etPhone"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:hint="उदा. 9876543210"
+                    android:hint=""
                     android:inputType="phone"
                     android:maxLength="10" />
             </com.google.android.material.textfield.TextInputLayout>
@@ -170,7 +170,7 @@
                     android:id="@+id/etPin"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:hint="उदा. 1234"
+                    android:hint=""
                     android:inputType="numberPassword"
                     android:maxLength="6" />
             </com.google.android.material.textfield.TextInputLayout>

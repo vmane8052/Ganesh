@@ -261,10 +261,10 @@ app.post('/api/members', async (req, res) => {
   }
 });
 
-// --- EVENTS (कार्यक्रम) ---
+// --- EVENTS (कार्यक्रम व्यवस्थापन) ---
 app.get('/api/events', async (req, res) => {
   try {
-    const events = await Event.find().sort({ createdAt: -1 });
+    const events = await Event.find().sort({ createdAt: 1 });
     res.json({ success: true, data: events });
   } catch (err) {
     res.status(500).json({ success: false, error: err.message });
@@ -273,9 +273,44 @@ app.get('/api/events', async (req, res) => {
 
 app.post('/api/events', async (req, res) => {
   try {
-    const { title, date, description, expenseAmount } = req.body;
-    const event = await Event.create({ title, date, description, expenseAmount });
-    res.status(201).json({ success: true, data: event });
+    const { dayTitle, date, morningAarti, eveningAarti, lunchHost, modakHost, culturalProgram, specialNotes } = req.body;
+    if (!dayTitle || !date) {
+      return res.status(400).json({ success: false, message: 'दिवस आणि तारीख आवश्यक आहे' });
+    }
+    const event = await Event.create({
+      dayTitle,
+      date,
+      morningAarti: morningAarti || '',
+      eveningAarti: eveningAarti || '',
+      lunchHost: lunchHost || '',
+      modakHost: modakHost || '',
+      culturalProgram: culturalProgram || '',
+      specialNotes: specialNotes || ''
+    });
+    res.status(201).json({ success: true, message: 'कार्यक्रम यशस्वीरीत्या जोडला गेला', data: event });
+  } catch (err) {
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
+
+app.put('/api/events/:id', async (req, res) => {
+  try {
+    const { id } = req.params;
+    const updated = await Event.findByIdAndUpdate(id, req.body, { new: true });
+    if (!updated) {
+      return res.status(404).json({ success: false, message: 'कार्यक्रम सापडला नाही' });
+    }
+    res.json({ success: true, message: 'कार्यक्रम यशस्वीरीत्या अपडेट केला', data: updated });
+  } catch (err) {
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
+
+app.delete('/api/events/:id', async (req, res) => {
+  try {
+    const { id } = req.params;
+    await Event.findByIdAndDelete(id);
+    res.json({ success: true, message: 'कार्यक्रम यशस्वीरीत्या हटवला गेला' });
   } catch (err) {
     res.status(500).json({ success: false, error: err.message });
   }

@@ -1,6 +1,9 @@
 package com.ganeshmandal.app.api;
 
+import com.ganeshmandal.app.models.EventListResponse;
 import com.ganeshmandal.app.models.LoginResponse;
+import com.ganeshmandal.app.models.MandalEvent;
+import com.ganeshmandal.app.models.SingleEventResponse;
 import com.ganeshmandal.app.models.SingleTransactionResponse;
 import com.ganeshmandal.app.models.Transaction;
 import com.ganeshmandal.app.models.TransactionResponse;
@@ -40,4 +43,17 @@ public interface ApiService {
 
     @DELETE("api/users/phone/{phone}")
     Call<Void> deleteUser(@Path("phone") String phone);
+
+    // --- Daily Events & Aarti Schedule ---
+    @GET("api/events")
+    Call<EventListResponse> getEvents();
+
+    @POST("api/events")
+    Call<SingleEventResponse> addEvent(@Body MandalEvent event);
+
+    @PUT("api/events/{id}")
+    Call<SingleEventResponse> updateEvent(@Path("id") String id, @Body MandalEvent event);
+
+    @DELETE("api/events/{id}")
+    Call<Void> deleteEvent(@Path("id") String id);
 }

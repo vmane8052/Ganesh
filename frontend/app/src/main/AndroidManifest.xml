@@ -60,6 +60,16 @@
             android:exported="false"
             android:screenOrientation="portrait" />
 
+        <activity
+            android:name=".EventsActivity"
+            android:exported="false"
+            android:screenOrientation="portrait" />
+
+        <activity
+            android:name=".AddEventActivity"
+            android:exported="false"
+            android:screenOrientation="portrait" />
+
     </application>
 
 </manifest>

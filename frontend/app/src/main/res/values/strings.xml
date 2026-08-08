@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">श्री गणेश मित्र मंडळ</string>
-    <string name="mandal_subtitle">माने/ देरे वस्ती</string>
+    <string name="mandal_subtitle">माने/ ढेरे वस्ती</string>
     <string name="ganapati_slogan">- || गणपती बाप्पा मोरया || -</string>
 
     <string name="login_title">मंडळ लॉगिन</string>
-    <string name="phone_hint">मोबाईल नंबर (उदा. 9999999999)</string>
+    <string name="phone_hint">मोबाईल नंबर </string>
     <string name="pin_hint">पिन (PIN - 4 अंकी)</string>
     <string name="btn_login">लॉगिन करा</string>
 
