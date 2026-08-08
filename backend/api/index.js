@@ -33,16 +33,16 @@ async function connectDB() {
     }).then(async (db) => {
       console.log('Connected to MongoDB Atlas successfully');
       try {
-        await User.findOneAndUpdate(
-          { phone: '9999999999' },
-          { name: 'मुख्य व्यवस्थापक (Admin)', phone: '9999999999', pin: '1234', role: 'ADMIN', roleInMandal: 'मुख्य व्यवस्थापक' },
-          { upsert: true }
-        );
-        await User.findOneAndUpdate(
-          { phone: '8888888888' },
-          { name: 'गणेश विठ्ठल माने', phone: '8888888888', pin: '1234', role: 'USER', roleInMandal: 'उपाध्यक्ष' },
-          { upsert: true }
-        );
+        const adminCount = await User.countDocuments({ phone: '9999999999' });
+        if (adminCount === 0) {
+          await User.create({
+            name: 'मुख्य व्यवस्थापक (Admin)',
+            phone: '9999999999',
+            pin: '1234',
+            role: 'ADMIN',
+            roleInMandal: 'मुख्य व्यवस्थापक'
+          });
+        }
       } catch (seedErr) {
         console.error('Seed error:', seedErr);
       }
