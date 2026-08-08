@@ -44,7 +44,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="6dp"
-        android:layout_marginBottom="20dp"
+        android:layout_marginBottom="24dp"
         android:text="@string/ganapati_slogan"
         android:textColor="@color/accent_orange"
         android:textSize="14sp"
@@ -62,58 +62,22 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical"
-            android:padding="20dp">
+            android:padding="24dp">
 
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginBottom="14dp"
+                android:layout_marginBottom="20dp"
                 android:text="@string/login_title"
                 android:textColor="@color/text_primary"
-                android:textSize="19sp"
+                android:textSize="20sp"
                 android:textStyle="bold" />
-
-            <!-- Quick One-Click Login Options -->
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginBottom="16dp"
-                android:orientation="horizontal">
-
-                <com.google.android.material.button.MaterialButton
-                    android:id="@+id/btnQuickAdmin"
-                    style="@style/Widget.MaterialComponents.Button.OutlinedButton"
-                    android:layout_width="0dp"
-                    android:layout_height="44dp"
-                    android:layout_marginEnd="6dp"
-                    android:layout_weight="1"
-                    android:text="👑 Admin"
-                    android:textColor="@color/primary_blue"
-                    android:textSize="13sp"
-                    android:textStyle="bold"
-                    app:cornerRadius="8dp"
-                    app:strokeColor="@color/primary_blue" />
-
-                <com.google.android.material.button.MaterialButton
-                    android:id="@+id/btnQuickUser"
-                    style="@style/Widget.MaterialComponents.Button.OutlinedButton"
-                    android:layout_width="0dp"
-                    android:layout_height="44dp"
-                    android:layout_marginStart="6dp"
-                    android:layout_weight="1"
-                    android:text="👤 User"
-                    android:textColor="@color/text_secondary"
-                    android:textSize="13sp"
-                    android:textStyle="bold"
-                    app:cornerRadius="8dp"
-                    app:strokeColor="@color/text_secondary" />
-            </LinearLayout>
 
             <!-- Phone Input -->
             <com.google.android.material.textfield.TextInputLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginBottom="14dp"
+                android:layout_marginBottom="16dp"
                 app:boxStrokeColor="@color/primary_blue">
 
                 <com.google.android.material.textfield.TextInputEditText
@@ -123,7 +87,6 @@
                     android:hint="@string/phone_hint"
                     android:inputType="phone"
                     android:maxLength="10"
-                    android:text="9999999999"
                     android:textColor="@color/text_primary" />
             </com.google.android.material.textfield.TextInputLayout>
 
@@ -131,7 +94,7 @@
             <com.google.android.material.textfield.TextInputLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginBottom="20dp"
+                android:layout_marginBottom="24dp"
                 app:boxStrokeColor="@color/primary_blue"
                 app:passwordToggleEnabled="true">
 
@@ -142,7 +105,6 @@
                     android:hint="@string/pin_hint"
                     android:inputType="numberPassword"
                     android:maxLength="6"
-                    android:text="1234"
                     android:textColor="@color/text_primary" />
             </com.google.android.material.textfield.TextInputLayout>
 
@@ -150,7 +112,7 @@
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/btnLogin"
                 android:layout_width="match_parent"
-                android:layout_height="52dp"
+                android:layout_height="54dp"
                 android:backgroundTint="@color/primary_blue"
                 android:text="@string/btn_login"
                 android:textColor="@color/white"

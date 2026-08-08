@@ -19,7 +19,7 @@ import retrofit2.Response;
 public class LoginActivity extends AppCompatActivity {
 
     private TextInputEditText etPhone, etPin;
-    private MaterialButton btnLogin, btnQuickAdmin, btnQuickUser;
+    private MaterialButton btnLogin;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -29,20 +29,6 @@ public class LoginActivity extends AppCompatActivity {
         etPhone = findViewById(R.id.etPhone);
         etPin = findViewById(R.id.etPin);
         btnLogin = findViewById(R.id.btnLogin);
-        btnQuickAdmin = findViewById(R.id.btnQuickAdmin);
-        btnQuickUser = findViewById(R.id.btnQuickUser);
-
-        btnQuickAdmin.setOnClickListener(v -> {
-            etPhone.setText("9999999999");
-            etPin.setText("1234");
-            performLogin();
-        });
-
-        btnQuickUser.setOnClickListener(v -> {
-            etPhone.setText("8888888888");
-            etPin.setText("1234");
-            performLogin();
-        });
 
         btnLogin.setOnClickListener(v -> performLogin());
     }
