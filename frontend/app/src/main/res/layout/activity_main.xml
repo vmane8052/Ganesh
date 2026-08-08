@@ -16,7 +16,7 @@
         <LinearLayout
             android:id="@+id/headerBanner"
             android:layout_width="match_parent"
-            android:layout_height="180dp"
+            android:layout_height="wrap_content"
             android:background="@color/primary_blue"
             android:orientation="vertical"
             android:padding="16dp">
@@ -37,29 +37,6 @@
                     android:src="@android:drawable/ic_menu_sort_by_size"
                     app:tint="@color/white" />
 
-                <LinearLayout
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_centerInParent="true"
-                    android:gravity="center"
-                    android:orientation="vertical">
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="@string/app_name"
-                        android:textColor="@color/white"
-                        android:textSize="18sp"
-                        android:textStyle="bold" />
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="@string/mandal_subtitle"
-                        android:textColor="@color/white"
-                        android:textSize="14sp" />
-                </LinearLayout>
-
                 <ImageView
                     android:id="@+id/btnNotification"
                     android:layout_width="28dp"
@@ -70,16 +47,46 @@
                     app:tint="@color/accent_orange" />
             </RelativeLayout>
 
-            <!-- Ganapati Center Title/Symbol -->
-            <TextView
+            <!-- Center Official Logo Emblem & Mandal Titles -->
+            <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="24dp"
+                android:layout_marginTop="12dp"
+                android:layout_marginBottom="12dp"
                 android:gravity="center"
-                android:text="ॐ गणपतये नमः"
-                android:textColor="@color/accent_orange"
-                android:textSize="28sp"
-                android:textStyle="bold" />
+                android:orientation="vertical">
+
+                <androidx.cardview.widget.CardView
+                    android:layout_width="86dp"
+                    android:layout_height="86dp"
+                    app:cardBackgroundColor="@color/white"
+                    app:cardCornerRadius="43dp"
+                    app:cardElevation="6dp">
+
+                    <ImageView
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:scaleType="centerCrop"
+                        android:src="@drawable/app_logo" />
+                </androidx.cardview.widget.CardView>
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="8dp"
+                    android:text="@string/app_name"
+                    android:textColor="@color/white"
+                    android:textSize="20sp"
+                    android:textStyle="bold" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/mandal_subtitle"
+                    android:textColor="#FFE082"
+                    android:textSize="14sp"
+                    android:textStyle="bold" />
+            </LinearLayout>
 
         </LinearLayout>
 
@@ -380,15 +387,37 @@
         android:orientation="vertical"
         android:padding="24dp">
 
-        <TextView
-            android:id="@+id/tvRoleTitle"
-            android:layout_width="wrap_content"
+        <LinearLayout
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginBottom="24dp"
-            android:text="व्यवस्थापक (Admin)"
-            android:textColor="@color/primary_blue"
-            android:textSize="20sp"
-            android:textStyle="bold" />
+            android:layout_marginBottom="20dp"
+            android:gravity="center_vertical"
+            android:orientation="horizontal">
+
+            <androidx.cardview.widget.CardView
+                android:layout_width="48dp"
+                android:layout_height="48dp"
+                android:layout_marginEnd="12dp"
+                app:cardBackgroundColor="@color/white"
+                app:cardCornerRadius="24dp"
+                app:cardElevation="3dp">
+
+                <ImageView
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:scaleType="centerCrop"
+                    android:src="@drawable/app_logo" />
+            </androidx.cardview.widget.CardView>
+
+            <TextView
+                android:id="@+id/tvRoleTitle"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="व्यवस्थापक (Admin)"
+                android:textColor="@color/primary_blue"
+                android:textSize="18sp"
+                android:textStyle="bold" />
+        </LinearLayout>
 
         <TextView
             android:id="@+id/menuAddMember"
