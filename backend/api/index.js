@@ -32,20 +32,6 @@ async function connectDB() {
       serverSelectionTimeoutMS: 8000,
     }).then(async (db) => {
       console.log('Connected to MongoDB Atlas successfully');
-      try {
-        const adminCount = await User.countDocuments({ phone: '9999999999' });
-        if (adminCount === 0) {
-          await User.create({
-            name: 'मुख्य व्यवस्थापक (Admin)',
-            phone: '9999999999',
-            pin: '1234',
-            role: 'ADMIN',
-            roleInMandal: 'मुख्य व्यवस्थापक'
-          });
-        }
-      } catch (seedErr) {
-        console.error('Seed error:', seedErr);
-      }
       return db;
     }).catch(err => {
       cachedPromise = null;
