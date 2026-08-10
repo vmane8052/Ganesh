@@ -19,7 +19,7 @@ public class MainActivity extends AppCompatActivity {
     private ImageView btnMenu;
     private CardView cardTransactions, cardMembers, cardEvents, cardDonations;
     private TextView tvRoleTitle, menuAddMember, menuAddEvent, menuAddDonationRate, menuUploadPhoto, menuLogout;
-    private LinearLayout navVyavahar, navSadasya, navProfile;
+    private LinearLayout navVyavahar, navAarti, navProfile;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -42,7 +42,7 @@ public class MainActivity extends AppCompatActivity {
         menuLogout = findViewById(R.id.menuLogout);
 
         navVyavahar = findViewById(R.id.navVyavahar);
-        navSadasya = findViewById(R.id.navSadasya);
+        LinearLayout navAarti = findViewById(R.id.navAarti);
         navProfile = findViewById(R.id.navProfile);
 
         // Check user role from SharedPreferences
@@ -88,9 +88,9 @@ public class MainActivity extends AppCompatActivity {
             startActivity(intent);
         });
 
-        if (navSadasya != null) {
-            navSadasya.setOnClickListener(v -> {
-                Intent intent = new Intent(MainActivity.this, MembersActivity.class);
+        if (navAarti != null) {
+            navAarti.setOnClickListener(v -> {
+                Intent intent = new Intent(MainActivity.this, AartiActivity.class);
                 startActivity(intent);
             });
         }
