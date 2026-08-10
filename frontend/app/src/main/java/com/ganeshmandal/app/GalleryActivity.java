@@ -1,6 +1,7 @@
 package com.ganeshmandal.app;
 
 import android.app.Dialog;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -63,7 +64,27 @@ public class GalleryActivity extends AppCompatActivity {
     private String selectedFilterYear = "2026"; // Default filter to current year
     private String selectedUploadYear = "2026"; // Default upload year
 
-    // Multi-Image Picker
+    // Universal Chooser Launcher (Google Photos, System Gallery, Files, Drive)
+    private final ActivityResultLauncher<Intent> chooserPickerLauncher = registerForActivityResult(
+            new ActivityResultContracts.StartActivityForResult(),
+            result -> {
+                if (result.getResultCode() == RESULT_OK && result.getData() != null) {
+                    List<Uri> selectedUris = new ArrayList<>();
+                    Intent data = result.getData();
+                    if (data.getClipData() != null) {
+                        int count = data.getClipData().getItemCount();
+                        for (int i = 0; i < count; i++) {
+                            selectedUris.add(data.getClipData().getItemAt(i).getUri());
+                        }
+                    } else if (data.getData() != null) {
+                        selectedUris.add(data.getData());
+                    }
+                    handleSelectedMultipleImages(selectedUris);
+                }
+            }
+    );
+
+    // Fallback Multi-Image Picker
     private final ActivityResultLauncher<String> multiPhotoPickerLauncher = registerForActivityResult(
             new ActivityResultContracts.GetMultipleContents(),
             this::handleSelectedMultipleImages
@@ -182,10 +203,26 @@ public class GalleryActivity extends AppCompatActivity {
             String selectedItem = spinner.getSelectedItem().toString();
             selectedUploadYear = selectedItem.startsWith("2026") ? "2026" : selectedItem;
             dialog.dismiss();
-            multiPhotoPickerLauncher.launch("image/*");
+            launchUniversalPhotoPicker();
         });
 
         dialog.show();
+    }
+
+    private void launchUniversalPhotoPicker() {
+        try {
+            Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
+            intent.setType("image/*");
+            intent.putExtra(Intent.EXTRA_ALLOW_MULTIPLE, true);
+            intent.putExtra(Intent.EXTRA_LOCAL_ONLY, false); // Crucial: Allows Google Photos cloud backup & albums!
+            intent.addCategory(Intent.CATEGORY_OPENABLE);
+
+            Intent chooser = Intent.createChooser(intent, "Google Photos किंवा फोन गॅलरी निवडा");
+            chooserPickerLauncher.launch(chooser);
+        } catch (Exception e) {
+            // Fallback
+            multiPhotoPickerLauncher.launch("image/*");
+        }
     }
 
     private void fetchGalleryPhotos() {
