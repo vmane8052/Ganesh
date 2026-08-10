@@ -3,10 +3,13 @@ package com.ganeshmandal.app.api;
 import com.ganeshmandal.app.models.Donation;
 import com.ganeshmandal.app.models.DonationListResponse;
 import com.ganeshmandal.app.models.EventListResponse;
+import com.ganeshmandal.app.models.GalleryListResponse;
+import com.ganeshmandal.app.models.GalleryPhoto;
 import com.ganeshmandal.app.models.LoginResponse;
 import com.ganeshmandal.app.models.MandalEvent;
 import com.ganeshmandal.app.models.SingleDonationResponse;
 import com.ganeshmandal.app.models.SingleEventResponse;
+import com.ganeshmandal.app.models.SingleGalleryResponse;
 import com.ganeshmandal.app.models.SingleTransactionResponse;
 import com.ganeshmandal.app.models.Transaction;
 import com.ganeshmandal.app.models.TransactionResponse;
@@ -77,4 +80,14 @@ public interface ApiService {
     // --- Photo Upload (Cloudinary) ---
     @POST("api/upload")
     Call<UploadResponse> uploadPhoto(@Body Map<String, String> payload);
+
+    // --- Photo Gallery (मंडळ फोटो गॅलरी) ---
+    @GET("api/gallery")
+    Call<GalleryListResponse> getGallery();
+
+    @POST("api/gallery")
+    Call<SingleGalleryResponse> addGalleryPhoto(@Body GalleryPhoto photo);
+
+    @DELETE("api/gallery/{id}")
+    Call<Void> deleteGalleryPhoto(@Path("id") String id);
 }

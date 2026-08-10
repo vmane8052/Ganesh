@@ -19,7 +19,7 @@ public class MainActivity extends AppCompatActivity {
     private ImageView btnMenu;
     private CardView cardTransactions, cardMembers, cardEvents, cardDonations;
     private TextView tvRoleTitle, menuAddMember, menuAddEvent, menuAddDonationRate, menuUploadPhoto, menuLogout;
-    private LinearLayout navVyavahar, navAarti, navProfile;
+    private LinearLayout navGallery, navAarti, navProfile;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -41,8 +41,8 @@ public class MainActivity extends AppCompatActivity {
         menuUploadPhoto = findViewById(R.id.menuUploadPhoto);
         menuLogout = findViewById(R.id.menuLogout);
 
-        navVyavahar = findViewById(R.id.navVyavahar);
-        LinearLayout navAarti = findViewById(R.id.navAarti);
+        navGallery = findViewById(R.id.navGallery);
+        navAarti = findViewById(R.id.navAarti);
         navProfile = findViewById(R.id.navProfile);
 
         // Check user role from SharedPreferences
@@ -66,28 +66,41 @@ public class MainActivity extends AppCompatActivity {
             menuUploadPhoto.setVisibility(View.GONE);
         }
 
-        // Open sidebar on menu click
         btnMenu.setOnClickListener(v -> drawerLayout.openDrawer(GravityCompat.START));
 
-        // Navigation to Transactions list
+        // Open Transactions (जमा / खर्च)
         cardTransactions.setOnClickListener(v -> {
             Intent intent = new Intent(MainActivity.this, TransactionsActivity.class);
             startActivity(intent);
         });
 
-        if (navVyavahar != null) {
-            navVyavahar.setOnClickListener(v -> {
-                Intent intent = new Intent(MainActivity.this, TransactionsActivity.class);
-                startActivity(intent);
-            });
-        }
-
-        // Members List - Opens for BOTH Admin and Normal User
+        // Open Members List
         cardMembers.setOnClickListener(v -> {
             Intent intent = new Intent(MainActivity.this, MembersActivity.class);
             startActivity(intent);
         });
 
+        // Open Daily Events & Aarti Schedule
+        cardEvents.setOnClickListener(v -> {
+            Intent intent = new Intent(MainActivity.this, EventsActivity.class);
+            startActivity(intent);
+        });
+
+        // Open Donations
+        cardDonations.setOnClickListener(v -> {
+            Intent intent = new Intent(MainActivity.this, DonationsActivity.class);
+            startActivity(intent);
+        });
+
+        // Bottom Nav: Gallery (फोटो गॅलरी)
+        if (navGallery != null) {
+            navGallery.setOnClickListener(v -> {
+                Intent intent = new Intent(MainActivity.this, GalleryActivity.class);
+                startActivity(intent);
+            });
+        }
+
+        // Bottom Nav: Aarti Sangrah (आरती संग्रह)
         if (navAarti != null) {
             navAarti.setOnClickListener(v -> {
                 Intent intent = new Intent(MainActivity.this, AartiActivity.class);
@@ -95,22 +108,13 @@ public class MainActivity extends AppCompatActivity {
             });
         }
 
+        // Bottom Nav: Profile (माझी प्रोफाइल)
         if (navProfile != null) {
             navProfile.setOnClickListener(v -> {
                 Intent intent = new Intent(MainActivity.this, ProfileActivity.class);
                 startActivity(intent);
             });
         }
-
-        cardEvents.setOnClickListener(v -> {
-            Intent intent = new Intent(MainActivity.this, EventsActivity.class);
-            startActivity(intent);
-        });
-
-        cardDonations.setOnClickListener(v -> {
-            Intent intent = new Intent(MainActivity.this, DonationsActivity.class);
-            startActivity(intent);
-        });
 
         // Sidebar Actions
         menuAddMember.setOnClickListener(v -> {
@@ -133,7 +137,7 @@ public class MainActivity extends AppCompatActivity {
 
         menuUploadPhoto.setOnClickListener(v -> {
             drawerLayout.closeDrawer(GravityCompat.START);
-            Intent intent = new Intent(MainActivity.this, ProfileActivity.class);
+            Intent intent = new Intent(MainActivity.this, GalleryActivity.class);
             startActivity(intent);
         });
 

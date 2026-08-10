@@ -437,7 +437,7 @@ app.post('/api/upload', async (req, res) => {
   }
 });
 
-// --- GALLERY (फोटो) ---
+// --- GALLERY (फोटो गॅलरी) ---
 app.get('/api/gallery', async (req, res) => {
   try {
     const photos = await Gallery.find().sort({ createdAt: -1 });
@@ -450,8 +450,38 @@ app.get('/api/gallery', async (req, res) => {
 app.post('/api/gallery', async (req, res) => {
   try {
     const { title, imageUrl, uploadedBy } = req.body;
-    const photo = await Gallery.create({ title, imageUrl, uploadedBy });
-    res.status(201).json({ success: true, data: photo });
+    if (!imageUrl) {
+      return res.status(400).json({ success: false, message: 'फोटो आवश्यक आहे' });
+    }
+
+    let finalImageUrl = imageUrl;
+    if (imageUrl.startsWith('data:image')) {
+      try {
+        const uploadRes = await cloudinary.uploader.upload(imageUrl, {
+          folder: 'ganesh_mandal_gallery'
+        });
+        finalImageUrl = uploadRes.secure_url;
+      } catch (uploadErr) {
+        console.error('Cloudinary gallery upload error:', uploadErr);
+      }
+    }
+
+    const photo = await Gallery.create({
+      title: title || 'श्री गणेश उत्सव',
+      imageUrl: finalImageUrl,
+      uploadedBy: uploadedBy || 'मंडळ सदस्य'
+    });
+    res.status(201).json({ success: true, message: 'फोटो गॅलरीमध्ये जोडला गेला!', data: photo });
+  } catch (err) {
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
+
+app.delete('/api/gallery/:id', async (req, res) => {
+  try {
+    const { id } = req.params;
+    await Gallery.findByIdAndDelete(id);
+    res.json({ success: true, message: 'फोटो गॅलरीमधून हटवला गेला' });
   } catch (err) {
     res.status(500).json({ success: false, error: err.message });
   }
