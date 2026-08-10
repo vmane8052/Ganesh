@@ -338,6 +338,7 @@ public class GalleryActivity extends AppCompatActivity {
         progressDialog.setCancelable(false);
         if (progressDialog.getWindow() != null) {
             progressDialog.getWindow().setBackgroundDrawableResource(android.R.color.transparent);
+            progressDialog.getWindow().addFlags(android.view.WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
         }
 
         LinearProgressIndicator progressBar = progressDialog.findViewById(R.id.progressUpload);
