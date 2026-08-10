@@ -10,7 +10,6 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.Window;
 import android.widget.ImageView;
-import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AlertDialog;
 import androidx.recyclerview.widget.RecyclerView;
@@ -56,14 +55,6 @@ public class GalleryAdapter extends RecyclerView.Adapter<GalleryAdapter.GalleryV
     public void onBindViewHolder(@NonNull GalleryViewHolder holder, int position) {
         GalleryPhoto photo = photoList.get(position);
 
-        if (photo.getTitle() != null && !photo.getTitle().trim().isEmpty()) {
-            holder.tvPhotoTitle.setVisibility(View.VISIBLE);
-            holder.tvPhotoTitle.setText(photo.getTitle());
-        } else {
-            holder.tvPhotoTitle.setVisibility(View.GONE);
-        }
-        holder.tvUploadedBy.setText("👤 " + (photo.getUploadedBy() != null && !photo.getUploadedBy().isEmpty() ? photo.getUploadedBy() : "सदस्य"));
-
         String img = photo.getImageUrl();
         if (img != null && !img.isEmpty()) {
             if (img.startsWith("http://") || img.startsWith("https://")) {
@@ -97,23 +88,31 @@ public class GalleryAdapter extends RecyclerView.Adapter<GalleryAdapter.GalleryV
         // Tap to open full screen image preview
         holder.itemView.setOnClickListener(v -> showFullPhotoDialog(photo));
 
-        // Admin or Uploader can delete photo via long press
-        boolean canDelete = isAdmin || (photo.getUploadedBy() != null && photo.getUploadedBy().equals(loggedInUserName));
-        if (canDelete) {
+        // Admin can delete photo directly via trash icon or long press
+        if (isAdmin) {
+            holder.btnDeletePhoto.setVisibility(View.VISIBLE);
+            holder.btnDeletePhoto.setOnClickListener(v -> confirmDelete(photo));
             holder.itemView.setOnLongClickListener(v -> {
-                new AlertDialog.Builder(context)
-                        .setTitle("फोटो हटवा")
-                        .setMessage("तुम्हाला नक्की हा फोटो गॅलरीमधून हटवायचा आहे का?")
-                        .setPositiveButton("हटवा", (dialog, which) -> {
-                            if (deleteListener != null) {
-                                deleteListener.onDelete(photo);
-                            }
-                        })
-                        .setNegativeButton("रद्द करा", null)
-                        .show();
+                confirmDelete(photo);
                 return true;
             });
+        } else {
+            holder.btnDeletePhoto.setVisibility(View.GONE);
+            holder.itemView.setOnLongClickListener(null);
         }
+    }
+
+    private void confirmDelete(GalleryPhoto photo) {
+        new AlertDialog.Builder(context)
+                .setTitle("फोटो हटवा")
+                .setMessage("तुम्हाला नक्की हा फोटो गॅलरीमधून हटवायचा आहे का?")
+                .setPositiveButton("हटवा", (dialog, which) -> {
+                    if (deleteListener != null) {
+                        deleteListener.onDelete(photo);
+                    }
+                })
+                .setNegativeButton("रद्द करा", null)
+                .show();
     }
 
     private void showFullPhotoDialog(GalleryPhoto photo) {
@@ -123,11 +122,17 @@ public class GalleryAdapter extends RecyclerView.Adapter<GalleryAdapter.GalleryV
 
         ImageView ivFull = dialog.findViewById(R.id.ivFullPhoto);
         ImageView btnClose = dialog.findViewById(R.id.btnCloseFullPhoto);
-        TextView tvTitle = dialog.findViewById(R.id.tvFullTitle);
-        TextView tvUploaded = dialog.findViewById(R.id.tvFullUploadedBy);
+        ImageView btnFullDelete = dialog.findViewById(R.id.btnFullDeletePhoto);
 
-        tvTitle.setText(photo.getTitle() != null ? photo.getTitle() : "श्री गणेश उत्सव");
-        tvUploaded.setText("अपलोड: " + (photo.getUploadedBy() != null ? photo.getUploadedBy() : "मंडळ सदस्य"));
+        if (isAdmin) {
+            btnFullDelete.setVisibility(View.VISIBLE);
+            btnFullDelete.setOnClickListener(v -> {
+                dialog.dismiss();
+                confirmDelete(photo);
+            });
+        } else {
+            btnFullDelete.setVisibility(View.GONE);
+        }
 
         String img = photo.getImageUrl();
         if (img != null && (img.startsWith("http://") || img.startsWith("https://"))) {
@@ -156,14 +161,11 @@ public class GalleryAdapter extends RecyclerView.Adapter<GalleryAdapter.GalleryV
 
     static class GalleryViewHolder extends RecyclerView.ViewHolder {
         ImageView ivGalleryPhoto, btnDeletePhoto;
-        TextView tvPhotoTitle, tvUploadedBy;
 
         public GalleryViewHolder(@NonNull View itemView) {
             super(itemView);
             ivGalleryPhoto = itemView.findViewById(R.id.ivGalleryPhoto);
             btnDeletePhoto = itemView.findViewById(R.id.btnDeletePhoto);
-            tvPhotoTitle = itemView.findViewById(R.id.tvPhotoTitle);
-            tvUploadedBy = itemView.findViewById(R.id.tvUploadedBy);
         }
     }
 }

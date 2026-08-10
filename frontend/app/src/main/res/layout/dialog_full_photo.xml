@@ -3,60 +3,51 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#E6000000">
+    android:background="#FA000000">
 
-    <!-- Close Button -->
-    <ImageView
-        android:id="@+id/btnCloseFullPhoto"
-        android:layout_width="40dp"
-        android:layout_height="40dp"
+    <!-- Top Action Bar for Full Screen Preview -->
+    <RelativeLayout
+        android:id="@+id/topFullBar"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
         android:layout_alignParentTop="true"
-        android:layout_alignParentEnd="true"
-        android:layout_margin="16dp"
-        android:background="@drawable/circle_bg"
-        android:backgroundTint="#80000000"
-        android:padding="8dp"
-        android:src="@android:drawable/ic_menu_close_clear_cancel"
-        app:tint="@color/white" />
+        android:padding="16dp">
+
+        <!-- Admin Delete Button in Full Screen -->
+        <ImageView
+            android:id="@+id/btnFullDeletePhoto"
+            android:layout_width="44dp"
+            android:layout_height="44dp"
+            android:layout_alignParentStart="true"
+            android:background="@drawable/circle_bg"
+            android:backgroundTint="#CCB71C1C"
+            android:padding="10dp"
+            android:src="@android:drawable/ic_menu_delete"
+            android:visibility="gone"
+            app:tint="@color/white" />
+
+        <!-- Close Button -->
+        <ImageView
+            android:id="@+id/btnCloseFullPhoto"
+            android:layout_width="44dp"
+            android:layout_height="44dp"
+            android:layout_alignParentEnd="true"
+            android:background="@drawable/circle_bg"
+            android:backgroundTint="#80FFFFFF"
+            android:padding="10dp"
+            android:src="@android:drawable/ic_menu_close_clear_cancel"
+            app:tint="@color/text_primary" />
+    </RelativeLayout>
 
     <!-- Full Image View -->
     <ImageView
         android:id="@+id/ivFullPhoto"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_above="@id/layoutBottomInfo"
+        android:layout_below="@id/topFullBar"
         android:layout_centerInParent="true"
-        android:layout_margin="12dp"
+        android:layout_margin="8dp"
         android:adjustViewBounds="true"
         android:scaleType="fitCenter" />
-
-    <!-- Bottom Caption Container -->
-    <LinearLayout
-        android:id="@+id/layoutBottomInfo"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_alignParentBottom="true"
-        android:background="#99000000"
-        android:orientation="vertical"
-        android:padding="16dp">
-
-        <TextView
-            android:id="@+id/tvFullTitle"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="श्री गणेश स्थापना"
-            android:textColor="@color/white"
-            android:textSize="18sp"
-            android:textStyle="bold" />
-
-        <TextView
-            android:id="@+id/tvFullUploadedBy"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="4dp"
-            android:text="अपलोड केले: गणेश माने"
-            android:textColor="#B0BEC5"
-            android:textSize="14sp" />
-    </LinearLayout>
 
 </RelativeLayout>

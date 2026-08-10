@@ -3,72 +3,35 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:layout_margin="6dp"
+    android:layout_margin="5dp"
     app:cardBackgroundColor="@color/white"
-    app:cardCornerRadius="12dp"
+    app:cardCornerRadius="14dp"
     app:cardElevation="3dp">
 
     <RelativeLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content">
 
-        <!-- Photo Image (Square / 1:1 Aspect Ratio) -->
+        <!-- Clean Full Photo Image (No text overlay) -->
         <ImageView
             android:id="@+id/ivGalleryPhoto"
             android:layout_width="match_parent"
-            android:layout_height="160dp"
+            android:layout_height="170dp"
             android:scaleType="centerCrop"
             android:src="@drawable/app_logo" />
 
-        <!-- Gradient Shadow for Title -->
-        <View
-            android:layout_width="match_parent"
-            android:layout_height="60dp"
-            android:layout_alignBottom="@id/ivGalleryPhoto"
-            android:background="#99000000" />
-
-        <!-- Title & Uploader Overlay -->
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_alignBottom="@id/ivGalleryPhoto"
-            android:orientation="vertical"
-            android:paddingHorizontal="8dp"
-            android:paddingVertical="6dp">
-
-            <TextView
-                android:id="@+id/tvPhotoTitle"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:ellipsize="end"
-                android:maxLines="1"
-                android:text="गणेश मूर्ती स्थापना"
-                android:textColor="@color/white"
-                android:textSize="13sp"
-                android:textStyle="bold" />
-
-            <TextView
-                android:id="@+id/tvUploadedBy"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:ellipsize="end"
-                android:maxLines="1"
-                android:text="👤 गणेश माने"
-                android:textColor="#E0E0E0"
-                android:textSize="11sp" />
-        </LinearLayout>
-
-        <!-- Admin Delete Icon (Optional / Long press) -->
+        <!-- Admin Delete Trash Button -->
         <ImageView
             android:id="@+id/btnDeletePhoto"
-            android:layout_width="28dp"
-            android:layout_height="28dp"
+            android:layout_width="34dp"
+            android:layout_height="34dp"
             android:layout_alignParentTop="true"
             android:layout_alignParentEnd="true"
-            android:layout_margin="6dp"
-            android:background="@drawable/badge_bg"
-            android:backgroundTint="#CCB71C1C"
-            android:padding="5dp"
+            android:layout_margin="8dp"
+            android:background="@drawable/circle_bg"
+            android:backgroundTint="#D9B71C1C"
+            android:elevation="6dp"
+            android:padding="7dp"
             android:src="@android:drawable/ic_menu_delete"
             android:visibility="gone"
             app:tint="@color/white" />
