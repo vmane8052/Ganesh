@@ -7,9 +7,9 @@ const { User, Transaction, Member, Event, Donation, Gallery } = require('../mode
 
 // Configure Cloudinary
 cloudinary.config({
-  cloud_name: process.env.CLOUDINARY_CLOUD_NAME || '',
-  api_key: process.env.CLOUDINARY_API_KEY || '',
-  api_secret: process.env.CLOUDINARY_API_SECRET || ''
+  cloud_name: process.env.CLOUDINARY_CLOUD_NAME || 't19ganuk',
+  api_key: process.env.CLOUDINARY_API_KEY || '936194428912286',
+  api_secret: process.env.CLOUDINARY_API_SECRET || 'teZxIFJt4hit5pnT9NnxP0zfpjc'
 });
 
 const dns = require('dns');
