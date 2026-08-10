@@ -7,12 +7,12 @@ import android.util.Base64;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ImageView;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 import com.bumptech.glide.Glide;
 import com.ganeshmandal.app.R;
 import com.ganeshmandal.app.models.GalleryPhoto;
+import com.github.chrisbanes.photoview.PhotoView;
 import java.util.List;
 
 public class FullScreenPhotoAdapter extends RecyclerView.Adapter<FullScreenPhotoAdapter.FullScreenViewHolder> {
@@ -70,7 +70,7 @@ public class FullScreenPhotoAdapter extends RecyclerView.Adapter<FullScreenPhoto
     }
 
     static class FullScreenViewHolder extends RecyclerView.ViewHolder {
-        ImageView ivSwipePhoto;
+        PhotoView ivSwipePhoto;
 
         public FullScreenViewHolder(@NonNull View itemView) {
             super(itemView);

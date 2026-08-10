@@ -87,20 +87,17 @@ public class GalleryAdapter extends RecyclerView.Adapter<GalleryAdapter.GalleryV
             holder.ivGalleryPhoto.setImageResource(R.drawable.app_logo);
         }
 
-        // Tap to open full screen swipeable photo viewer
+        // Tap to open full screen swipeable photo viewer (with Pinch-to-Zoom & Double-Tap Zoom)
         int clickedIndex = position;
         holder.itemView.setOnClickListener(v -> showFullPhotoDialog(clickedIndex));
 
-        // Admin can delete photo directly via trash icon or long press
+        // Delete option ONLY appears when holding / long pressing the photo (Admin only)
         if (isAdmin) {
-            holder.btnDeletePhoto.setVisibility(View.VISIBLE);
-            holder.btnDeletePhoto.setOnClickListener(v -> confirmDelete(photo));
             holder.itemView.setOnLongClickListener(v -> {
                 confirmDelete(photo);
                 return true;
             });
         } else {
-            holder.btnDeletePhoto.setVisibility(View.GONE);
             holder.itemView.setOnLongClickListener(null);
         }
     }
@@ -169,12 +166,11 @@ public class GalleryAdapter extends RecyclerView.Adapter<GalleryAdapter.GalleryV
     }
 
     static class GalleryViewHolder extends RecyclerView.ViewHolder {
-        ImageView ivGalleryPhoto, btnDeletePhoto;
+        ImageView ivGalleryPhoto;
 
         public GalleryViewHolder(@NonNull View itemView) {
             super(itemView);
             ivGalleryPhoto = itemView.findViewById(R.id.ivGalleryPhoto);
-            btnDeletePhoto = itemView.findViewById(R.id.btnDeletePhoto);
         }
     }
 }
