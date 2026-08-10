@@ -153,6 +153,31 @@ app.post('/api/users', async (req, res) => {
   }
 });
 
+app.post('/api/users/change-password', async (req, res) => {
+  try {
+    const { phone, currentPin, newPin } = req.body;
+    if (!phone || !newPin) {
+      return res.status(400).json({ success: false, message: 'मोबाईल नंबर आणि नवीन पासवर्ड आवश्यक आहे' });
+    }
+
+    const user = await User.findOne({ phone: phone.trim() });
+    if (!user) {
+      return res.status(404).json({ success: false, message: 'सदस्य सापडला नाही' });
+    }
+
+    if (currentPin && user.pin && user.pin.trim() !== currentPin.trim()) {
+      return res.status(400).json({ success: false, message: 'सध्याचा जुना पासवर्ड चुकीचा आहे' });
+    }
+
+    user.pin = newPin.trim();
+    await user.save();
+
+    res.json({ success: true, message: 'पासवर्ड यशस्वीरीत्या बदलला आहे! कृपया पुन्हा नवीन पासवर्डने लॉगिन करा.' });
+  } catch (err) {
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
+
 app.get('/api/users', async (req, res) => {
   try {
     const users = await User.find().sort({ createdAt: -1 });

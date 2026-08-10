@@ -20,23 +20,27 @@ public class LoginActivity extends AppCompatActivity {
 
     private TextInputEditText etPhone, etPin;
     private MaterialButton btnLogin;
+    private SharedPreferences prefs;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        // Check if user is already logged in - Auto-login session!
-        SharedPreferences prefs = getSharedPreferences("MandalPrefs", MODE_PRIVATE);
+        prefs = getSharedPreferences("MandalPrefs", MODE_PRIVATE);
         boolean isLoggedIn = prefs.getBoolean("IS_LOGGED_IN", false);
         String savedPhone = prefs.getString("USER_PHONE", null);
+        String savedPin = prefs.getString("USER_PIN", null);
 
-        if (isLoggedIn && savedPhone != null && !savedPhone.trim().isEmpty()) {
-            Intent intent = new Intent(this, MainActivity.class);
-            startActivity(intent);
-            finish();
+        // Verify Auto-Login credentials live with MongoDB Atlas
+        if (isLoggedIn && savedPhone != null && !savedPhone.trim().isEmpty() && savedPin != null && !savedPin.trim().isEmpty()) {
+            verifyAutoLogin(savedPhone, savedPin);
             return;
         }
 
+        initLoginUi();
+    }
+
+    private void initLoginUi() {
         setContentView(R.layout.activity_login);
 
         etPhone = findViewById(R.id.etPhone);
@@ -44,6 +48,44 @@ public class LoginActivity extends AppCompatActivity {
         btnLogin = findViewById(R.id.btnLogin);
 
         btnLogin.setOnClickListener(v -> performLogin());
+    }
+
+    private void verifyAutoLogin(String phone, String pin) {
+        Map<String, String> creds = new HashMap<>();
+        creds.put("phone", phone);
+        creds.put("pin", pin);
+
+        ApiClient.getService().login(creds).enqueue(new Callback<LoginResponse>() {
+            @Override
+            public void onResponse(Call<LoginResponse> call, Response<LoginResponse> response) {
+                if (response.isSuccessful() && response.body() != null && response.body().isSuccess() && response.body().getUser() != null) {
+                    User u = response.body().getUser();
+                    prefs.edit()
+                            .putString("USER_ROLE", u.getRole())
+                            .putString("USER_NAME", u.getName())
+                            .putString("USER_ROLE_IN_MANDAL", u.getRoleInMandal())
+                            .putString("USER_PHOTO_URL", u.getPhotoUrl() != null ? u.getPhotoUrl() : "")
+                            .apply();
+
+                    Intent intent = new Intent(LoginActivity.this, MainActivity.class);
+                    startActivity(intent);
+                    finish();
+                } else {
+                    // Password was changed! Cancel auto-login and ask to login again with new password
+                    prefs.edit().clear().apply();
+                    Toast.makeText(LoginActivity.this, "पासवर्ड बदलला आहे, कृपया नवीन पासवर्डने पुन्हा लॉगिन करा.", Toast.LENGTH_LONG).show();
+                    initLoginUi();
+                }
+            }
+
+            @Override
+            public void onFailure(Call<LoginResponse> call, Throwable t) {
+                // If offline, allow opening main activity
+                Intent intent = new Intent(LoginActivity.this, MainActivity.class);
+                startActivity(intent);
+                finish();
+            }
+        });
     }
 
     private void performLogin() {
@@ -62,7 +104,6 @@ public class LoginActivity extends AppCompatActivity {
         creds.put("phone", phone);
         creds.put("pin", pin);
 
-        // 100% Strict Real-Time MongoDB Atlas Authentication
         ApiClient.getService().login(creds).enqueue(new Callback<LoginResponse>() {
             @Override
             public void onResponse(Call<LoginResponse> call, Response<LoginResponse> response) {
@@ -71,12 +112,12 @@ public class LoginActivity extends AppCompatActivity {
 
                 if (response.isSuccessful() && response.body() != null && response.body().isSuccess() && response.body().getUser() != null) {
                     User u = response.body().getUser();
-                    SharedPreferences prefs = getSharedPreferences("MandalPrefs", MODE_PRIVATE);
                     prefs.edit()
-                            .putBoolean("IS_LOGGED_IN", true) // Session active until logout
+                            .putBoolean("IS_LOGGED_IN", true)
                             .putString("USER_ROLE", u.getRole())
                             .putString("USER_NAME", u.getName())
                             .putString("USER_PHONE", u.getPhone())
+                            .putString("USER_PIN", pin) // Store PIN to detect password changes
                             .putString("USER_ROLE_IN_MANDAL", u.getRoleInMandal())
                             .putString("USER_PHOTO_URL", u.getPhotoUrl() != null ? u.getPhotoUrl() : "")
                             .apply();

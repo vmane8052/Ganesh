@@ -1,5 +1,6 @@
 package com.ganeshmandal.app;
 
+import android.app.Dialog;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Bitmap;
@@ -8,6 +9,7 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.util.Base64;
 import android.view.View;
+import android.view.Window;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -16,8 +18,10 @@ import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.appcompat.app.AppCompatActivity;
 import com.bumptech.glide.Glide;
 import com.ganeshmandal.app.api.ApiClient;
+import com.ganeshmandal.app.models.LoginResponse;
 import com.ganeshmandal.app.models.UploadResponse;
 import com.google.android.material.button.MaterialButton;
+import com.google.android.material.textfield.TextInputEditText;
 import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
 import java.util.HashMap;
@@ -30,7 +34,7 @@ public class ProfileActivity extends AppCompatActivity {
 
     private ImageView btnBack, ivProfilePhoto, btnChangePhoto;
     private TextView tvProfileName, tvProfileRoleInMandal, tvProfilePhone, tvProfileRole, tvChangePhotoHint;
-    private MaterialButton btnLogout;
+    private MaterialButton btnChangePassword, btnLogout;
     private SharedPreferences prefs;
     private String userPhone = "";
 
@@ -52,6 +56,7 @@ public class ProfileActivity extends AppCompatActivity {
         tvProfileRoleInMandal = findViewById(R.id.tvProfileRoleInMandal);
         tvProfilePhone = findViewById(R.id.tvProfilePhone);
         tvProfileRole = findViewById(R.id.tvProfileRole);
+        btnChangePassword = findViewById(R.id.btnChangePassword);
         btnLogout = findViewById(R.id.btnLogout);
 
         prefs = getSharedPreferences("MandalPrefs", MODE_PRIVATE);
@@ -75,13 +80,95 @@ public class ProfileActivity extends AppCompatActivity {
         btnChangePhoto.setOnClickListener(pickPhotoListener);
         tvChangePhotoHint.setOnClickListener(pickPhotoListener);
 
-        btnLogout.setOnClickListener(v -> {
-            prefs.edit().clear().apply();
-            Intent intent = new Intent(ProfileActivity.this, LoginActivity.class);
-            intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
-            startActivity(intent);
-            finish();
+        btnChangePassword.setOnClickListener(v -> showChangePasswordDialog());
+
+        btnLogout.setOnClickListener(v -> performLogout("लॉगआऊट झाले आहे"));
+    }
+
+    private void showChangePasswordDialog() {
+        Dialog dialog = new Dialog(this);
+        dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
+        dialog.setContentView(R.layout.dialog_change_password);
+        if (dialog.getWindow() != null) {
+            dialog.getWindow().setBackgroundDrawableResource(android.R.color.transparent);
+        }
+
+        TextInputEditText etCurrentPin = dialog.findViewById(R.id.etCurrentPin);
+        TextInputEditText etNewPin = dialog.findViewById(R.id.etNewPin);
+        TextInputEditText etConfirmNewPin = dialog.findViewById(R.id.etConfirmNewPin);
+        MaterialButton btnCancel = dialog.findViewById(R.id.btnCancelPass);
+        MaterialButton btnSave = dialog.findViewById(R.id.btnSavePass);
+
+        btnCancel.setOnClickListener(v -> dialog.dismiss());
+
+        btnSave.setOnClickListener(v -> {
+            String currentPin = etCurrentPin.getText() != null ? etCurrentPin.getText().toString().trim() : "";
+            String newPin = etNewPin.getText() != null ? etNewPin.getText().toString().trim() : "";
+            String confirmNewPin = etConfirmNewPin.getText() != null ? etConfirmNewPin.getText().toString().trim() : "";
+
+            if (currentPin.isEmpty()) {
+                Toast.makeText(ProfileActivity.this, "कृपया सध्याचा जुना पासवर्ड टाका", Toast.LENGTH_SHORT).show();
+                return;
+            }
+            if (newPin.isEmpty()) {
+                Toast.makeText(ProfileActivity.this, "कृपया नवीन पासवर्ड टाका", Toast.LENGTH_SHORT).show();
+                return;
+            }
+            if (newPin.length() < 4) {
+                Toast.makeText(ProfileActivity.this, "पासवर्ड किमान ४ अंकांचा/अक्षरांचा असावा", Toast.LENGTH_SHORT).show();
+                return;
+            }
+            if (!newPin.equals(confirmNewPin)) {
+                Toast.makeText(ProfileActivity.this, "नवीन पासवर्ड जुळत नाही", Toast.LENGTH_SHORT).show();
+                return;
+            }
+
+            btnSave.setEnabled(false);
+            btnSave.setText("बदलत आहे...");
+
+            Map<String, String> payload = new HashMap<>();
+            payload.put("phone", userPhone);
+            payload.put("currentPin", currentPin);
+            payload.put("newPin", newPin);
+
+            ApiClient.getService().changePassword(payload).enqueue(new Callback<LoginResponse>() {
+                @Override
+                public void onResponse(Call<LoginResponse> call, Response<LoginResponse> response) {
+                    btnSave.setEnabled(true);
+                    btnSave.setText("जतन करा");
+
+                    if (response.isSuccessful() && response.body() != null && response.body().isSuccess()) {
+                        dialog.dismiss();
+                        Toast.makeText(ProfileActivity.this, "पासवर्ड बदलला आहे! कृपया नवीन पासवर्डने पुन्हा लॉगिन करा.", Toast.LENGTH_LONG).show();
+                        performLogout(null);
+                    } else {
+                        String msg = (response.body() != null && response.body().getMessage() != null)
+                                ? response.body().getMessage() : "पासवर्ड बदलताना त्रुटी आली";
+                        Toast.makeText(ProfileActivity.this, msg, Toast.LENGTH_LONG).show();
+                    }
+                }
+
+                @Override
+                public void onFailure(Call<LoginResponse> call, Throwable t) {
+                    btnSave.setEnabled(true);
+                    btnSave.setText("जतन करा");
+                    Toast.makeText(ProfileActivity.this, "नेटवर्क एरर: " + t.getMessage(), Toast.LENGTH_SHORT).show();
+                }
+            });
         });
+
+        dialog.show();
+    }
+
+    private void performLogout(String message) {
+        prefs.edit().clear().apply();
+        if (message != null) {
+            Toast.makeText(this, message, Toast.LENGTH_SHORT).show();
+        }
+        Intent intent = new Intent(ProfileActivity.this, LoginActivity.class);
+        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+        startActivity(intent);
+        finish();
     }
 
     private void loadProfilePhoto(String photoUrl) {
@@ -163,7 +250,7 @@ public class ProfileActivity extends AppCompatActivity {
 
                 @Override
                 public void onFailure(Call<UploadResponse> call, Throwable t) {
-                    Toast.makeText(ProfileActivity.this, "नेटवर्क एरर: " + t.getMessage(), Toast.LENGTH_LONG).show();
+                    Toast.makeText(ProfileActivity.this, "नेटवर्क एरर: " + t.getMessage(), Toast.LENGTH_SHORT).show();
                 }
             });
 

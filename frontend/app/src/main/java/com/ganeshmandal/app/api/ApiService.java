@@ -43,6 +43,9 @@ public interface ApiService {
     @POST("api/users")
     Call<LoginResponse> addUser(@Body User user);
 
+    @POST("api/users/change-password")
+    Call<LoginResponse> changePassword(@Body Map<String, String> payload);
+
     @GET("api/users")
     Call<UserListResponse> getUsers();
 
