@@ -41,12 +41,32 @@
             app:tint="@color/white" />
     </RelativeLayout>
 
+    <!-- Horizontal Year Filter Bar -->
+    <HorizontalScrollView
+        android:id="@+id/scrollYearFilter"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/topBar"
+        android:background="@color/white"
+        android:elevation="2dp"
+        android:paddingHorizontal="10dp"
+        android:paddingVertical="10dp"
+        android:scrollbars="none">
+
+        <LinearLayout
+            android:id="@+id/layoutYearChips"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:gravity="center_vertical"
+            android:orientation="horizontal" />
+    </HorizontalScrollView>
+
     <!-- Swipe to Refresh & Grid Layout -->
     <androidx.swiperefreshlayout.widget.SwipeRefreshLayout
         android:id="@+id/swipeRefresh"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_below="@id/topBar">
+        android:layout_below="@id/scrollYearFilter">
 
         <RelativeLayout
             android:layout_width="match_parent"
@@ -69,21 +89,14 @@
                     app:tint="@color/text_secondary" />
 
                 <TextView
+                    android:id="@+id/tvEmptyMessage"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="12dp"
-                    android:text="अजून कोणतेही फोटो अपलोड केलेले नाहीत"
+                    android:text="या वर्षासाठी अजून कोणतेही फोटो उपलब्ध नाहीत"
                     android:textColor="@color/text_secondary"
-                    android:textSize="16sp"
+                    android:textSize="15sp"
                     android:textStyle="bold" />
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="4dp"
-                    android:text="नवीन फोटो जोडण्यासाठी खालील '+' बटण दाबा"
-                    android:textColor="@color/text_secondary"
-                    android:textSize="13sp" />
             </LinearLayout>
 
             <!-- 2-Column Photo Grid -->
@@ -97,7 +110,7 @@
         </RelativeLayout>
     </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
 
-    <!-- Floating Action Button: Add Photo -->
+    <!-- Floating Action Button for Admin: Add Photos -->
     <com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton
         android:id="@+id/fabAddPhoto"
         android:layout_width="wrap_content"
@@ -105,10 +118,9 @@
         android:layout_alignParentEnd="true"
         android:layout_alignParentBottom="true"
         android:layout_margin="20dp"
-        android:backgroundTint="@color/accent_orange"
+        android:backgroundTint="@color/primary_blue"
         android:text="➕ फोटो जोडा"
         android:textColor="@color/white"
-        android:textSize="15sp"
         android:textStyle="bold"
         app:elevation="6dp"
         app:icon="@android:drawable/ic_menu_camera"

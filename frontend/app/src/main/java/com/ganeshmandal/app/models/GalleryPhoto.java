@@ -15,15 +15,19 @@ public class GalleryPhoto {
     @SerializedName("uploadedBy")
     private String uploadedBy;
 
+    @SerializedName("year")
+    private String year;
+
     @SerializedName("createdAt")
     private String createdAt;
 
     public GalleryPhoto() {}
 
-    public GalleryPhoto(String title, String imageUrl, String uploadedBy) {
+    public GalleryPhoto(String title, String imageUrl, String uploadedBy, String year) {
         this.title = title;
         this.imageUrl = imageUrl;
         this.uploadedBy = uploadedBy;
+        this.year = year != null ? year : "2026";
     }
 
     public String getId() {
@@ -56,6 +60,14 @@ public class GalleryPhoto {
 
     public void setUploadedBy(String uploadedBy) {
         this.uploadedBy = uploadedBy;
+    }
+
+    public String getYear() {
+        return year != null ? year : "2026";
+    }
+
+    public void setYear(String year) {
+        this.year = year;
     }
 
     public String getCreatedAt() {

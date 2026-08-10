@@ -87,13 +87,13 @@ public interface ApiService {
 
     // --- Photo Gallery (मंडळ फोटो गॅलरी) ---
     @GET("api/gallery")
-    Call<GalleryListResponse> getGallery();
+    Call<GalleryListResponse> getGallery(@Query("year") String year);
 
     @POST("api/gallery")
     Call<SingleGalleryResponse> addGalleryPhoto(@Body GalleryPhoto photo);
 
     @POST("api/gallery/batch")
-    Call<GalleryListResponse> addGalleryBatch(@Body Map<String, List<GalleryPhoto>> payload);
+    Call<GalleryListResponse> addGalleryBatch(@Body Map<String, Object> payload);
 
     @DELETE("api/gallery/{id}")
     Call<Void> deleteGalleryPhoto(@Path("id") String id);

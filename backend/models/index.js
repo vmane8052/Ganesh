@@ -51,7 +51,8 @@ const donationSchema = new mongoose.Schema({
 const gallerySchema = new mongoose.Schema({
   title: { type: String },
   imageUrl: { type: String, required: true },
-  uploadedBy: { type: String }
+  uploadedBy: { type: String },
+  year: { type: String, default: '2026' }
 }, { timestamps: true });
 
 module.exports = {

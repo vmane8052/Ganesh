@@ -1,14 +1,20 @@
 package com.ganeshmandal.app;
 
+import android.app.Dialog;
 import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.os.Bundle;
 import android.util.Base64;
+import android.view.Gravity;
 import android.view.View;
+import android.view.Window;
+import android.widget.ArrayAdapter;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.Spinner;
+import android.widget.TextView;
 import android.widget.Toast;
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
@@ -20,10 +26,12 @@ import com.ganeshmandal.app.adapters.GalleryAdapter;
 import com.ganeshmandal.app.api.ApiClient;
 import com.ganeshmandal.app.models.GalleryListResponse;
 import com.ganeshmandal.app.models.GalleryPhoto;
+import com.google.android.material.button.MaterialButton;
 import com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton;
 import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -36,7 +44,8 @@ public class GalleryActivity extends AppCompatActivity {
     private ImageView btnBack, btnAddPhotoTop;
     private SwipeRefreshLayout swipeRefresh;
     private RecyclerView rvGallery;
-    private LinearLayout layoutEmpty;
+    private LinearLayout layoutEmpty, layoutYearChips;
+    private TextView tvEmptyMessage;
     private ExtendedFloatingActionButton fabAddPhoto;
 
     private GalleryAdapter adapter;
@@ -44,7 +53,14 @@ public class GalleryActivity extends AppCompatActivity {
     private boolean isAdmin = false;
     private String loggedInUserName = "सदस्य";
 
-    // Multi-Image Picker: Allows selecting 1, 2, 5, 10 or more photos at once without asking for titles
+    // Year selection & filtering
+    private final List<String> availableYears = Arrays.asList(
+            "सर्व वर्षे", "2026", "2025", "2024", "2023", "2022", "2021", "2020", "2019", "2018", "2017", "2016", "2015"
+    );
+    private String selectedFilterYear = "2026"; // Default filter to current year
+    private String selectedUploadYear = "2026"; // Default upload year
+
+    // Multi-Image Picker
     private final ActivityResultLauncher<String> multiPhotoPickerLauncher = registerForActivityResult(
             new ActivityResultContracts.GetMultipleContents(),
             this::handleSelectedMultipleImages
@@ -60,6 +76,8 @@ public class GalleryActivity extends AppCompatActivity {
         swipeRefresh = findViewById(R.id.swipeRefresh);
         rvGallery = findViewById(R.id.rvGallery);
         layoutEmpty = findViewById(R.id.layoutEmpty);
+        tvEmptyMessage = findViewById(R.id.tvEmptyMessage);
+        layoutYearChips = findViewById(R.id.layoutYearChips);
         fabAddPhoto = findViewById(R.id.fabAddPhoto);
 
         SharedPreferences prefs = getSharedPreferences("MandalPrefs", MODE_PRIVATE);
@@ -73,13 +91,15 @@ public class GalleryActivity extends AppCompatActivity {
         adapter = new GalleryAdapter(this, photoList, isAdmin, loggedInUserName, this::deletePhoto);
         rvGallery.setAdapter(adapter);
 
+        setupYearFilterChips();
+
         swipeRefresh.setOnRefreshListener(this::fetchGalleryPhotos);
 
-        // Show "फोटो जोडा" option ONLY for Admin
+        // Upload photo action (Admin only)
         if (isAdmin) {
             fabAddPhoto.setVisibility(View.VISIBLE);
             btnAddPhotoTop.setVisibility(View.VISIBLE);
-            View.OnClickListener addPhotoClickListener = v -> multiPhotoPickerLauncher.launch("image/*");
+            View.OnClickListener addPhotoClickListener = v -> showSelectUploadYearDialog();
             fabAddPhoto.setOnClickListener(addPhotoClickListener);
             btnAddPhotoTop.setOnClickListener(addPhotoClickListener);
         } else {
@@ -90,9 +110,84 @@ public class GalleryActivity extends AppCompatActivity {
         fetchGalleryPhotos();
     }
 
+    private void setupYearFilterChips() {
+        layoutYearChips.removeAllViews();
+
+        for (String year : availableYears) {
+            TextView chip = new TextView(this);
+            chip.setText(year.equals("2026") ? "2026 (चालू)" : year);
+            chip.setTextSize(13f);
+            chip.setGravity(Gravity.CENTER);
+            chip.setPadding(36, 16, 36, 16);
+
+            LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(
+                    LinearLayout.LayoutParams.WRAP_CONTENT,
+                    LinearLayout.LayoutParams.WRAP_CONTENT
+            );
+            params.setMargins(8, 0, 8, 0);
+            chip.setLayoutParams(params);
+
+            boolean isSelected = year.equals(selectedFilterYear);
+            applyChipStyle(chip, isSelected);
+
+            chip.setOnClickListener(v -> {
+                selectedFilterYear = year;
+                setupYearFilterChips();
+                fetchGalleryPhotos();
+            });
+
+            layoutYearChips.addView(chip);
+        }
+    }
+
+    private void applyChipStyle(TextView chip, boolean isSelected) {
+        if (isSelected) {
+            chip.setBackgroundResource(R.drawable.chip_year_selected);
+            chip.setTextColor(getResources().getColor(R.color.white));
+            chip.setTypeface(null, android.graphics.Typeface.BOLD);
+        } else {
+            chip.setBackgroundResource(R.drawable.chip_year_unselected);
+            chip.setTextColor(getResources().getColor(R.color.text_primary));
+            chip.setTypeface(null, android.graphics.Typeface.NORMAL);
+        }
+    }
+
+    private void showSelectUploadYearDialog() {
+        Dialog dialog = new Dialog(this);
+        dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
+        dialog.setContentView(R.layout.dialog_select_upload_year);
+        if (dialog.getWindow() != null) {
+            dialog.getWindow().setBackgroundDrawableResource(android.R.color.transparent);
+        }
+
+        Spinner spinner = dialog.findViewById(R.id.spinnerUploadYear);
+        MaterialButton btnCancel = dialog.findViewById(R.id.btnCancelYear);
+        MaterialButton btnProceed = dialog.findViewById(R.id.btnProceedPickPhotos);
+
+        List<String> uploadYearsList = new ArrayList<>();
+        uploadYearsList.add("2026 (चालू वर्ष)");
+        for (int y = 2025; y >= 2015; y--) {
+            uploadYearsList.add(String.valueOf(y));
+        }
+
+        ArrayAdapter<String> adapter = new ArrayAdapter<>(this, android.R.layout.simple_spinner_dropdown_item, uploadYearsList);
+        spinner.setAdapter(adapter);
+
+        btnCancel.setOnClickListener(v -> dialog.dismiss());
+
+        btnProceed.setOnClickListener(v -> {
+            String selectedItem = spinner.getSelectedItem().toString();
+            selectedUploadYear = selectedItem.startsWith("2026") ? "2026" : selectedItem;
+            dialog.dismiss();
+            multiPhotoPickerLauncher.launch("image/*");
+        });
+
+        dialog.show();
+    }
+
     private void fetchGalleryPhotos() {
         swipeRefresh.setRefreshing(true);
-        ApiClient.getService().getGallery().enqueue(new Callback<GalleryListResponse>() {
+        ApiClient.getService().getGallery(selectedFilterYear).enqueue(new Callback<GalleryListResponse>() {
             @Override
             public void onResponse(Call<GalleryListResponse> call, Response<GalleryListResponse> response) {
                 swipeRefresh.setRefreshing(false);
@@ -104,7 +199,7 @@ public class GalleryActivity extends AppCompatActivity {
                     adapter.updateData(photoList);
                     updateEmptyState();
                 } else {
-                    Toast.makeText(GalleryActivity.this, "गॅलरी फोटो लोड करण्यात अडचण आली", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(GalleryActivity.this, "फोटो लोड करण्यात अडचण आली", Toast.LENGTH_SHORT).show();
                     updateEmptyState();
                 }
             }
@@ -122,6 +217,13 @@ public class GalleryActivity extends AppCompatActivity {
         if (photoList.isEmpty()) {
             layoutEmpty.setVisibility(View.VISIBLE);
             rvGallery.setVisibility(View.GONE);
+            if (tvEmptyMessage != null) {
+                if ("सर्व वर्षे".equals(selectedFilterYear)) {
+                    tvEmptyMessage.setText("अजून कोणतेही फोटो अपलोड केलेले नाहीत");
+                } else {
+                    tvEmptyMessage.setText(selectedFilterYear + " या वर्षासाठी अजून कोणतेही फोटो उपलब्ध नाहीत");
+                }
+            }
         } else {
             layoutEmpty.setVisibility(View.GONE);
             rvGallery.setVisibility(View.VISIBLE);
@@ -134,7 +236,7 @@ public class GalleryActivity extends AppCompatActivity {
         }
 
         int count = uriList.size();
-        Toast.makeText(this, count + " फोटो Cloudinary वर अपलोड होत आहेत, कृपया थोडा वेळ थांबा...", Toast.LENGTH_LONG).show();
+        Toast.makeText(this, count + " फोटो (" + selectedUploadYear + ") Cloudinary वर अपलोड होत आहेत...", Toast.LENGTH_LONG).show();
         swipeRefresh.setRefreshing(true);
 
         new Thread(() -> {
@@ -147,7 +249,6 @@ public class GalleryActivity extends AppCompatActivity {
                     if (is != null) is.close();
 
                     if (originalBitmap != null) {
-                        // Compress to max 900px for optimal cloud upload speed & quality
                         int maxDimension = 900;
                         int width = originalBitmap.getWidth();
                         int height = originalBitmap.getHeight();
@@ -159,7 +260,7 @@ public class GalleryActivity extends AppCompatActivity {
                         byte[] bytes = baos.toByteArray();
                         String base64 = "data:image/jpeg;base64," + Base64.encodeToString(bytes, Base64.NO_WRAP);
 
-                        batchPhotos.add(new GalleryPhoto("", base64, loggedInUserName));
+                        batchPhotos.add(new GalleryPhoto("", base64, loggedInUserName, selectedUploadYear));
                     }
                 } catch (Exception e) {
                     e.printStackTrace();
@@ -173,7 +274,8 @@ public class GalleryActivity extends AppCompatActivity {
                     return;
                 }
 
-                Map<String, List<GalleryPhoto>> payload = new HashMap<>();
+                Map<String, Object> payload = new HashMap<>();
+                payload.put("year", selectedUploadYear);
                 payload.put("photos", batchPhotos);
 
                 ApiClient.getService().addGalleryBatch(payload).enqueue(new Callback<GalleryListResponse>() {
@@ -181,7 +283,11 @@ public class GalleryActivity extends AppCompatActivity {
                     public void onResponse(Call<GalleryListResponse> call, Response<GalleryListResponse> response) {
                         swipeRefresh.setRefreshing(false);
                         if (response.isSuccessful() && response.body() != null && response.body().isSuccess()) {
-                            Toast.makeText(GalleryActivity.this, batchPhotos.size() + " फोटो गॅलरीमध्ये यशस्वीरीत्या अपलोड झाले!", Toast.LENGTH_LONG).show();
+                            Toast.makeText(GalleryActivity.this, batchPhotos.size() + " फोटो (" + selectedUploadYear + ") यशस्वीरीत्या जोडले गेले!", Toast.LENGTH_LONG).show();
+
+                            // Automatically switch filter to the uploaded year
+                            selectedFilterYear = selectedUploadYear;
+                            setupYearFilterChips();
                             fetchGalleryPhotos();
                         } else {
                             Toast.makeText(GalleryActivity.this, "फोटो अपलोड करताना त्रुटी आली", Toast.LENGTH_SHORT).show();
