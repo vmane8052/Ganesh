@@ -6,6 +6,8 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Looper;
 import android.util.Base64;
 import android.view.Gravity;
 import android.view.View;
@@ -28,6 +30,7 @@ import com.ganeshmandal.app.models.GalleryListResponse;
 import com.ganeshmandal.app.models.GalleryPhoto;
 import com.google.android.material.button.MaterialButton;
 import com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton;
+import com.google.android.material.progressindicator.LinearProgressIndicator;
 import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
 import java.util.ArrayList;
@@ -218,7 +221,7 @@ public class GalleryActivity extends AppCompatActivity {
             layoutEmpty.setVisibility(View.VISIBLE);
             rvGallery.setVisibility(View.GONE);
             if (tvEmptyMessage != null) {
-                if ("सर्व वर्षे".equals(selectedFilterYear)) {
+                if ("सर्व".equals(selectedFilterYear) || "सर्व वर्षे".equals(selectedFilterYear)) {
                     tvEmptyMessage.setText("अजून कोणतेही फोटो अपलोड केलेले नाहीत");
                 } else {
                     tvEmptyMessage.setText(selectedFilterYear + " या वर्षासाठी अजून कोणतेही फोटो उपलब्ध नाहीत");
@@ -235,14 +238,37 @@ public class GalleryActivity extends AppCompatActivity {
             return;
         }
 
-        int count = uriList.size();
-        Toast.makeText(this, count + " फोटो (" + selectedUploadYear + ") Cloudinary वर अपलोड होत आहेत...", Toast.LENGTH_LONG).show();
-        swipeRefresh.setRefreshing(true);
+        int totalCount = uriList.size();
+
+        // Create and show Live Progress Dialog with Percentage
+        Dialog progressDialog = new Dialog(this);
+        progressDialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
+        progressDialog.setContentView(R.layout.dialog_upload_progress);
+        progressDialog.setCancelable(false);
+        if (progressDialog.getWindow() != null) {
+            progressDialog.getWindow().setBackgroundDrawableResource(android.R.color.transparent);
+        }
+
+        LinearProgressIndicator progressBar = progressDialog.findViewById(R.id.progressUpload);
+        TextView tvStatus = progressDialog.findViewById(R.id.tvUploadStatus);
+        TextView tvPercent = progressDialog.findViewById(R.id.tvUploadPercentage);
+        TextView tvYearTag = progressDialog.findViewById(R.id.tvUploadYearTag);
+
+        if (tvYearTag != null) {
+            tvYearTag.setText("वर्ष: " + selectedUploadYear);
+        }
+
+        progressBar.setProgress(5);
+        tvPercent.setText("5%");
+        tvStatus.setText("फोटो कॉम्प्रेस करत आहे... (0 / " + totalCount + ")");
+        progressDialog.show();
 
         new Thread(() -> {
             List<GalleryPhoto> batchPhotos = new ArrayList<>();
 
-            for (Uri uri : uriList) {
+            for (int i = 0; i < uriList.size(); i++) {
+                Uri uri = uriList.get(i);
+                final int currentPhotoNum = i + 1;
                 try {
                     InputStream is = getContentResolver().openInputStream(uri);
                     Bitmap originalBitmap = BitmapFactory.decodeStream(is);
@@ -265,14 +291,27 @@ public class GalleryActivity extends AppCompatActivity {
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
+
+                // Update Progress (Phase 1: 10% to 50%)
+                int prepPercent = 10 + (int) (((float) currentPhotoNum / totalCount) * 40);
+                runOnUiThread(() -> {
+                    progressBar.setProgress(prepPercent);
+                    tvPercent.setText(prepPercent + "%");
+                    tvStatus.setText("फोटो तयार करत आहे... (" + currentPhotoNum + " / " + totalCount + ")");
+                });
             }
 
             runOnUiThread(() -> {
                 if (batchPhotos.isEmpty()) {
-                    swipeRefresh.setRefreshing(false);
+                    progressDialog.dismiss();
                     Toast.makeText(GalleryActivity.this, "कोणतेही फोटो लोड करता आले नाहीत", Toast.LENGTH_SHORT).show();
                     return;
                 }
+
+                // Phase 2: Cloud Upload (50% -> 90%)
+                progressBar.setProgress(65);
+                tvPercent.setText("65%");
+                tvStatus.setText("Cloudinary वर अपलोड सुरू आहे... (" + batchPhotos.size() + " फोटो)");
 
                 Map<String, Object> payload = new HashMap<>();
                 payload.put("year", selectedUploadYear);
@@ -281,22 +320,30 @@ public class GalleryActivity extends AppCompatActivity {
                 ApiClient.getService().addGalleryBatch(payload).enqueue(new Callback<GalleryListResponse>() {
                     @Override
                     public void onResponse(Call<GalleryListResponse> call, Response<GalleryListResponse> response) {
-                        swipeRefresh.setRefreshing(false);
                         if (response.isSuccessful() && response.body() != null && response.body().isSuccess()) {
-                            Toast.makeText(GalleryActivity.this, batchPhotos.size() + " फोटो (" + selectedUploadYear + ") यशस्वीरीत्या जोडले गेले!", Toast.LENGTH_LONG).show();
+                            // Phase 3: 100% Success!
+                            progressBar.setProgress(100);
+                            tvPercent.setText("100%");
+                            tvStatus.setText("सर्व " + batchPhotos.size() + " फोटो यशस्वीरीत्या अपलोड झाले! 🎉");
 
-                            // Automatically switch filter to the uploaded year
-                            selectedFilterYear = selectedUploadYear;
-                            setupYearFilterChips();
-                            fetchGalleryPhotos();
+                            new Handler(Looper.getMainLooper()).postDelayed(() -> {
+                                progressDialog.dismiss();
+                                Toast.makeText(GalleryActivity.this, batchPhotos.size() + " फोटो (" + selectedUploadYear + ") यशस्वीरीत्या जोडले गेले!", Toast.LENGTH_LONG).show();
+
+                                // Automatically switch filter to the uploaded year
+                                selectedFilterYear = selectedUploadYear;
+                                setupYearFilterChips();
+                                fetchGalleryPhotos();
+                            }, 800);
                         } else {
+                            progressDialog.dismiss();
                             Toast.makeText(GalleryActivity.this, "फोटो अपलोड करताना त्रुटी आली", Toast.LENGTH_SHORT).show();
                         }
                     }
 
                     @Override
                     public void onFailure(Call<GalleryListResponse> call, Throwable t) {
-                        swipeRefresh.setRefreshing(false);
+                        progressDialog.dismiss();
                         Toast.makeText(GalleryActivity.this, "नेटवर्क एरर: " + t.getMessage(), Toast.LENGTH_SHORT).show();
                     }
                 });
