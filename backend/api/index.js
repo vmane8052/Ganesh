@@ -470,7 +470,7 @@ app.get('/api/gallery', async (req, res) => {
     if (year && year !== 'ALL' && year !== 'सर्व' && year !== 'सर्व वर्षे') {
       filter.year = year;
     }
-    const photos = await Gallery.find(filter).sort({ createdAt: -1 });
+    const photos = await Gallery.find(filter).sort({ year: -1, createdAt: -1 });
     res.json({ success: true, data: photos });
   } catch (err) {
     res.status(500).json({ success: false, error: err.message });

@@ -11,13 +11,13 @@
         android:layout_width="match_parent"
         android:layout_height="64dp"
         android:layout_alignParentTop="true"
-        android:paddingHorizontal="16dp">
+        android:paddingHorizontal="14dp">
 
         <!-- Admin Delete Button -->
         <ImageView
             android:id="@+id/btnFullDeletePhoto"
-            android:layout_width="40dp"
-            android:layout_height="40dp"
+            android:layout_width="38dp"
+            android:layout_height="38dp"
             android:layout_alignParentStart="true"
             android:layout_centerVertical="true"
             android:background="@drawable/circle_bg"
@@ -35,25 +35,57 @@
             android:layout_centerInParent="true"
             android:background="@drawable/badge_bg"
             android:backgroundTint="#66FFFFFF"
-            android:paddingHorizontal="14dp"
+            android:paddingHorizontal="12dp"
             android:paddingVertical="4dp"
             android:text="१ / १"
             android:textColor="@color/white"
-            android:textSize="15sp"
+            android:textSize="14sp"
             android:textStyle="bold" />
 
-        <!-- Close Button -->
-        <ImageView
-            android:id="@+id/btnCloseFullPhoto"
-            android:layout_width="40dp"
-            android:layout_height="40dp"
+        <!-- Action Buttons on Right (Download, WhatsApp/Share, Close) -->
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
             android:layout_alignParentEnd="true"
             android:layout_centerVertical="true"
-            android:background="@drawable/circle_bg"
-            android:backgroundTint="#66FFFFFF"
-            android:padding="8dp"
-            android:src="@android:drawable/ic_menu_close_clear_cancel"
-            app:tint="@color/white" />
+            android:gravity="center_vertical"
+            android:orientation="horizontal">
+
+            <!-- Download Button -->
+            <ImageView
+                android:id="@+id/btnDownloadPhoto"
+                android:layout_width="38dp"
+                android:layout_height="38dp"
+                android:layout_marginEnd="10dp"
+                android:background="@drawable/circle_bg"
+                android:backgroundTint="#66FFFFFF"
+                android:padding="8dp"
+                android:src="@android:drawable/stat_sys_download_done"
+                app:tint="@color/white" />
+
+            <!-- WhatsApp & Share Button -->
+            <ImageView
+                android:id="@+id/btnSharePhoto"
+                android:layout_width="38dp"
+                android:layout_height="38dp"
+                android:layout_marginEnd="10dp"
+                android:background="@drawable/circle_bg"
+                android:backgroundTint="#25D366"
+                android:padding="8dp"
+                android:src="@android:drawable/ic_menu_share"
+                app:tint="@color/white" />
+
+            <!-- Close Button -->
+            <ImageView
+                android:id="@+id/btnCloseFullPhoto"
+                android:layout_width="38dp"
+                android:layout_height="38dp"
+                android:background="@drawable/circle_bg"
+                android:backgroundTint="#66FFFFFF"
+                android:padding="8dp"
+                android:src="@android:drawable/ic_menu_close_clear_cancel"
+                app:tint="@color/white" />
+        </LinearLayout>
     </RelativeLayout>
 
     <!-- Swipeable ViewPager2 for full screen gallery sliding -->
