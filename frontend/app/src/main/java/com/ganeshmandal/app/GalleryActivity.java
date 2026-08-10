@@ -75,10 +75,17 @@ public class GalleryActivity extends AppCompatActivity {
 
         swipeRefresh.setOnRefreshListener(this::fetchGalleryPhotos);
 
-        // Click directly opens multiple photo selector (No title required)
-        View.OnClickListener addPhotoClickListener = v -> multiPhotoPickerLauncher.launch("image/*");
-        fabAddPhoto.setOnClickListener(addPhotoClickListener);
-        btnAddPhotoTop.setOnClickListener(addPhotoClickListener);
+        // Show "फोटो जोडा" option ONLY for Admin
+        if (isAdmin) {
+            fabAddPhoto.setVisibility(View.VISIBLE);
+            btnAddPhotoTop.setVisibility(View.VISIBLE);
+            View.OnClickListener addPhotoClickListener = v -> multiPhotoPickerLauncher.launch("image/*");
+            fabAddPhoto.setOnClickListener(addPhotoClickListener);
+            btnAddPhotoTop.setOnClickListener(addPhotoClickListener);
+        } else {
+            fabAddPhoto.setVisibility(View.GONE);
+            btnAddPhotoTop.setVisibility(View.GONE);
+        }
 
         fetchGalleryPhotos();
     }
