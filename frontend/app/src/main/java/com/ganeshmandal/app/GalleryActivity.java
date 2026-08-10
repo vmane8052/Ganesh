@@ -53,11 +53,11 @@ public class GalleryActivity extends AppCompatActivity {
     private boolean isAdmin = false;
     private String loggedInUserName = "सदस्य";
 
-    // Year selection & filtering (Latest years on top/first)
+    // Year selection & filtering ("सर्व" first, then latest years descending)
     private final List<String> availableYears = Arrays.asList(
-            "2026", "2025", "2024", "2023", "2022", "2021", "2020", "2019", "2018", "2017", "2016", "2015", "सर्व वर्षे"
+            "सर्व", "2026", "2025", "2024", "2023", "2022", "2021", "2020", "2019", "2018", "2017", "2016", "2015"
     );
-    private String selectedFilterYear = "2026"; // Default filter to latest/current year
+    private String selectedFilterYear = "2026"; // Default filter to current year
     private String selectedUploadYear = "2026"; // Default upload year
 
     // Multi-Image Picker
@@ -115,7 +115,7 @@ public class GalleryActivity extends AppCompatActivity {
 
         for (String year : availableYears) {
             TextView chip = new TextView(this);
-            chip.setText(year.equals("2026") ? "2026 (चालू)" : year);
+            chip.setText(year.equals("2026") ? "2026 (चालू)" : (year.equals("सर्व") ? "सर्व (All)" : year));
             chip.setTextSize(13f);
             chip.setGravity(Gravity.CENTER);
             chip.setPadding(36, 16, 36, 16);
