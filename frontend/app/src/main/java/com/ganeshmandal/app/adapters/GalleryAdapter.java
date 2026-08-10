@@ -10,9 +10,11 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.Window;
 import android.widget.ImageView;
+import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AlertDialog;
 import androidx.recyclerview.widget.RecyclerView;
+import androidx.viewpager2.widget.ViewPager2;
 import com.bumptech.glide.Glide;
 import com.ganeshmandal.app.R;
 import com.ganeshmandal.app.models.GalleryPhoto;
@@ -85,8 +87,9 @@ public class GalleryAdapter extends RecyclerView.Adapter<GalleryAdapter.GalleryV
             holder.ivGalleryPhoto.setImageResource(R.drawable.app_logo);
         }
 
-        // Tap to open full screen image preview
-        holder.itemView.setOnClickListener(v -> showFullPhotoDialog(photo));
+        // Tap to open full screen swipeable photo viewer
+        int clickedIndex = position;
+        holder.itemView.setOnClickListener(v -> showFullPhotoDialog(clickedIndex));
 
         // Admin can delete photo directly via trash icon or long press
         if (isAdmin) {
@@ -115,39 +118,45 @@ public class GalleryAdapter extends RecyclerView.Adapter<GalleryAdapter.GalleryV
                 .show();
     }
 
-    private void showFullPhotoDialog(GalleryPhoto photo) {
+    private void showFullPhotoDialog(int initialPosition) {
+        if (photoList == null || photoList.isEmpty()) return;
+
         Dialog dialog = new Dialog(context, android.R.style.Theme_Black_NoTitleBar_Fullscreen);
         dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
         dialog.setContentView(R.layout.dialog_full_photo);
 
-        ImageView ivFull = dialog.findViewById(R.id.ivFullPhoto);
+        ViewPager2 viewPager = dialog.findViewById(R.id.viewPagerPhotos);
+        TextView tvCounter = dialog.findViewById(R.id.tvPhotoCounter);
         ImageView btnClose = dialog.findViewById(R.id.btnCloseFullPhoto);
         ImageView btnFullDelete = dialog.findViewById(R.id.btnFullDeletePhoto);
+
+        FullScreenPhotoAdapter pagerAdapter = new FullScreenPhotoAdapter(context, photoList);
+        viewPager.setAdapter(pagerAdapter);
+        viewPager.setCurrentItem(initialPosition, false);
+
+        int total = photoList.size();
+        tvCounter.setText((initialPosition + 1) + " / " + total);
+
+        viewPager.registerOnPageChangeCallback(new ViewPager2.OnPageChangeCallback() {
+            @Override
+            public void onPageSelected(int position) {
+                super.onPageSelected(position);
+                tvCounter.setText((position + 1) + " / " + photoList.size());
+            }
+        });
 
         if (isAdmin) {
             btnFullDelete.setVisibility(View.VISIBLE);
             btnFullDelete.setOnClickListener(v -> {
-                dialog.dismiss();
-                confirmDelete(photo);
+                int currentPos = viewPager.getCurrentItem();
+                if (currentPos >= 0 && currentPos < photoList.size()) {
+                    GalleryPhoto currentPhoto = photoList.get(currentPos);
+                    dialog.dismiss();
+                    confirmDelete(currentPhoto);
+                }
             });
         } else {
             btnFullDelete.setVisibility(View.GONE);
-        }
-
-        String img = photo.getImageUrl();
-        if (img != null && (img.startsWith("http://") || img.startsWith("https://"))) {
-            Glide.with(context)
-                    .load(img)
-                    .fitCenter()
-                    .placeholder(R.drawable.app_logo)
-                    .into(ivFull);
-        } else if (img != null && !img.isEmpty()) {
-            try {
-                String clean = img.contains(",") ? img.substring(img.indexOf(",") + 1) : img;
-                byte[] b = Base64.decode(clean, Base64.DEFAULT);
-                Bitmap bmp = BitmapFactory.decodeByteArray(b, 0, b.length);
-                if (bmp != null) ivFull.setImageBitmap(bmp);
-            } catch (Exception ignored) {}
         }
 
         btnClose.setOnClickListener(v -> dialog.dismiss());
