@@ -85,6 +85,7 @@ public class ProfileActivity extends AppCompatActivity {
     }
 
     private void loadProfilePhoto(String photoUrl) {
+        ivProfilePhoto.setImageTintList(null);
         if (photoUrl != null && !photoUrl.trim().isEmpty()) {
             if (photoUrl.startsWith("http://") || photoUrl.startsWith("https://")) {
                 Glide.with(this)
@@ -95,15 +96,23 @@ public class ProfileActivity extends AppCompatActivity {
                         .into(ivProfilePhoto);
             } else {
                 try {
-                    byte[] decodedBytes = Base64.decode(photoUrl, Base64.DEFAULT);
+                    String cleanBase64 = photoUrl;
+                    if (photoUrl.contains(",")) {
+                        cleanBase64 = photoUrl.substring(photoUrl.indexOf(",") + 1);
+                    }
+                    byte[] decodedBytes = Base64.decode(cleanBase64, Base64.DEFAULT);
                     Bitmap bitmap = BitmapFactory.decodeByteArray(decodedBytes, 0, decodedBytes.length);
                     if (bitmap != null) {
-                        ivProfilePhoto.setImageBitmap(bitmap);
+                        Glide.with(this).load(bitmap).circleCrop().into(ivProfilePhoto);
+                    } else {
+                        Glide.with(this).load(R.drawable.app_logo).circleCrop().into(ivProfilePhoto);
                     }
                 } catch (Exception e) {
-                    e.printStackTrace();
+                    Glide.with(this).load(R.drawable.app_logo).circleCrop().into(ivProfilePhoto);
                 }
             }
+        } else {
+            Glide.with(this).load(R.drawable.app_logo).circleCrop().into(ivProfilePhoto);
         }
     }
 

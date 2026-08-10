@@ -67,8 +67,7 @@
                         android:background="@drawable/circle_bg"
                         android:padding="3dp"
                         android:scaleType="centerCrop"
-                        android:src="@android:drawable/ic_menu_camera"
-                        app:tint="@color/primary_blue" />
+                        android:src="@drawable/app_logo" />
 
                     <TextView
                         android:id="@+id/tvName"

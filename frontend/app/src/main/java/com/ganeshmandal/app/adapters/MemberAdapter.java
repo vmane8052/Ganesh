@@ -79,6 +79,7 @@ public class MemberAdapter extends RecyclerView.Adapter<MemberAdapter.MemberView
         }
 
         // Profile Photo loading (Cloudinary URL or Base64)
+        holder.ivMemberPhoto.setImageTintList(null);
         if (user.getPhotoUrl() != null && !user.getPhotoUrl().isEmpty()) {
             if (user.getPhotoUrl().startsWith("http://") || user.getPhotoUrl().startsWith("https://")) {
                 com.bumptech.glide.Glide.with(context)
@@ -89,19 +90,23 @@ public class MemberAdapter extends RecyclerView.Adapter<MemberAdapter.MemberView
                         .into(holder.ivMemberPhoto);
             } else {
                 try {
-                    byte[] decodedBytes = Base64.decode(user.getPhotoUrl(), Base64.DEFAULT);
+                    String cleanBase64 = user.getPhotoUrl();
+                    if (cleanBase64.contains(",")) {
+                        cleanBase64 = cleanBase64.substring(cleanBase64.indexOf(",") + 1);
+                    }
+                    byte[] decodedBytes = Base64.decode(cleanBase64, Base64.DEFAULT);
                     Bitmap bitmap = BitmapFactory.decodeByteArray(decodedBytes, 0, decodedBytes.length);
                     if (bitmap != null) {
-                        holder.ivMemberPhoto.setImageBitmap(bitmap);
+                        com.bumptech.glide.Glide.with(context).load(bitmap).circleCrop().into(holder.ivMemberPhoto);
                     } else {
-                        holder.ivMemberPhoto.setImageResource(R.drawable.app_logo);
+                        com.bumptech.glide.Glide.with(context).load(R.drawable.app_logo).circleCrop().into(holder.ivMemberPhoto);
                     }
                 } catch (Exception e) {
-                    holder.ivMemberPhoto.setImageResource(R.drawable.app_logo);
+                    com.bumptech.glide.Glide.with(context).load(R.drawable.app_logo).circleCrop().into(holder.ivMemberPhoto);
                 }
             }
         } else {
-            holder.ivMemberPhoto.setImageResource(R.drawable.app_logo);
+            com.bumptech.glide.Glide.with(context).load(R.drawable.app_logo).circleCrop().into(holder.ivMemberPhoto);
         }
 
         // Call member dialer

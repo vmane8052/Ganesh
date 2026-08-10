@@ -111,6 +111,7 @@ public class MemberDetailActivity extends AppCompatActivity {
         tvRoleInMandal.setText(roleInMandal);
         tvPin.setText(pin);
 
+        ivProfilePhoto.setImageTintList(null);
         if (photoUrl != null && !photoUrl.isEmpty()) {
             if (photoUrl.startsWith("http://") || photoUrl.startsWith("https://")) {
                 com.bumptech.glide.Glide.with(this)
@@ -121,19 +122,23 @@ public class MemberDetailActivity extends AppCompatActivity {
                         .into(ivProfilePhoto);
             } else {
                 try {
-                    byte[] decodedBytes = Base64.decode(photoUrl, Base64.DEFAULT);
+                    String cleanBase64 = photoUrl;
+                    if (cleanBase64.contains(",")) {
+                        cleanBase64 = cleanBase64.substring(cleanBase64.indexOf(",") + 1);
+                    }
+                    byte[] decodedBytes = Base64.decode(cleanBase64, Base64.DEFAULT);
                     Bitmap bitmap = BitmapFactory.decodeByteArray(decodedBytes, 0, decodedBytes.length);
                     if (bitmap != null) {
-                        ivProfilePhoto.setImageBitmap(bitmap);
+                        com.bumptech.glide.Glide.with(this).load(bitmap).circleCrop().into(ivProfilePhoto);
                     } else {
-                        ivProfilePhoto.setImageResource(R.drawable.app_logo);
+                        com.bumptech.glide.Glide.with(this).load(R.drawable.app_logo).circleCrop().into(ivProfilePhoto);
                     }
                 } catch (Exception e) {
-                    ivProfilePhoto.setImageResource(R.drawable.app_logo);
+                    com.bumptech.glide.Glide.with(this).load(R.drawable.app_logo).circleCrop().into(ivProfilePhoto);
                 }
             }
         } else {
-            ivProfilePhoto.setImageResource(R.drawable.app_logo);
+            com.bumptech.glide.Glide.with(this).load(R.drawable.app_logo).circleCrop().into(ivProfilePhoto);
         }
     }
 

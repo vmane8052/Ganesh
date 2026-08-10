@@ -8,7 +8,7 @@
     <!-- Top Blue Title Bar -->
     <RelativeLayout
         android:id="@+id/topBar"
-        android:layout_width="match_parent"
+        android:layout_width="match_parent "
         android:layout_height="64dp"
         android:background="@color/primary_blue"
         android:paddingHorizontal="16dp">
@@ -61,8 +61,7 @@
                     android:background="@drawable/circle_bg"
                     android:padding="2dp"
                     android:scaleType="centerCrop"
-                    android:src="@android:drawable/ic_menu_camera"
-                    app:tint="@color/primary_blue" />
+                    android:src="@drawable/app_logo" />
 
                 <ImageView
                     android:layout_width="32dp"
