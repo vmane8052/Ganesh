@@ -467,11 +467,50 @@ app.post('/api/gallery', async (req, res) => {
     }
 
     const photo = await Gallery.create({
-      title: title || 'श्री गणेश उत्सव',
+      title: title || '',
       imageUrl: finalImageUrl,
       uploadedBy: uploadedBy || 'मंडळ सदस्य'
     });
     res.status(201).json({ success: true, message: 'फोटो गॅलरीमध्ये जोडला गेला!', data: photo });
+  } catch (err) {
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
+
+app.post('/api/gallery/batch', async (req, res) => {
+  try {
+    const { photos } = req.body;
+    if (!photos || !Array.isArray(photos) || photos.length === 0) {
+      return res.status(400).json({ success: false, message: 'फोटो आवश्यक आहेत' });
+    }
+
+    const createdList = [];
+    for (const item of photos) {
+      let finalImageUrl = item.imageUrl;
+      if (item.imageUrl && item.imageUrl.startsWith('data:image')) {
+        try {
+          const uploadRes = await cloudinary.uploader.upload(item.imageUrl, {
+            folder: 'ganesh_mandal_gallery'
+          });
+          finalImageUrl = uploadRes.secure_url;
+        } catch (uploadErr) {
+          console.error('Cloudinary batch upload error:', uploadErr);
+        }
+      }
+
+      const p = await Gallery.create({
+        title: item.title || '',
+        imageUrl: finalImageUrl,
+        uploadedBy: item.uploadedBy || 'मंडळ सदस्य'
+      });
+      createdList.push(p);
+    }
+
+    res.status(201).json({
+      success: true,
+      message: `${createdList.length} फोटो गॅलरीमध्ये जोडले गेले!`,
+      data: createdList
+    });
   } catch (err) {
     res.status(500).json({ success: false, error: err.message });
   }

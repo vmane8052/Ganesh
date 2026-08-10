@@ -88,6 +88,9 @@ public interface ApiService {
     @POST("api/gallery")
     Call<SingleGalleryResponse> addGalleryPhoto(@Body GalleryPhoto photo);
 
+    @POST("api/gallery/batch")
+    Call<GalleryListResponse> addGalleryBatch(@Body Map<String, List<GalleryPhoto>> payload);
+
     @DELETE("api/gallery/{id}")
     Call<Void> deleteGalleryPhoto(@Path("id") String id);
 }

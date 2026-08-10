@@ -56,7 +56,12 @@ public class GalleryAdapter extends RecyclerView.Adapter<GalleryAdapter.GalleryV
     public void onBindViewHolder(@NonNull GalleryViewHolder holder, int position) {
         GalleryPhoto photo = photoList.get(position);
 
-        holder.tvPhotoTitle.setText(photo.getTitle() != null && !photo.getTitle().isEmpty() ? photo.getTitle() : "श्री गणेश उत्सव");
+        if (photo.getTitle() != null && !photo.getTitle().trim().isEmpty()) {
+            holder.tvPhotoTitle.setVisibility(View.VISIBLE);
+            holder.tvPhotoTitle.setText(photo.getTitle());
+        } else {
+            holder.tvPhotoTitle.setVisibility(View.GONE);
+        }
         holder.tvUploadedBy.setText("👤 " + (photo.getUploadedBy() != null && !photo.getUploadedBy().isEmpty() ? photo.getUploadedBy() : "सदस्य"));
 
         String img = photo.getImageUrl();
