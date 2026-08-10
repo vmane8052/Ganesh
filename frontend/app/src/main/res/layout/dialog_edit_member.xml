@@ -14,10 +14,56 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginBottom="16dp"
-            android:text="सदस्याची माहिती अपडेट करा"
+            android:text="सदस्याची माहिती व फोटो अपडेट करा"
             android:textColor="@color/primary_blue"
             android:textSize="18sp"
             android:textStyle="bold" />
+
+        <!-- Member Photo Edit Section -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            android:orientation="vertical"
+            android:layout_marginBottom="16dp">
+
+            <RelativeLayout
+                android:layout_width="100dp"
+                android:layout_height="100dp">
+
+                <ImageView
+                    android:id="@+id/ivEditMemberPhoto"
+                    android:layout_width="90dp"
+                    android:layout_height="90dp"
+                    android:layout_centerInParent="true"
+                    android:background="@drawable/circle_bg"
+                    android:padding="2dp"
+                    android:scaleType="centerCrop"
+                    android:src="@drawable/app_logo" />
+
+                <ImageView
+                    android:layout_width="32dp"
+                    android:layout_height="32dp"
+                    android:layout_alignParentEnd="true"
+                    android:layout_alignParentBottom="true"
+                    android:background="@drawable/badge_bg"
+                    android:backgroundTint="@color/primary_blue"
+                    android:elevation="4dp"
+                    android:padding="6dp"
+                    android:src="@android:drawable/ic_menu_camera"
+                    app:tint="@color/white" />
+            </RelativeLayout>
+
+            <TextView
+                android:id="@+id/btnSelectEditPhoto"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="6dp"
+                android:text="📷 फोटो बदलण्यासाठी येथे क्लिक करा"
+                android:textColor="@color/primary_blue"
+                android:textSize="13sp"
+                android:textStyle="bold" />
+        </LinearLayout>
 
         <!-- Name Input -->
         <TextView

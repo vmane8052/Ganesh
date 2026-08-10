@@ -15,13 +15,18 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
+import com.bumptech.glide.Glide;
 import com.ganeshmandal.app.api.ApiClient;
 import com.ganeshmandal.app.models.LoginResponse;
 import com.ganeshmandal.app.models.User;
 import com.google.android.material.button.MaterialButton;
 import com.google.android.material.textfield.TextInputEditText;
+import java.io.ByteArrayOutputStream;
+import java.io.InputStream;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
@@ -36,6 +41,9 @@ public class MemberDetailActivity extends AppCompatActivity {
     private String name, phone, pin, role, roleInMandal, photoUrl;
     private boolean isAdmin = false;
 
+    private ImageView currentDialogPhotoView = null;
+    private String selectedEditPhotoBase64 = "";
+
     private static final String[] MANDAL_ROLES = new String[] {
             "अध्यक्ष",
             "उपाध्यक्ष",
@@ -44,6 +52,11 @@ public class MemberDetailActivity extends AppCompatActivity {
             "कार्यकर्ते",
             "सामान्य सदस्य"
     };
+
+    private final ActivityResultLauncher<String> editPhotoLauncher = registerForActivityResult(
+            new ActivityResultContracts.GetContent(),
+            this::handleSelectedEditImage
+    );
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -83,6 +96,7 @@ public class MemberDetailActivity extends AppCompatActivity {
         if (role == null) role = "USER";
         if (roleInMandal == null) roleInMandal = "सामान्य सदस्य";
         if (photoUrl == null) photoUrl = "";
+        selectedEditPhotoBase64 = photoUrl;
 
         updateUi();
 
@@ -92,6 +106,7 @@ public class MemberDetailActivity extends AppCompatActivity {
             layoutAdminActions.setVisibility(View.VISIBLE);
             btnEditMember.setOnClickListener(v -> showEditDialog());
             btnDeleteMember.setOnClickListener(v -> confirmDeleteMember());
+            ivProfilePhoto.setOnClickListener(v -> showEditDialog());
         } else {
             layoutPinRow.setVisibility(View.GONE);
             layoutAdminActions.setVisibility(View.GONE);
@@ -112,42 +127,89 @@ public class MemberDetailActivity extends AppCompatActivity {
         tvPin.setText(pin);
 
         ivProfilePhoto.setImageTintList(null);
-        if (photoUrl != null && !photoUrl.isEmpty()) {
-            if (photoUrl.startsWith("http://") || photoUrl.startsWith("https://")) {
-                com.bumptech.glide.Glide.with(this)
-                        .load(photoUrl)
+        loadPhotoIntoView(photoUrl, ivProfilePhoto);
+    }
+
+    private void loadPhotoIntoView(String urlOrBase64, ImageView targetView) {
+        if (targetView == null) return;
+        targetView.setImageTintList(null);
+
+        if (urlOrBase64 != null && !urlOrBase64.trim().isEmpty()) {
+            if (urlOrBase64.startsWith("http://") || urlOrBase64.startsWith("https://")) {
+                Glide.with(this)
+                        .load(urlOrBase64)
                         .circleCrop()
                         .placeholder(R.drawable.app_logo)
                         .error(R.drawable.app_logo)
-                        .into(ivProfilePhoto);
+                        .into(targetView);
             } else {
                 try {
-                    String cleanBase64 = photoUrl;
+                    String cleanBase64 = urlOrBase64;
                     if (cleanBase64.contains(",")) {
                         cleanBase64 = cleanBase64.substring(cleanBase64.indexOf(",") + 1);
                     }
                     byte[] decodedBytes = Base64.decode(cleanBase64, Base64.DEFAULT);
                     Bitmap bitmap = BitmapFactory.decodeByteArray(decodedBytes, 0, decodedBytes.length);
                     if (bitmap != null) {
-                        com.bumptech.glide.Glide.with(this).load(bitmap).circleCrop().into(ivProfilePhoto);
+                        Glide.with(this).load(bitmap).circleCrop().into(targetView);
                     } else {
-                        com.bumptech.glide.Glide.with(this).load(R.drawable.app_logo).circleCrop().into(ivProfilePhoto);
+                        Glide.with(this).load(R.drawable.app_logo).circleCrop().into(targetView);
                     }
                 } catch (Exception e) {
-                    com.bumptech.glide.Glide.with(this).load(R.drawable.app_logo).circleCrop().into(ivProfilePhoto);
+                    Glide.with(this).load(R.drawable.app_logo).circleCrop().into(targetView);
                 }
             }
         } else {
-            com.bumptech.glide.Glide.with(this).load(R.drawable.app_logo).circleCrop().into(ivProfilePhoto);
+            Glide.with(this).load(R.drawable.app_logo).circleCrop().into(targetView);
+        }
+    }
+
+    private void handleSelectedEditImage(Uri uri) {
+        if (uri == null) return;
+        try {
+            InputStream is = getContentResolver().openInputStream(uri);
+            Bitmap originalBitmap = BitmapFactory.decodeStream(is);
+            if (is != null) is.close();
+
+            if (originalBitmap == null) return;
+
+            int maxDimension = 500;
+            int width = originalBitmap.getWidth();
+            int height = originalBitmap.getHeight();
+            float ratio = Math.min((float) maxDimension / width, (float) maxDimension / height);
+            Bitmap scaled = Bitmap.createScaledBitmap(originalBitmap, Math.round(width * ratio), Math.round(height * ratio), true);
+
+            ByteArrayOutputStream baos = new ByteArrayOutputStream();
+            scaled.compress(Bitmap.CompressFormat.JPEG, 75, baos);
+            byte[] bytes = baos.toByteArray();
+            selectedEditPhotoBase64 = "data:image/jpeg;base64," + Base64.encodeToString(bytes, Base64.NO_WRAP);
+
+            if (currentDialogPhotoView != null) {
+                loadPhotoIntoView(selectedEditPhotoBase64, currentDialogPhotoView);
+            }
+            Toast.makeText(this, "नवीन फोटो निवडला गेला! अपडेट बटण दाबा.", Toast.LENGTH_SHORT).show();
+        } catch (Exception e) {
+            e.printStackTrace();
+            Toast.makeText(this, "फोटो लोड करताना एरर: " + e.getMessage(), Toast.LENGTH_SHORT).show();
         }
     }
 
     private void showEditDialog() {
         View dialogView = LayoutInflater.from(this).inflate(R.layout.dialog_edit_member, null);
+        ImageView ivEditMemberPhoto = dialogView.findViewById(R.id.ivEditMemberPhoto);
+        TextView btnSelectEditPhoto = dialogView.findViewById(R.id.btnSelectEditPhoto);
         TextInputEditText etEditName = dialogView.findViewById(R.id.etEditName);
         TextInputEditText etEditPhone = dialogView.findViewById(R.id.etEditPhone);
         TextInputEditText etEditPin = dialogView.findViewById(R.id.etEditPin);
         AutoCompleteTextView actvEditRoleInMandal = dialogView.findViewById(R.id.actvEditRoleInMandal);
+
+        currentDialogPhotoView = ivEditMemberPhoto;
+        selectedEditPhotoBase64 = photoUrl;
+        loadPhotoIntoView(photoUrl, ivEditMemberPhoto);
+
+        View.OnClickListener photoPickListener = v -> editPhotoLauncher.launch("image/*");
+        ivEditMemberPhoto.setOnClickListener(photoPickListener);
+        btnSelectEditPhoto.setOnClickListener(photoPickListener);
 
         etEditName.setText(name);
         etEditPhone.setText(phone);
@@ -158,7 +220,7 @@ public class MemberDetailActivity extends AppCompatActivity {
         actvEditRoleInMandal.setText(roleInMandal, false);
 
         new AlertDialog.Builder(this)
-                .setTitle("सदस्य माहिती अपडेट करा")
+                .setTitle("सदस्य माहिती व फोटो अपडेट")
                 .setView(dialogView)
                 .setPositiveButton("अपडेट करा", (dialog, which) -> {
                     String newName = etEditName.getText() != null ? etEditName.getText().toString().trim() : name;
@@ -176,16 +238,24 @@ public class MemberDetailActivity extends AppCompatActivity {
                     phone = newPhone;
                     pin = newPin;
                     roleInMandal = newRoleInMandal;
+                    String newPhoto = selectedEditPhotoBase64;
 
-                    User updatedUser = new User(name, phone, pin, role, roleInMandal, photoUrl);
+                    Toast.makeText(MemberDetailActivity.this, "डेटाबेस व Cloudinary वर सेव्ह होत आहे...", Toast.LENGTH_SHORT).show();
 
-                    // Sync update directly with MongoDB Atlas via API
+                    User updatedUser = new User(name, phone, pin, role, roleInMandal, newPhoto);
+
+                    // Sync update directly with MongoDB Atlas & Cloudinary via API
                     ApiClient.getService().updateUser(oldPhone, updatedUser).enqueue(new Callback<LoginResponse>() {
                         @Override
                         public void onResponse(Call<LoginResponse> call, Response<LoginResponse> response) {
                             if (response.isSuccessful() && response.body() != null && response.body().isSuccess()) {
+                                if (response.body().getUser() != null && response.body().getUser().getPhotoUrl() != null) {
+                                    photoUrl = response.body().getUser().getPhotoUrl();
+                                } else {
+                                    photoUrl = newPhoto;
+                                }
                                 updateUi();
-                                Toast.makeText(MemberDetailActivity.this, "डेटाबेसमध्ये माहिती यशस्वीरित्या अपडेट झाली!", Toast.LENGTH_SHORT).show();
+                                Toast.makeText(MemberDetailActivity.this, "सदस्याची माहिती व फोटो यशस्वीरित्या अपडेट झाला!", Toast.LENGTH_LONG).show();
                             } else {
                                 Toast.makeText(MemberDetailActivity.this, "डेटाबेस अपडेट करण्यात अडचण आली", Toast.LENGTH_SHORT).show();
                             }
