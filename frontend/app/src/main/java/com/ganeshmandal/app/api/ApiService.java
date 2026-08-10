@@ -10,6 +10,7 @@ import com.ganeshmandal.app.models.SingleEventResponse;
 import com.ganeshmandal.app.models.SingleTransactionResponse;
 import com.ganeshmandal.app.models.Transaction;
 import com.ganeshmandal.app.models.TransactionResponse;
+import com.ganeshmandal.app.models.UploadResponse;
 import com.ganeshmandal.app.models.User;
 import com.ganeshmandal.app.models.UserListResponse;
 import java.util.Map;
@@ -72,4 +73,8 @@ public interface ApiService {
 
     @DELETE("api/donations/{id}")
     Call<Void> deleteDonation(@Path("id") String id);
+
+    // --- Photo Upload (Cloudinary) ---
+    @POST("api/upload")
+    Call<UploadResponse> uploadPhoto(@Body Map<String, String> payload);
 }

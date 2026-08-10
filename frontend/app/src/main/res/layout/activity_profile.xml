@@ -60,15 +60,44 @@
                     android:orientation="vertical"
                     android:padding="24dp">
 
-                    <ImageView
-                        android:id="@+id/ivProfilePhoto"
-                        android:layout_width="110dp"
-                        android:layout_height="110dp"
-                        android:background="@drawable/circle_bg"
-                        android:padding="3dp"
-                        android:scaleType="centerCrop"
-                        android:src="@android:drawable/ic_menu_camera"
-                        app:tint="@color/primary_blue" />
+                    <RelativeLayout
+                        android:layout_width="120dp"
+                        android:layout_height="120dp">
+
+                        <ImageView
+                            android:id="@+id/ivProfilePhoto"
+                            android:layout_width="110dp"
+                            android:layout_height="110dp"
+                            android:layout_centerInParent="true"
+                            android:background="@drawable/circle_bg"
+                            android:padding="3dp"
+                            android:scaleType="centerCrop"
+                            android:src="@android:drawable/ic_menu_camera"
+                            app:tint="@color/primary_blue" />
+
+                        <ImageView
+                            android:id="@+id/btnChangePhoto"
+                            android:layout_width="36dp"
+                            android:layout_height="36dp"
+                            android:layout_alignParentEnd="true"
+                            android:layout_alignParentBottom="true"
+                            android:background="@drawable/badge_bg"
+                            android:backgroundTint="@color/primary_blue"
+                            android:elevation="4dp"
+                            android:padding="6dp"
+                            android:src="@android:drawable/ic_menu_camera"
+                            app:tint="@color/white" />
+                    </RelativeLayout>
+
+                    <TextView
+                        android:id="@+id/tvChangePhotoHint"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="6dp"
+                        android:text="📷 फोटो बदलण्यासाठी येथे क्लिक करा"
+                        android:textColor="@color/primary_blue"
+                        android:textSize="12sp"
+                        android:textStyle="bold" />
 
                     <TextView
                         android:id="@+id/tvProfileName"

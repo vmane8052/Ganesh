@@ -2,7 +2,15 @@ require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
 const mongoose = require('mongoose');
+const cloudinary = require('cloudinary').v2;
 const { User, Transaction, Member, Event, Donation, Gallery } = require('../models');
+
+// Configure Cloudinary
+cloudinary.config({
+  cloud_name: process.env.CLOUDINARY_CLOUD_NAME || '',
+  api_key: process.env.CLOUDINARY_API_KEY || '',
+  api_secret: process.env.CLOUDINARY_API_SECRET || ''
+});
 
 const dns = require('dns');
 try { dns.setServers(['8.8.8.8', '8.8.4.4']); } catch(e){}
@@ -366,6 +374,36 @@ app.delete('/api/donations/:id', async (req, res) => {
     const { id } = req.params;
     await Donation.findByIdAndDelete(id);
     res.json({ success: true, message: 'देणगी यशस्वीरीत्या हटवली गेली' });
+  } catch (err) {
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
+
+// --- PHOTO UPLOAD (Cloudinary & Base64 Fallback) ---
+app.post('/api/upload', async (req, res) => {
+  try {
+    const { image, phone } = req.body;
+    if (!image) {
+      return res.status(400).json({ success: false, message: 'फोटो डेटा आवश्यक आहे' });
+    }
+
+    let finalUrl = image;
+
+    // If Cloudinary environment variables are present, upload to Cloudinary
+    if (process.env.CLOUDINARY_CLOUD_NAME && process.env.CLOUDINARY_API_KEY && process.env.CLOUDINARY_API_SECRET) {
+      const uploadRes = await cloudinary.uploader.upload(image, {
+        folder: 'ganesh_mandal_profiles',
+        transformation: [{ width: 500, height: 500, crop: 'fill', gravity: 'face' }]
+      });
+      finalUrl = uploadRes.secure_url;
+    }
+
+    // If phone is supplied, automatically update the user's profile photo in MongoDB
+    if (phone) {
+      await User.findOneAndUpdate({ phone }, { photoUrl: finalUrl });
+    }
+
+    res.json({ success: true, message: 'फोटो यशस्वीरीत्या सेव्ह झाला', photoUrl: finalUrl });
   } catch (err) {
     res.status(500).json({ success: false, error: err.message });
   }
