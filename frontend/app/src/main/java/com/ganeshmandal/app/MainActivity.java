@@ -133,7 +133,8 @@ public class MainActivity extends AppCompatActivity {
 
         menuUploadPhoto.setOnClickListener(v -> {
             drawerLayout.closeDrawer(GravityCompat.START);
-            Toast.makeText(this, "फोटो अपलोड करा लवकरच येत आहे...", Toast.LENGTH_SHORT).show();
+            Intent intent = new Intent(MainActivity.this, ProfileActivity.class);
+            startActivity(intent);
         });
 
         menuLogout.setOnClickListener(v -> {

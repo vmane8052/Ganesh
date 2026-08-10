@@ -40,9 +40,11 @@ public class MemberDetailActivity extends AppCompatActivity {
 
     private String name, phone, pin, role, roleInMandal, photoUrl;
     private boolean isAdmin = false;
+    private boolean isSelf = false;
 
     private ImageView currentDialogPhotoView = null;
     private String selectedEditPhotoBase64 = "";
+    private SharedPreferences prefs;
 
     private static final String[] MANDAL_ROLES = new String[] {
             "अध्यक्ष",
@@ -77,8 +79,9 @@ public class MemberDetailActivity extends AppCompatActivity {
 
         btnBack.setOnClickListener(v -> finish());
 
-        SharedPreferences prefs = getSharedPreferences("MandalPrefs", MODE_PRIVATE);
+        prefs = getSharedPreferences("MandalPrefs", MODE_PRIVATE);
         String userRole = prefs.getString("USER_ROLE", "USER");
+        String loggedInPhone = prefs.getString("USER_PHONE", "");
         isAdmin = "ADMIN".equalsIgnoreCase(userRole);
 
         // Get member data from Intent
@@ -98,15 +101,27 @@ public class MemberDetailActivity extends AppCompatActivity {
         if (photoUrl == null) photoUrl = "";
         selectedEditPhotoBase64 = photoUrl;
 
+        isSelf = loggedInPhone != null && loggedInPhone.equals(phone);
+        boolean canEdit = isAdmin || isSelf;
+
         updateUi();
 
-        // Show Admin controls if Admin
-        if (isAdmin) {
-            layoutPinRow.setVisibility(View.VISIBLE);
+        // Admin or Self can edit details & photo
+        if (canEdit) {
             layoutAdminActions.setVisibility(View.VISIBLE);
+            btnEditMember.setVisibility(View.VISIBLE);
+            btnEditMember.setText(isSelf ? "✏️ माझी माहिती व फोटो बदला" : "✏️ माहिती व फोटो बदला");
             btnEditMember.setOnClickListener(v -> showEditDialog());
-            btnDeleteMember.setOnClickListener(v -> confirmDeleteMember());
             ivProfilePhoto.setOnClickListener(v -> showEditDialog());
+
+            if (isAdmin) {
+                layoutPinRow.setVisibility(View.VISIBLE);
+                btnDeleteMember.setVisibility(View.VISIBLE);
+                btnDeleteMember.setOnClickListener(v -> confirmDeleteMember());
+            } else {
+                layoutPinRow.setVisibility(View.VISIBLE);
+                btnDeleteMember.setVisibility(View.GONE);
+            }
         } else {
             layoutPinRow.setVisibility(View.GONE);
             layoutAdminActions.setVisibility(View.GONE);
@@ -219,8 +234,12 @@ public class MemberDetailActivity extends AppCompatActivity {
         actvEditRoleInMandal.setAdapter(adapter);
         actvEditRoleInMandal.setText(roleInMandal, false);
 
+        if (!isAdmin) {
+            actvEditRoleInMandal.setEnabled(false); // Non-admin cannot change their own mandal role
+        }
+
         new AlertDialog.Builder(this)
-                .setTitle("सदस्य माहिती व फोटो अपडेट")
+                .setTitle(isSelf ? "माझी माहिती व फोटो अपडेट" : "सदस्य माहिती व फोटो अपडेट")
                 .setView(dialogView)
                 .setPositiveButton("अपडेट करा", (dialog, which) -> {
                     String newName = etEditName.getText() != null ? etEditName.getText().toString().trim() : name;
@@ -254,8 +273,17 @@ public class MemberDetailActivity extends AppCompatActivity {
                                 } else {
                                     photoUrl = newPhoto;
                                 }
+
+                                if (isSelf) {
+                                    prefs.edit()
+                                            .putString("USER_NAME", name)
+                                            .putString("USER_PHONE", phone)
+                                            .putString("USER_PHOTO_URL", photoUrl)
+                                            .apply();
+                                }
+
                                 updateUi();
-                                Toast.makeText(MemberDetailActivity.this, "सदस्याची माहिती व फोटो यशस्वीरित्या अपडेट झाला!", Toast.LENGTH_LONG).show();
+                                Toast.makeText(MemberDetailActivity.this, "माहिती व फोटो यशस्वीरित्या अपडेट झाला!", Toast.LENGTH_LONG).show();
                             } else {
                                 Toast.makeText(MemberDetailActivity.this, "डेटाबेस अपडेट करण्यात अडचण आली", Toast.LENGTH_SHORT).show();
                             }
