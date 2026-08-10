@@ -16,7 +16,7 @@ public class AartiActivity extends AppCompatActivity {
 
     private ImageView btnBack;
     private TextView btnZoomIn, btnZoomOut;
-    private TextView chipGanapati, chipShankar, chipDurga, chipVitthal, chipDatta, chipMahalaxmi, chipMaruti, chipLotangan, chipMantra, chipPasaydan;
+    private TextView chipGanapati, chipShankar, chipDurga, chipVitthal, chipDatta, chipYeiHoVitthale, chipDnyanraja, chipTukaram, chipLotangan, chipMantra, chipPasaydan;
     private RecyclerView rvAartis;
     private LinearLayoutManager layoutManager;
     private AartiAdapter adapter;
@@ -37,8 +37,9 @@ public class AartiActivity extends AppCompatActivity {
         chipDurga = findViewById(R.id.chipDurga);
         chipVitthal = findViewById(R.id.chipVitthal);
         chipDatta = findViewById(R.id.chipDatta);
-        chipMahalaxmi = findViewById(R.id.chipMahalaxmi);
-        chipMaruti = findViewById(R.id.chipMaruti);
+        chipYeiHoVitthale = findViewById(R.id.chipYeiHoVitthale);
+        chipDnyanraja = findViewById(R.id.chipDnyanraja);
+        chipTukaram = findViewById(R.id.chipTukaram);
         chipLotangan = findViewById(R.id.chipLotangan);
         chipMantra = findViewById(R.id.chipMantra);
         chipPasaydan = findViewById(R.id.chipPasaydan);
@@ -76,8 +77,9 @@ public class AartiActivity extends AppCompatActivity {
         chipDurga.setOnClickListener(v -> scrollToPosition(2));
         chipVitthal.setOnClickListener(v -> scrollToPosition(3));
         chipDatta.setOnClickListener(v -> scrollToPosition(4));
-        chipMahalaxmi.setOnClickListener(v -> scrollToPosition(5));
-        chipMaruti.setOnClickListener(v -> scrollToPosition(6));
+        chipYeiHoVitthale.setOnClickListener(v -> scrollToPosition(5));
+        chipDnyanraja.setOnClickListener(v -> scrollToPosition(6));
+        chipTukaram.setOnClickListener(v -> scrollToPosition(7));
         chipLotangan.setOnClickListener(v -> scrollToPosition(8));
         chipMantra.setOnClickListener(v -> scrollToPosition(9));
         chipPasaydan.setOnClickListener(v -> scrollToPosition(10));
@@ -112,14 +114,14 @@ public class AartiActivity extends AppCompatActivity {
                 "दास रामाचा वाट पाहे सदना ।\n" +
                 "संकटी पावावे निर्वाणी रक्षावे सुरवंदना ॥\n\n" +
                 "जय देव जय देव जय मंगलमूर्ती ।\n" +
-                "दर्शनमात्रे मनकामना पुरती ॥ ३ ॥"
+                "दर्शनमात्रे मनकामना पुरती ॥ दर्शन० ॥ ३ ॥"
         ));
 
         // 2. शंकराची आरती (लवथवती विक्राळा)
         aartiList.add(new AartiItem(
                 "shankar",
                 "🔱",
-                "श्री शंकराची आरती (लवथवती विक्राळा)",
+                "लवथवती विक्राळा (श्री शंकराची आरती)",
                 "लवथवती विक्राळा ब्रह्मांडी माळा ।\n" +
                 "विषें कंठी काळा त्रिनेत्रीं ज्वाळां ॥\n" +
                 "लावण्यसुंदर मस्तकीं बाळा ।\n" +
@@ -189,7 +191,7 @@ public class AartiActivity extends AppCompatActivity {
                 "चंद्रभागेमध्यें स्नाने जे करिती ॥\n" +
                 "दर्शनहेळामात्रे तया होय मुक्ती ।\n" +
                 "केशवासी नामदेव भावे ऑवळिती ॥\n\n" +
-                "जय देव जय देव जय पांडुरंगा ॥ ५ ॥"
+                "जय देव जय देव ॥ ५ ॥"
         ));
 
         // 5. श्री दत्ताची आरती
@@ -202,7 +204,7 @@ public class AartiActivity extends AppCompatActivity {
                 "नेती नेती शब्द न ये अनुमाना ॥\n" +
                 "सुरवर मुनिजन योगी समाधी न ये ध्याना ॥ १ ॥\n\n" +
                 "जय देव जय देव जय श्री गुरुदत्ता ।\n" +
-                "आरती ओवाळिता हरली भवचिंता ॥ धृ. ॥\n\n" +
+                "आरती ओवाळिता हरली भवचिंता ॥ धृ ॥\n\n" +
                 "सबाह्य अभ्यंतरी तू एक दत्त ।\n" +
                 "अभाग्यासी कैची कळेल हि मात ॥\n" +
                 "पराही परतली तेथे कैचा हेत ।\n" +
@@ -217,82 +219,100 @@ public class AartiActivity extends AppCompatActivity {
                 "एका जनार्दनी श्रीदत्तध्यान ॥ ४ ॥"
         ));
 
-        // 6. श्री महालक्ष्मीची आरती
+        // 6. येई हो विठ्ठले (दत्ताच्या आरतीनंतर १)
         aartiList.add(new AartiItem(
-                "mahalaxmi",
+                "yei_ho_vitthale",
                 "🌸",
-                "श्री महालक्ष्मीची आरती",
-                "जय देवी जय देवी जय महालक्ष्मी ।\n" +
-                "करिती पूजन तुझे जन प्रेमळ अंतःकरणी ॥ धृ. ॥\n\n" +
-                "रत्नखचित हे मुकुट शोभतो माथा ।\n" +
-                "कस्तुरीचा टिळक लाविला आता ।\n" +
-                "कंठी विराजित दिव्य पुष्पमाला ।\n" +
-                "दर्शन होता जन तृप्त जाहला ॥ १ ॥\n\n" +
-                "अष्टभुजा वरदायिनी भक्तांची माऊली ।\n" +
-                "संकटनाशनी कृपा छत्र छाया पावली ।\n" +
-                "सुवर्ण कमळ हाती पद्मनेत्री सुंदरा ।\n" +
-                "प्रसन्न वदने पावे निज दासांतरा ॥ २ ॥\n\n" +
-                "जय देवी जय देवी जय महालक्ष्मी ॥"
+                "येई हो विठ्ठले",
+                "येई हो विठ्ठले माझे माऊली ये ॥\n" +
+                "निढळावरी कर ठेऊनी वाट मी पाहे ॥ धृ. ॥\n\n" +
+                "आलिया गेलीया हातीं धाडी निरोप ॥\n" +
+                "पंढरपुरी आहे माझा मायबाप ॥\n" +
+                "येई हो विठ्ठले माझे माऊली ये..\n\n" +
+                "पिंवळा पीतांबर कैसा गगनी झळकला ॥\n" +
+                "गरुडावरी बैसून माझा कैवारी आला ॥\n" +
+                "येई हो विठ्ठले माझे माऊली ये ..\n\n" +
+                "विठोबाचे राज आम्हां नित्य दिपवाळी ॥\n" +
+                "विष्णुदास नामा जीवेंभावे ओंवाळी ॥\n" +
+                "येई हो विठ्ठले माझे माऊली ये.."
         ));
 
-        // 7. श्री मारुतीची आरती
+        // 7. आरती ज्ञानराजा (दत्ताच्या आरतीनंतर २)
         aartiList.add(new AartiItem(
-                "maruti",
+                "dnyanraja",
+                "📖",
+                "आरती ज्ञान राजा",
+                "आरती ज्ञानराजा\n" +
+                "महाकैवल्यतेजा\n" +
+                "सेविती साधुसंत\n" +
+                "मनु वेधला माझा\n" +
+                "आरती ज्ञानराजा ॥ धृ०\n\n" +
+                "लोपलें ज्ञान जगीं\n" +
+                "हित नेणती कोणी\n" +
+                "अवतार पांडुरंग\n" +
+                "नाम ठेविलें ज्ञानी ॥ आरती ॥\n\n" +
+                "कनकाचे ताट करीं\n" +
+                "उभ्या गोपिका नारी\n" +
+                "नारद तुंबरु हो\n" +
+                "साम गायन करी ॥ आरती ॥\n\n" +
+                "प्रगट गुह्य बोले\n" +
+                "विश्व ब्रह्माचे केलें\n" +
+                "नामा जनार्दनी\n" +
+                "पायीं मस्तक ठेविलें ॥ आरती ॥"
+        ));
+
+        // 8. संत तुकाराम आरती (दत्ताच्या आरतीनंतर ३)
+        aartiList.add(new AartiItem(
+                "tukaram",
                 "🚩",
-                "श्री मारुतीची आरती (सत्राणे उड्डाणे)",
-                "सत्राणे उड्डाणे हुंकार वदनी ।\n" +
-                "करि डळमळ भूमंडळ सिंधूजळ गगनी ॥ १ ॥\n\n" +
-                "जय देव जय देव जय श्रीहनुमंता ।\n" +
-                "तुमचेनि प्रसादे न भी मी कृतांता ॥ धृ. ॥\n\n" +
-                "कदा कपी कपिराज अंजनीसूता ।\n" +
-                "पाताळी पाचारुनि मारिले रावणा ॥ २ ॥\n\n" +
-                "रामाचे सेवक तुम्ही भक्तांचे कैवारी ।\n" +
-                "संकट हरुनी रक्षावे सुखकारी ॥ ३ ॥"
+                "संत तुकाराम आरती",
+                "आरती तुकारामा\n" +
+                "स्वामी सद्गुरुधामा\n" +
+                "सच्चिदानंद मूर्ती\n" +
+                "पाय दाखवी आम्हा\n" +
+                "आरती तुकारामा ॥ धृ. ॥\n\n" +
+                "राघवे सागरात\n" +
+                "पाषाण तारीले\n" +
+                "तैसे हे तुकोबाचे\n" +
+                "अभंग उदकी रक्षियेले\n" +
+                "आरती तुकारामा ...॥ १ ॥\n\n" +
+                "तुकिता तुलनेशी\n" +
+                "ब्रह्म तुकासी आले\n" +
+                "म्हणोनि रामेश्वरे\n" +
+                "चरणी मस्तक ठेविले\n" +
+                "आरती तुकारामा ...॥ २ ॥\n\n" +
+                "स्वामी सद्गुरुधामा\n" +
+                "सच्चिदानंद मूर्ती\n" +
+                "पाय दाखवी आम्हा\n" +
+                "आरती तुकारामा ...॥"
         ));
 
-        // 8. श्री गणपतीची आरती (शेंदुर लाल चढायो)
-        aartiList.add(new AartiItem(
-                "shendur",
-                "🐘",
-                "श्री गणपती आरती (शेंदुर लाल चढायो)",
-                "शेंदुर लाल चढायो चांगो हर कुंवरो ।\n" +
-                "जय जय जी गणराज विद्यासुखदाता ॥\n" +
-                "धन्य तुम्हारो दर्शन प्रभुजी शुभदाता ।\n" +
-                "जय देव जय मंगलमूर्ती ॥ धृ. ॥\n\n" +
-                "गौरीपुत्र विनायक मंगल फलदायी ।\n" +
-                "ऋद्धि सिद्धि के स्वामी त्रिभुवन सुखदायी ॥ १ ॥"
-        ));
-
-        // 9. घालिन लोटांगण
+        // 9. घालीन लोटांगण (दत्ताच्या आरतीनंतर ४)
         aartiList.add(new AartiItem(
                 "lotangan",
                 "🙏",
                 "घालीन लोटांगण",
-                "घालीन लोटांगण वंदीन चरण ।\n" +
-                "डोळ्यांनी पाहीन रूप तुझें ।\n" +
-                "प्रेमें आलिंगिन आनंदें पूजिन ।\n" +
-                "भावें ओवाळिन म्हणे नामा ॥ १ ॥\n\n" +
+                "घालीन लोटांगण, वंदीन चरण ।\n" +
+                "डोळ्यांनी पाहीन रुप तुझें ।\n" +
+                "प्रेमें आलिंगन, आनंदे पूजिन ।\n" +
+                "भावें ओवाळीन म्हणे नामा ॥ १ ॥\n\n" +
                 "त्वमेव माता च पिता त्वमेव ।\n" +
-                "त्वमेव बन्धुश्च सखा त्वमेव ।\n" +
+                "त्वमेव बंधुश्च सखा त्वमेव ।\n" +
                 "त्वमेव विद्या द्रविणं त्वमेव ।\n" +
                 "त्वमेव सर्वं मम देवदेव ॥ २ ॥\n\n" +
-                "कायेन वाचा मनसेंद्रियैर्वा ।\n" +
-                "बुद्ध्यात्मना वा प्रकृतिस्वभावात् ।\n" +
-                "करोमि यद्यत् सकलं परस्मै ।\n" +
-                "नारायणायेति समर्पयामि ॥ ३ ॥\n\n" +
-                "अच्युतं केशवं रामनारायणं ।\n" +
-                "कृष्णदामोदरं वासुदेवं हरिम् ।\n" +
-                "श्रीधरं माधवं गोपिकावल्लभं ।\n" +
-                "जानकीनायकं रामचंद्रं भजे ॥ ४ ॥\n\n" +
-                "हरे राम हरे राम राम राम हरे हरे ।\n" +
-                "हरे कृष्ण हरे कृष्ण कृष्ण कृष्ण हरे हरे ॥ ५ ॥"
+                "कायेन वाचा मनसेंद्रीयेव्रा, बुद्ध्यात्मना वा प्रकृतिस्वभावात ।\n" +
+                "करोमि यध्यत सकलं परस्मे, नारायणायेति समर्पयामि ॥ ३ ॥\n\n" +
+                "अच्युतं केशवं रामनारायणं कृष्णदामोदरं वासुदेवं हरिम ।\n" +
+                "श्रीधरं माधवं गोपिकावल्लभं, जानकीनायकं रामचंद्र भजे ॥ ४ ॥\n\n" +
+                "हरे राम हर राम, राम राम हरे हरे ।\n" +
+                "हरे कृष्ण हरे कृष्ण, कृष्ण कृष्ण हरे हरे ।"
         ));
 
         // 10. मंत्रपुष्पांजली
         aartiList.add(new AartiItem(
                 "mantra",
                 "🌿",
-                "मंत्रपुष्पांजली (Mantrapushpanjali)",
+                "मंत्रपुष्पांजली",
                 "ॐ यज्ञेन यज्ञमयजन्त देवास्तानि धर्माणि प्रथमान्यासन् ।\n" +
                 "ते ह नाकं महिमानः सचन्त यत्र पूर्वे साध्याः सन्ति देवाः ॥\n\n" +
                 "ॐ राजाधिराजाय प्रसह्यसाहिने ।\n" +
