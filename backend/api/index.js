@@ -110,6 +110,20 @@ app.post('/api/users', async (req, res) => {
     if (!name || !phone || !pin) {
       return res.status(400).json({ success: false, message: 'नाव, मोबाईल नंबर आणि पासवर्ड आवश्यक आहेत' });
     }
+
+    let finalPhotoUrl = photoUrl || '';
+    if (photoUrl && photoUrl.startsWith('data:image')) {
+      try {
+        const uploadRes = await cloudinary.uploader.upload(photoUrl, {
+          folder: 'ganesh_mandal_profiles',
+          transformation: [{ width: 500, height: 500, crop: 'fill', gravity: 'face' }]
+        });
+        finalPhotoUrl = uploadRes.secure_url;
+      } catch (uploadErr) {
+        console.error('Cloudinary upload error:', uploadErr);
+      }
+    }
+
     const user = await User.findOneAndUpdate(
       { phone },
       {
@@ -118,7 +132,7 @@ app.post('/api/users', async (req, res) => {
         pin,
         role: role || 'USER',
         roleInMandal: roleInMandal || 'सामान्य सदस्य',
-        photoUrl: photoUrl || ''
+        photoUrl: finalPhotoUrl
       },
       { upsert: true, new: true, setDefaultsOnInsert: true }
     );
@@ -152,9 +166,23 @@ app.put('/api/users/phone/:phone', async (req, res) => {
   try {
     const { phone } = req.params;
     const { name, pin, role, roleInMandal, photoUrl } = req.body;
+
+    let finalPhotoUrl = photoUrl;
+    if (photoUrl && photoUrl.startsWith('data:image')) {
+      try {
+        const uploadRes = await cloudinary.uploader.upload(photoUrl, {
+          folder: 'ganesh_mandal_profiles',
+          transformation: [{ width: 500, height: 500, crop: 'fill', gravity: 'face' }]
+        });
+        finalPhotoUrl = uploadRes.secure_url;
+      } catch (uploadErr) {
+        console.error('Cloudinary upload error:', uploadErr);
+      }
+    }
+
     const updatedUser = await User.findOneAndUpdate(
       { phone },
-      { name, pin, role, roleInMandal, photoUrl },
+      { name, pin, role, roleInMandal, photoUrl: finalPhotoUrl },
       { new: true }
     );
     if (!updatedUser) {

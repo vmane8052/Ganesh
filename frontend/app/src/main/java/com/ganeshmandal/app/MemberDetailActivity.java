@@ -112,19 +112,28 @@ public class MemberDetailActivity extends AppCompatActivity {
         tvPin.setText(pin);
 
         if (photoUrl != null && !photoUrl.isEmpty()) {
-            try {
-                byte[] decodedBytes = Base64.decode(photoUrl, Base64.DEFAULT);
-                Bitmap bitmap = BitmapFactory.decodeByteArray(decodedBytes, 0, decodedBytes.length);
-                if (bitmap != null) {
-                    ivProfilePhoto.setImageBitmap(bitmap);
-                } else {
-                    ivProfilePhoto.setImageResource(android.R.drawable.ic_menu_camera);
+            if (photoUrl.startsWith("http://") || photoUrl.startsWith("https://")) {
+                com.bumptech.glide.Glide.with(this)
+                        .load(photoUrl)
+                        .circleCrop()
+                        .placeholder(R.drawable.app_logo)
+                        .error(R.drawable.app_logo)
+                        .into(ivProfilePhoto);
+            } else {
+                try {
+                    byte[] decodedBytes = Base64.decode(photoUrl, Base64.DEFAULT);
+                    Bitmap bitmap = BitmapFactory.decodeByteArray(decodedBytes, 0, decodedBytes.length);
+                    if (bitmap != null) {
+                        ivProfilePhoto.setImageBitmap(bitmap);
+                    } else {
+                        ivProfilePhoto.setImageResource(R.drawable.app_logo);
+                    }
+                } catch (Exception e) {
+                    ivProfilePhoto.setImageResource(R.drawable.app_logo);
                 }
-            } catch (Exception e) {
-                ivProfilePhoto.setImageResource(android.R.drawable.ic_menu_camera);
             }
         } else {
-            ivProfilePhoto.setImageResource(android.R.drawable.ic_menu_camera);
+            ivProfilePhoto.setImageResource(R.drawable.app_logo);
         }
     }
 

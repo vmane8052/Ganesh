@@ -78,21 +78,30 @@ public class MemberAdapter extends RecyclerView.Adapter<MemberAdapter.MemberView
             holder.tvMemberRoleInMandal.setBackgroundColor(0xFFE8F5E9);
         }
 
-        // Profile Photo decoding
+        // Profile Photo loading (Cloudinary URL or Base64)
         if (user.getPhotoUrl() != null && !user.getPhotoUrl().isEmpty()) {
-            try {
-                byte[] decodedBytes = Base64.decode(user.getPhotoUrl(), Base64.DEFAULT);
-                Bitmap bitmap = BitmapFactory.decodeByteArray(decodedBytes, 0, decodedBytes.length);
-                if (bitmap != null) {
-                    holder.ivMemberPhoto.setImageBitmap(bitmap);
-                } else {
-                    holder.ivMemberPhoto.setImageResource(android.R.drawable.ic_menu_camera);
+            if (user.getPhotoUrl().startsWith("http://") || user.getPhotoUrl().startsWith("https://")) {
+                com.bumptech.glide.Glide.with(context)
+                        .load(user.getPhotoUrl())
+                        .circleCrop()
+                        .placeholder(R.drawable.app_logo)
+                        .error(R.drawable.app_logo)
+                        .into(holder.ivMemberPhoto);
+            } else {
+                try {
+                    byte[] decodedBytes = Base64.decode(user.getPhotoUrl(), Base64.DEFAULT);
+                    Bitmap bitmap = BitmapFactory.decodeByteArray(decodedBytes, 0, decodedBytes.length);
+                    if (bitmap != null) {
+                        holder.ivMemberPhoto.setImageBitmap(bitmap);
+                    } else {
+                        holder.ivMemberPhoto.setImageResource(R.drawable.app_logo);
+                    }
+                } catch (Exception e) {
+                    holder.ivMemberPhoto.setImageResource(R.drawable.app_logo);
                 }
-            } catch (Exception e) {
-                holder.ivMemberPhoto.setImageResource(android.R.drawable.ic_menu_camera);
             }
         } else {
-            holder.ivMemberPhoto.setImageResource(android.R.drawable.ic_menu_camera);
+            holder.ivMemberPhoto.setImageResource(R.drawable.app_logo);
         }
 
         // Call member dialer
