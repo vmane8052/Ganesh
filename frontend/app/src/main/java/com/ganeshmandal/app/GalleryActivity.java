@@ -29,6 +29,7 @@ import com.ganeshmandal.app.adapters.GalleryAdapter;
 import com.ganeshmandal.app.api.ApiClient;
 import com.ganeshmandal.app.models.GalleryListResponse;
 import com.ganeshmandal.app.models.GalleryPhoto;
+import com.ganeshmandal.app.models.SingleGalleryResponse;
 import com.google.android.material.button.MaterialButton;
 import com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton;
 import com.google.android.material.progressindicator.LinearProgressIndicator;
@@ -36,9 +37,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
@@ -214,7 +213,7 @@ public class GalleryActivity extends AppCompatActivity {
             Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
             intent.setType("image/*");
             intent.putExtra(Intent.EXTRA_ALLOW_MULTIPLE, true);
-            intent.putExtra(Intent.EXTRA_LOCAL_ONLY, false); // Crucial: Allows Google Photos cloud backup & albums!
+            intent.putExtra(Intent.EXTRA_LOCAL_ONLY, false); // Allows Google Photos cloud media
             intent.addCategory(Intent.CATEGORY_OPENABLE);
 
             Intent chooser = Intent.createChooser(intent, "Google Photos किंवा फोन गॅलरी निवडा");
@@ -270,12 +269,67 @@ public class GalleryActivity extends AppCompatActivity {
         }
     }
 
+    private String decodeAndCompressUri(Uri uri) {
+        try {
+            // Step 1: Query image dimensions without loading entire bitmap into memory
+            BitmapFactory.Options options = new BitmapFactory.Options();
+            options.inJustDecodeBounds = true;
+            InputStream is = getContentResolver().openInputStream(uri);
+            BitmapFactory.decodeStream(is, null, options);
+            if (is != null) is.close();
+
+            int maxDim = 850;
+            int inSampleSize = 1;
+            if (options.outHeight > maxDim || options.outWidth > maxDim) {
+                int halfHeight = options.outHeight / 2;
+                int halfWidth = options.outWidth / 2;
+                while ((halfHeight / inSampleSize) >= maxDim && (halfWidth / inSampleSize) >= maxDim) {
+                    inSampleSize *= 2;
+                }
+            }
+
+            // Step 2: Decode bitmap with calculated sample size
+            options.inJustDecodeBounds = false;
+            options.inSampleSize = inSampleSize;
+            is = getContentResolver().openInputStream(uri);
+            Bitmap bitmap = BitmapFactory.decodeStream(is, null, options);
+            if (is != null) is.close();
+
+            if (bitmap != null) {
+                int width = bitmap.getWidth();
+                int height = bitmap.getHeight();
+                float ratio = Math.min((float) maxDim / width, (float) maxDim / height);
+                Bitmap scaled = Bitmap.createScaledBitmap(bitmap, Math.round(width * ratio), Math.round(height * ratio), true);
+                if (scaled != bitmap) {
+                    bitmap.recycle();
+                }
+
+                ByteArrayOutputStream baos = new ByteArrayOutputStream();
+                scaled.compress(Bitmap.CompressFormat.JPEG, 75, baos);
+                byte[] bytes = baos.toByteArray();
+                scaled.recycle();
+
+                return "data:image/jpeg;base64," + Base64.encodeToString(bytes, Base64.NO_WRAP);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+    /**
+     * Handles large batch uploads (50, 100, 200+ photos) reliably:
+     * - Decodes and uploads photo-by-photo sequentially.
+     * - Frees memory immediately after each photo.
+     * - Avoids Vercel 4.5MB payload limit and 10s execution timeout.
+     * - Live accurate percentage and photo counter updates on UI.
+     */
     private void handleSelectedMultipleImages(List<Uri> uriList) {
         if (uriList == null || uriList.isEmpty()) {
             return;
         }
 
-        int totalCount = uriList.size();
+        final int totalCount = uriList.size();
 
         // Create and show Live Progress Dialog with Percentage
         Dialog progressDialog = new Dialog(this);
@@ -295,95 +349,79 @@ public class GalleryActivity extends AppCompatActivity {
             tvYearTag.setText("वर्ष: " + selectedUploadYear);
         }
 
-        progressBar.setProgress(5);
-        tvPercent.setText("5%");
-        tvStatus.setText("फोटो कॉम्प्रेस करत आहे... (0 / " + totalCount + ")");
+        progressBar.setProgress(0);
+        tvPercent.setText("0%");
+        tvStatus.setText("फोटो अपलोड सुरू होत आहे... (० / " + totalCount + ")");
         progressDialog.show();
 
         new Thread(() -> {
-            List<GalleryPhoto> batchPhotos = new ArrayList<>();
+            int successCount = 0;
+            int failureCount = 0;
 
-            for (int i = 0; i < uriList.size(); i++) {
+            for (int i = 0; i < totalCount; i++) {
                 Uri uri = uriList.get(i);
                 final int currentPhotoNum = i + 1;
-                try {
-                    InputStream is = getContentResolver().openInputStream(uri);
-                    Bitmap originalBitmap = BitmapFactory.decodeStream(is);
-                    if (is != null) is.close();
 
-                    if (originalBitmap != null) {
-                        int maxDimension = 900;
-                        int width = originalBitmap.getWidth();
-                        int height = originalBitmap.getHeight();
-                        float ratio = Math.min((float) maxDimension / width, (float) maxDimension / height);
-                        Bitmap scaled = Bitmap.createScaledBitmap(originalBitmap, Math.round(width * ratio), Math.round(height * ratio), true);
+                // Update status on UI: preparing & uploading current photo
+                runOnUiThread(() -> {
+                    tvStatus.setText("फोटो अपलोड होत आहे: (" + currentPhotoNum + " / " + totalCount + ")");
+                });
 
-                        ByteArrayOutputStream baos = new ByteArrayOutputStream();
-                        scaled.compress(Bitmap.CompressFormat.JPEG, 80, baos);
-                        byte[] bytes = baos.toByteArray();
-                        String base64 = "data:image/jpeg;base64," + Base64.encodeToString(bytes, Base64.NO_WRAP);
-
-                        batchPhotos.add(new GalleryPhoto("", base64, loggedInUserName, selectedUploadYear));
+                String base64 = decodeAndCompressUri(uri);
+                if (base64 != null && !base64.isEmpty()) {
+                    GalleryPhoto photo = new GalleryPhoto("", base64, loggedInUserName, selectedUploadYear);
+                    try {
+                        // Synchronous execution on background thread (handles 1 photo at a time fast and reliably)
+                        Response<SingleGalleryResponse> response = ApiClient.getService().addGalleryPhoto(photo).execute();
+                        if (response.isSuccessful() && response.body() != null && response.body().isSuccess()) {
+                            successCount++;
+                        } else {
+                            failureCount++;
+                        }
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                        failureCount++;
                     }
-                } catch (Exception e) {
-                    e.printStackTrace();
+                } else {
+                    failureCount++;
                 }
 
-                // Update Progress (Phase 1: 10% to 50%)
-                int prepPercent = 10 + (int) (((float) currentPhotoNum / totalCount) * 40);
+                // Update live percentage after each photo finishes
+                final int percent = Math.min(100, (int) (((float) currentPhotoNum / totalCount) * 100));
+                final int currentSuccess = successCount;
                 runOnUiThread(() -> {
-                    progressBar.setProgress(prepPercent);
-                    tvPercent.setText(prepPercent + "%");
-                    tvStatus.setText("फोटो तयार करत आहे... (" + currentPhotoNum + " / " + totalCount + ")");
+                    progressBar.setProgress(percent);
+                    tvPercent.setText(percent + "%");
+                    tvStatus.setText("प्रगती: " + currentSuccess + " / " + totalCount + " फोटो पूर्ण (" + percent + "%)");
                 });
             }
 
+            final int finalSuccess = successCount;
+            final int finalFailure = failureCount;
+
             runOnUiThread(() -> {
-                if (batchPhotos.isEmpty()) {
-                    progressDialog.dismiss();
-                    Toast.makeText(GalleryActivity.this, "कोणतेही फोटो लोड करता आले नाहीत", Toast.LENGTH_SHORT).show();
-                    return;
-                }
+                if (finalSuccess > 0) {
+                    progressBar.setProgress(100);
+                    tvPercent.setText("100%");
+                    tvStatus.setText("सर्व " + finalSuccess + " फोटो यशस्वीरीत्या अपलोड झाले! 🎉");
 
-                // Phase 2: Cloud Upload (50% -> 90%)
-                progressBar.setProgress(65);
-                tvPercent.setText("65%");
-                tvStatus.setText("Cloudinary वर अपलोड सुरू आहे... (" + batchPhotos.size() + " फोटो)");
-
-                Map<String, Object> payload = new HashMap<>();
-                payload.put("year", selectedUploadYear);
-                payload.put("photos", batchPhotos);
-
-                ApiClient.getService().addGalleryBatch(payload).enqueue(new Callback<GalleryListResponse>() {
-                    @Override
-                    public void onResponse(Call<GalleryListResponse> call, Response<GalleryListResponse> response) {
-                        if (response.isSuccessful() && response.body() != null && response.body().isSuccess()) {
-                            // Phase 3: 100% Success!
-                            progressBar.setProgress(100);
-                            tvPercent.setText("100%");
-                            tvStatus.setText("सर्व " + batchPhotos.size() + " फोटो यशस्वीरीत्या अपलोड झाले! 🎉");
-
-                            new Handler(Looper.getMainLooper()).postDelayed(() -> {
-                                progressDialog.dismiss();
-                                Toast.makeText(GalleryActivity.this, batchPhotos.size() + " फोटो (" + selectedUploadYear + ") यशस्वीरीत्या जोडले गेले!", Toast.LENGTH_LONG).show();
-
-                                // Automatically switch filter to the uploaded year
-                                selectedFilterYear = selectedUploadYear;
-                                setupYearFilterChips();
-                                fetchGalleryPhotos();
-                            }, 800);
-                        } else {
-                            progressDialog.dismiss();
-                            Toast.makeText(GalleryActivity.this, "फोटो अपलोड करताना त्रुटी आली", Toast.LENGTH_SHORT).show();
-                        }
-                    }
-
-                    @Override
-                    public void onFailure(Call<GalleryListResponse> call, Throwable t) {
+                    new Handler(Looper.getMainLooper()).postDelayed(() -> {
                         progressDialog.dismiss();
-                        Toast.makeText(GalleryActivity.this, "नेटवर्क एरर: " + t.getMessage(), Toast.LENGTH_SHORT).show();
-                    }
-                });
+                        String msg = finalSuccess + " फोटो (" + selectedUploadYear + ") यशस्वीरीत्या जोडले गेले!";
+                        if (finalFailure > 0) {
+                            msg += " (" + finalFailure + " फोटो लोड झाले नाहीत)";
+                        }
+                        Toast.makeText(GalleryActivity.this, msg, Toast.LENGTH_LONG).show();
+
+                        // Automatically switch filter to the uploaded year
+                        selectedFilterYear = selectedUploadYear;
+                        setupYearFilterChips();
+                        fetchGalleryPhotos();
+                    }, 800);
+                } else {
+                    progressDialog.dismiss();
+                    Toast.makeText(GalleryActivity.this, "फोटो अपलोड करताना त्रुटी आली. कृपया इंटरनेट तपासा.", Toast.LENGTH_LONG).show();
+                }
             });
         }).start();
     }
