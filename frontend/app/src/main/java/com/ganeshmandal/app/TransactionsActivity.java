@@ -217,6 +217,11 @@ public class TransactionsActivity extends AppCompatActivity {
         }
 
         LinearLayout layoutReceiptCard = dialog.findViewById(R.id.layoutReceiptCard);
+        TextView tvReceiptNo = dialog.findViewById(R.id.tvReceiptNo);
+        TextView tvReceiptDate = dialog.findViewById(R.id.tvReceiptDate);
+        TextView tvReceiptName = dialog.findViewById(R.id.tvReceiptName);
+        TextView tvReceiptPhone = dialog.findViewById(R.id.tvReceiptPhone);
+        TextView tvReceiptDetails = dialog.findViewById(R.id.tvReceiptDetails);
         TextView tvReceiptAmount = dialog.findViewById(R.id.tvReceiptAmount);
         MaterialButton btnDownload = dialog.findViewById(R.id.btnDownloadReceipt);
         MaterialButton btnShare = dialog.findViewById(R.id.btnShareReceipt);
