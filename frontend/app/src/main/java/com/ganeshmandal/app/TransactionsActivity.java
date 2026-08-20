@@ -217,47 +217,27 @@ public class TransactionsActivity extends AppCompatActivity {
         }
 
         LinearLayout layoutReceiptCard = dialog.findViewById(R.id.layoutReceiptCard);
-        TextView tvReceiptTag = dialog.findViewById(R.id.tvReceiptTag);
-        TextView tvReceiptNo = dialog.findViewById(R.id.tvReceiptNo);
-        TextView tvReceiptDate = dialog.findViewById(R.id.tvReceiptDate);
-        TextView tvReceiptName = dialog.findViewById(R.id.tvReceiptName);
-        TextView tvReceiptAddress = dialog.findViewById(R.id.tvReceiptAddress);
-        TextView tvReceiptPhone = dialog.findViewById(R.id.tvReceiptPhone);
-        TextView tvReceiptDetails = dialog.findViewById(R.id.tvReceiptDetails);
-        TextView tvReceiptRowAmount = dialog.findViewById(R.id.tvReceiptRowAmount);
-        TextView tvReceiptTotalAmount = dialog.findViewById(R.id.tvReceiptTotalAmount);
-        TextView tvReceiptAmountInWords = dialog.findViewById(R.id.tvReceiptAmountInWords);
+        TextView tvReceiptAmount = dialog.findViewById(R.id.tvReceiptAmount);
         MaterialButton btnDownload = dialog.findViewById(R.id.btnDownloadReceipt);
         MaterialButton btnShare = dialog.findViewById(R.id.btnShareReceipt);
 
         String rawReceiptNo = tx.getReceiptNo() != null && !tx.getReceiptNo().isEmpty()
                 ? tx.getReceiptNo() : ("REC-2026-" + Math.abs(tx.hashCode() % 9000 + 1000));
-        String cleanReceiptNo = rawReceiptNo.replace("REC-2026-", "");
-        if (cleanReceiptNo.length() < 4) {
-            cleanReceiptNo = String.format(Locale.getDefault(), "%04d", Integer.parseInt(cleanReceiptNo));
-        }
 
         String name = tx.getMemberName() != null && !tx.getMemberName().trim().isEmpty() ? tx.getMemberName() : "सदस्य / देणगीदार";
         String phone = tx.getMemberPhone() != null && !tx.getMemberPhone().trim().isEmpty() ? tx.getMemberPhone() : "-";
         String details = tx.getDetails() != null ? tx.getDetails() : (tx.isJama() ? "गणपती वर्गणी" : "मंडळ खर्च");
         String date = tx.getDate() != null ? tx.getDate() : "-";
 
-        if (tvReceiptTag != null) {
-            tvReceiptTag.setText(details.contains("देणगी") ? "गणपती देणगी पावती" : "गणपती वर्गणी पावती");
-        }
-        if (tvReceiptNo != null) tvReceiptNo.setText(cleanReceiptNo);
-        if (tvReceiptDate != null) tvReceiptDate.setText(date);
+        if (tvReceiptNo != null) tvReceiptNo.setText("पावती क्र: " + rawReceiptNo);
+        if (tvReceiptDate != null) tvReceiptDate.setText("तारीख: " + date);
         if (tvReceiptName != null) tvReceiptName.setText(name);
-        if (tvReceiptAddress != null) tvReceiptAddress.setText("माने/ढेरे वस्ती, बाळेवाडी");
         if (tvReceiptPhone != null) tvReceiptPhone.setText(phone);
         if (tvReceiptDetails != null) tvReceiptDetails.setText(details);
-        if (tvReceiptRowAmount != null) tvReceiptRowAmount.setText(String.format(Locale.getDefault(), "%.2f", tx.getAmount()));
-        if (tvReceiptTotalAmount != null) tvReceiptTotalAmount.setText(String.format(Locale.getDefault(), "₹ %.2f", tx.getAmount()));
-        if (tvReceiptAmountInWords != null) tvReceiptAmountInWords.setText(convertAmountToMarathiWords(tx.getAmount()));
+        if (tvReceiptAmount != null) tvReceiptAmount.setText(String.format(Locale.getDefault(), "₹ %.0f/-", tx.getAmount()));
 
-        final String finalReceiptNo = cleanReceiptNo;
-        btnDownload.setOnClickListener(v -> downloadReceiptBitmap(layoutReceiptCard, finalReceiptNo));
-        btnShare.setOnClickListener(v -> shareReceiptBitmap(layoutReceiptCard, tx, finalReceiptNo));
+        btnDownload.setOnClickListener(v -> downloadReceiptBitmap(layoutReceiptCard, rawReceiptNo));
+        btnShare.setOnClickListener(v -> shareReceiptBitmap(layoutReceiptCard, tx, rawReceiptNo));
 
         dialog.show();
     }
