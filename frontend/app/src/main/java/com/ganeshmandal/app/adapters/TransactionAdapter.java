@@ -7,6 +7,7 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
 import androidx.annotation.NonNull;
+import androidx.appcompat.widget.PopupMenu;
 import androidx.recyclerview.widget.RecyclerView;
 import com.ganeshmandal.app.R;
 import com.ganeshmandal.app.models.Transaction;
@@ -20,6 +21,7 @@ public class TransactionAdapter extends RecyclerView.Adapter<TransactionAdapter.
 
     public interface OnTransactionClickListener {
         void onDeleteClick(Transaction transaction, int position);
+        void onReceiptClick(Transaction transaction);
     }
 
     public void setAdmin(boolean isAdmin) {
@@ -61,7 +63,7 @@ public class TransactionAdapter extends RecyclerView.Adapter<TransactionAdapter.
             holder.tvTitle.setText(name);
             holder.tvDetails.setText(tx.getDetails() != null ? tx.getDetails() : "जमा");
 
-            holder.tvAmount.setText("+ ₹ " + tx.getAmount());
+            holder.tvAmount.setText("+ ₹ " + (long)tx.getAmount());
             holder.tvAmount.setTextColor(Color.parseColor("#2E7D32")); // Green
         } else {
             // KHARCH: Title in BOLD = Exact reason for expense (कशासाठी खर्च केला उदा. मंडप, लाईट, प्रसाद)
@@ -69,22 +71,31 @@ public class TransactionAdapter extends RecyclerView.Adapter<TransactionAdapter.
             holder.tvTitle.setText(expenseReason);
             holder.tvDetails.setText("मंडळ खर्च • " + tx.getDate());
 
-            holder.tvAmount.setText("- ₹ " + tx.getAmount());
+            holder.tvAmount.setText("- ₹ " + (long)tx.getAmount());
             holder.tvAmount.setTextColor(Color.parseColor("#C62828")); // Red
         }
 
-        // Show delete button ONLY IF ADMIN
-        if (isAdmin) {
-            holder.btnDelete.setVisibility(View.VISIBLE);
-            holder.btnDelete.setOnClickListener(v -> {
+        // Options Button (Three Dots ⋮) -> Click to show PopupMenu (Receipt / Delete)
+        holder.btnOptions.setOnClickListener(v -> {
+            PopupMenu popup = new PopupMenu(v.getContext(), v);
+            popup.getMenu().add(0, 1, 0, "📄 पावती जनरेट करा / पहा");
+            if (isAdmin) {
+                popup.getMenu().add(0, 2, 1, "🗑️ हा व्यवहार हटवा");
+            }
+
+            popup.setOnMenuItemClickListener(item -> {
                 int adapterPos = holder.getAdapterPosition();
                 if (listener != null && adapterPos != RecyclerView.NO_POSITION) {
-                    listener.onDeleteClick(tx, adapterPos);
+                    if (item.getItemId() == 1) {
+                        listener.onReceiptClick(tx);
+                    } else if (item.getItemId() == 2) {
+                        listener.onDeleteClick(tx, adapterPos);
+                    }
                 }
+                return true;
             });
-        } else {
-            holder.btnDelete.setVisibility(View.GONE);
-        }
+            popup.show();
+        });
     }
 
     @Override
@@ -94,7 +105,7 @@ public class TransactionAdapter extends RecyclerView.Adapter<TransactionAdapter.
 
     static class ViewHolder extends RecyclerView.ViewHolder {
         TextView tvDate, tvTitle, tvDetails, tvAmount;
-        ImageView btnDelete;
+        ImageView btnOptions;
 
         ViewHolder(@NonNull View itemView) {
             super(itemView);
@@ -102,7 +113,7 @@ public class TransactionAdapter extends RecyclerView.Adapter<TransactionAdapter.
             tvTitle = itemView.findViewById(R.id.tvTitle);
             tvDetails = itemView.findViewById(R.id.tvDetails);
             tvAmount = itemView.findViewById(R.id.tvAmount);
-            btnDelete = itemView.findViewById(R.id.btnDelete);
+            btnOptions = itemView.findViewById(R.id.btnOptions);
         }
     }
 }

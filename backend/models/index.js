@@ -16,7 +16,9 @@ const transactionSchema = new mongoose.Schema({
   date: { type: String, required: true },
   category: { type: String, default: 'इतर' },
   memberName: { type: String, default: 'सदस्य' },
-  addedBy: { type: String, default: 'व्यवस्थापक' }
+  memberPhone: { type: String, default: '' },
+  addedBy: { type: String, default: 'व्यवस्थापक' },
+  receiptNo: { type: String, default: '' }
 }, { timestamps: true });
 
 const memberSchema = new mongoose.Schema({

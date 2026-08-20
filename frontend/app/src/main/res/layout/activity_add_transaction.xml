@@ -44,7 +44,7 @@
             android:layout_height="wrap_content"
             android:orientation="vertical">
 
-            <!-- Member / Donor Name Section (Used for JAMA) -->
+            <!-- Member / Donor Name & Phone Section (Used for JAMA) -->
             <LinearLayout
                 android:id="@+id/layoutMemberName"
                 android:layout_width="match_parent"
@@ -56,6 +56,39 @@
                     android:layout_height="wrap_content"
                     android:layout_marginBottom="6dp"
                     android:text="सदस्याचे किंवा देणगीदाराचे नांव *"
+                    android:textColor="@color/text_primary"
+                    android:textSize="15sp"
+                    android:textStyle="bold" />
+
+                <!-- Member Name Dropdown/AutoComplete -->
+                <com.google.android.material.textfield.TextInputLayout
+                    style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.ExposedDropdownMenu"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="14dp"
+                    app:boxCornerRadiusBottomEnd="8dp"
+                    app:boxCornerRadiusBottomStart="8dp"
+                    app:boxCornerRadiusTopEnd="8dp"
+                    app:boxCornerRadiusTopStart="8dp"
+                    app:boxStrokeColor="@color/primary_blue">
+
+                    <AutoCompleteTextView
+                        android:id="@+id/etMemberName"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:hint="सदस्य निवडा किंवा नांव टाका (उदा. राम पाटील)"
+                        android:inputType="textPersonName"
+                        android:paddingVertical="14dp"
+                        android:textColor="@color/text_primary"
+                        android:textSize="16sp" />
+                </com.google.android.material.textfield.TextInputLayout>
+
+                <!-- Member Phone Field -->
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="6dp"
+                    android:text="मोबाईल नंबर"
                     android:textColor="@color/text_primary"
                     android:textSize="15sp"
                     android:textStyle="bold" />
@@ -72,10 +105,11 @@
                     app:boxStrokeColor="@color/primary_blue">
 
                     <com.google.android.material.textfield.TextInputEditText
-                        android:id="@+id/etMemberName"
+                        android:id="@+id/etMemberPhone"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:hint="नांव टाका (उदा. राम पाटील)"
+                        android:hint="मोबाईल नंबर (उदा. 9876543210)"
+                        android:inputType="phone"
                         android:textColor="@color/text_primary" />
                 </com.google.android.material.textfield.TextInputLayout>
             </LinearLayout>

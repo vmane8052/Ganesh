@@ -3,6 +3,7 @@ package com.ganeshmandal.app;
 import android.app.DatePickerDialog;
 import android.os.Bundle;
 import android.view.View;
+import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.AutoCompleteTextView;
 import android.widget.ImageView;
@@ -13,11 +14,17 @@ import androidx.appcompat.app.AppCompatActivity;
 import com.ganeshmandal.app.api.ApiClient;
 import com.ganeshmandal.app.models.SingleTransactionResponse;
 import com.ganeshmandal.app.models.Transaction;
+import com.ganeshmandal.app.models.User;
+import com.ganeshmandal.app.models.UserListResponse;
 import com.google.android.material.button.MaterialButton;
 import com.google.android.material.textfield.TextInputEditText;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.HashMap;
+import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
@@ -27,11 +34,14 @@ public class AddTransactionActivity extends AppCompatActivity {
     private ImageView btnBack;
     private TextView tvFormTitle, tvDetailsLabel;
     private LinearLayout layoutMemberName;
-    private TextInputEditText etAmount, etDate, etMemberName;
-    private AutoCompleteTextView etDetails;
+    private TextInputEditText etAmount, etDate, etMemberPhone;
+    private AutoCompleteTextView etDetails, etMemberName;
     private MaterialButton btnSave;
     private String transactionType = "JAMA"; // default
     private final Calendar calendar = Calendar.getInstance();
+
+    private final Map<String, String> memberNameToPhoneMap = new HashMap<>();
+    private final List<String> memberNamesList = new ArrayList<>();
 
     private static final String[] JAMA_OPTIONS = new String[]{
             "वर्गणी",
@@ -65,6 +75,7 @@ public class AddTransactionActivity extends AppCompatActivity {
         etDetails = findViewById(R.id.etDetails);
         etDate = findViewById(R.id.etDate);
         etMemberName = findViewById(R.id.etMemberName);
+        etMemberPhone = findViewById(R.id.etMemberPhone);
         btnSave = findViewById(R.id.btnSave);
 
         transactionType = getIntent().getStringExtra("TYPE");
@@ -88,6 +99,9 @@ public class AddTransactionActivity extends AppCompatActivity {
 
             ArrayAdapter<String> adapter = new ArrayAdapter<>(this, android.R.layout.simple_dropdown_item_1line, JAMA_OPTIONS);
             etDetails.setAdapter(adapter);
+
+            // Fetch registered Mandal members for dropdown
+            fetchMembersForDropdown();
         }
 
         // Set today's date by default
@@ -98,6 +112,49 @@ public class AddTransactionActivity extends AppCompatActivity {
 
         btnBack.setOnClickListener(v -> finish());
         btnSave.setOnClickListener(v -> saveTransaction());
+    }
+
+    private void fetchMembersForDropdown() {
+        ApiClient.getService().getUsers().enqueue(new Callback<UserListResponse>() {
+            @Override
+            public void onResponse(Call<UserListResponse> call, Response<UserListResponse> response) {
+                if (response.isSuccessful() && response.body() != null && response.body().isSuccess()) {
+                    List<User> users = response.body().getData();
+                    if (users != null) {
+                        memberNamesList.clear();
+                        memberNameToPhoneMap.clear();
+
+                        for (User u : users) {
+                            if (u.getName() != null && !u.getName().isEmpty()) {
+                                memberNamesList.add(u.getName());
+                                memberNameToPhoneMap.put(u.getName(), u.getPhone() != null ? u.getPhone() : "");
+                            }
+                        }
+
+                        ArrayAdapter<String> memberAdapter = new ArrayAdapter<>(
+                                AddTransactionActivity.this,
+                                android.R.layout.simple_dropdown_item_1line,
+                                memberNamesList
+                        );
+                        etMemberName.setAdapter(memberAdapter);
+
+                        // Auto fill mobile number on selection
+                        etMemberName.setOnItemClickListener((parent, view, position, id) -> {
+                            String selectedName = (String) parent.getItemAtPosition(position);
+                            String phone = memberNameToPhoneMap.get(selectedName);
+                            if (phone != null && etMemberPhone != null) {
+                                etMemberPhone.setText(phone);
+                            }
+                        });
+                    }
+                }
+            }
+
+            @Override
+            public void onFailure(Call<UserListResponse> call, Throwable t) {
+                // Ignore network error for dropdown
+            }
+        });
     }
 
     private void showDatePicker() {
@@ -127,6 +184,7 @@ public class AddTransactionActivity extends AppCompatActivity {
         String date = etDate.getText() != null ? etDate.getText().toString().trim() : "";
         String memberName = etMemberName != null && etMemberName.getText() != null && !etMemberName.getText().toString().trim().isEmpty()
                 ? etMemberName.getText().toString().trim() : ("KHARCH".equals(transactionType) ? "मंडळ खर्च" : "सदस्य");
+        String memberPhone = etMemberPhone != null && etMemberPhone.getText() != null ? etMemberPhone.getText().toString().trim() : "";
 
         if (amountStr.isEmpty() || details.isEmpty() || date.isEmpty()) {
             Toast.makeText(this, "कृपया सर्व आवश्यक माहिती भरा (*)", Toast.LENGTH_SHORT).show();
@@ -149,13 +207,17 @@ public class AddTransactionActivity extends AppCompatActivity {
         btnSave.setEnabled(false);
         btnSave.setText("डेटाबेसमध्ये साठवत आहे...");
 
+        String receiptNo = "REC-" + Calendar.getInstance().get(Calendar.YEAR) + "-" + (1000 + (int)(Math.random() * 9000));
+
         Transaction tx = new Transaction(
                 transactionType,
                 amount,
                 details,
                 date,
                 "JAMA".equals(transactionType) ? details : "मंडळ खर्च",
-                memberName
+                memberName,
+                memberPhone,
+                receiptNo
         );
 
         // Send directly to MongoDB Atlas Cloud API (100% Strict Cloud Saving)
@@ -165,7 +227,7 @@ public class AddTransactionActivity extends AppCompatActivity {
                 btnSave.setEnabled(true);
                 btnSave.setText(getString(R.string.btn_save));
                 if (response.isSuccessful() && response.body() != null && response.body().isSuccess()) {
-                    Toast.makeText(AddTransactionActivity.this, "व्यवहार MongoDB डेटाबेसमध्ये साठवला गेला!", Toast.LENGTH_LONG).show();
+                    Toast.makeText(AddTransactionActivity.this, "व्यवहार साठवला गेला!", Toast.LENGTH_LONG).show();
                     finish();
                 } else {
                     Toast.makeText(AddTransactionActivity.this, "डेटाबेस एरर: व्यवहार साठवता आला नाही", Toast.LENGTH_SHORT).show();

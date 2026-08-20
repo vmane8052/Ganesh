@@ -246,12 +246,13 @@ app.get('/api/transactions', async (req, res) => {
 
 app.post('/api/transactions', async (req, res) => {
   try {
-    const { type, amount, details, date, category, memberName, addedBy } = req.body;
+    const { type, amount, details, date, category, memberName, memberPhone, addedBy, receiptNo } = req.body;
     if (!type || !amount || !details || !date) {
       return res.status(400).json({ success: false, message: 'सर्व आवश्यक माहिती भरा' });
     }
+    const finalReceiptNo = receiptNo || (`REC-${new Date().getFullYear()}-${Math.floor(1000 + Math.random() * 9000)}`);
     const newTx = await Transaction.create({
-      type, amount, details, date, category, memberName, addedBy
+      type, amount, details, date, category, memberName, memberPhone: memberPhone || '', addedBy, receiptNo: finalReceiptNo
     });
     res.status(201).json({ success: true, data: newTx });
   } catch (err) {
