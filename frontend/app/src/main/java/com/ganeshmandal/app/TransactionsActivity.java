@@ -244,7 +244,7 @@ public class TransactionsActivity extends AppCompatActivity {
         if (tvReceiptNo != null) tvReceiptNo.setText(cleanReceiptNo);
         if (tvReceiptDate != null) tvReceiptDate.setText(date);
         if (tvReceiptName != null) tvReceiptName.setText(name);
-        if (tvReceiptAddress != null) tvReceiptAddress.setText("माने/ढेरे वस्ती, बाळेवाडी, पुणे");
+        if (tvReceiptAddress != null) tvReceiptAddress.setText("माने/ढेरे वस्ती, बाळेवाडी");
         if (tvReceiptPhone != null) tvReceiptPhone.setText(phone);
         if (tvReceiptDetails != null) tvReceiptDetails.setText(details);
         if (tvReceiptRowAmount != null) tvReceiptRowAmount.setText(String.format(Locale.getDefault(), "%.2f", tx.getAmount()));
@@ -307,11 +307,15 @@ public class TransactionsActivity extends AppCompatActivity {
     }
 
     private Bitmap captureViewBitmap(View view) {
-        int width = view.getWidth() > 0 ? view.getWidth() : 900;
-        int height = view.getHeight() > 0 ? view.getHeight() : 1200;
+        view.measure(
+                View.MeasureSpec.makeMeasureSpec(0, View.MeasureSpec.UNSPECIFIED),
+                View.MeasureSpec.makeMeasureSpec(0, View.MeasureSpec.UNSPECIFIED)
+        );
+        int width = view.getMeasuredWidth() > 0 ? view.getMeasuredWidth() : 900;
+        int height = view.getMeasuredHeight() > 0 ? view.getMeasuredHeight() : 1200;
+        view.layout(0, 0, width, height);
         Bitmap bitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888);
         Canvas canvas = new Canvas(bitmap);
-        view.layout(0, 0, width, height);
         view.draw(canvas);
         return bitmap;
     }
