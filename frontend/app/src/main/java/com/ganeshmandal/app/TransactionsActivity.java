@@ -213,42 +213,105 @@ public class TransactionsActivity extends AppCompatActivity {
         }
 
         LinearLayout layoutReceiptCard = dialog.findViewById(R.id.layoutReceiptCard);
+        TextView tvReceiptTag = dialog.findViewById(R.id.tvReceiptTag);
         TextView tvReceiptNo = dialog.findViewById(R.id.tvReceiptNo);
         TextView tvReceiptDate = dialog.findViewById(R.id.tvReceiptDate);
         TextView tvReceiptName = dialog.findViewById(R.id.tvReceiptName);
+        TextView tvReceiptAddress = dialog.findViewById(R.id.tvReceiptAddress);
         TextView tvReceiptPhone = dialog.findViewById(R.id.tvReceiptPhone);
         TextView tvReceiptDetails = dialog.findViewById(R.id.tvReceiptDetails);
-        TextView tvReceiptAmount = dialog.findViewById(R.id.tvReceiptAmount);
+        TextView tvReceiptRowAmount = dialog.findViewById(R.id.tvReceiptRowAmount);
+        TextView tvReceiptTotalAmount = dialog.findViewById(R.id.tvReceiptTotalAmount);
+        TextView tvReceiptAmountInWords = dialog.findViewById(R.id.tvReceiptAmountInWords);
         MaterialButton btnDownload = dialog.findViewById(R.id.btnDownloadReceipt);
         MaterialButton btnShare = dialog.findViewById(R.id.btnShareReceipt);
 
-        String receiptNo = tx.getReceiptNo() != null && !tx.getReceiptNo().isEmpty()
+        String rawReceiptNo = tx.getReceiptNo() != null && !tx.getReceiptNo().isEmpty()
                 ? tx.getReceiptNo() : ("REC-2026-" + Math.abs(tx.hashCode() % 9000 + 1000));
+        String cleanReceiptNo = rawReceiptNo.replace("REC-2026-", "");
+        if (cleanReceiptNo.length() < 4) {
+            cleanReceiptNo = String.format(Locale.getDefault(), "%04d", Integer.parseInt(cleanReceiptNo));
+        }
+
         String name = tx.getMemberName() != null && !tx.getMemberName().trim().isEmpty() ? tx.getMemberName() : "सदस्य / देणगीदार";
         String phone = tx.getMemberPhone() != null && !tx.getMemberPhone().trim().isEmpty() ? tx.getMemberPhone() : "-";
-        String details = tx.getDetails() != null ? tx.getDetails() : (tx.isJama() ? "वर्गणी / देणगी" : "खर्च");
+        String details = tx.getDetails() != null ? tx.getDetails() : (tx.isJama() ? "गणपती वर्गणी" : "मंडळ खर्च");
         String date = tx.getDate() != null ? tx.getDate() : "-";
-        String amountStr = String.format(Locale.getDefault(), "₹ %.0f/-", tx.getAmount());
 
-        tvReceiptNo.setText("पावती क्र: " + receiptNo);
-        tvReceiptDate.setText("तारीख: " + date);
-        tvReceiptName.setText(name);
-        tvReceiptPhone.setText(phone);
-        tvReceiptDetails.setText(details);
-        tvReceiptAmount.setText(amountStr);
+        if (tvReceiptTag != null) {
+            tvReceiptTag.setText(details.contains("देणगी") ? "गणपती देणगी पावती" : "गणपती वर्गणी पावती");
+        }
+        if (tvReceiptNo != null) tvReceiptNo.setText(cleanReceiptNo);
+        if (tvReceiptDate != null) tvReceiptDate.setText(date);
+        if (tvReceiptName != null) tvReceiptName.setText(name);
+        if (tvReceiptAddress != null) tvReceiptAddress.setText("माने/ढेरे वस्ती, बाळेवाडी, पुणे");
+        if (tvReceiptPhone != null) tvReceiptPhone.setText(phone);
+        if (tvReceiptDetails != null) tvReceiptDetails.setText(details);
+        if (tvReceiptRowAmount != null) tvReceiptRowAmount.setText(String.format(Locale.getDefault(), "%.2f", tx.getAmount()));
+        if (tvReceiptTotalAmount != null) tvReceiptTotalAmount.setText(String.format(Locale.getDefault(), "₹ %.2f", tx.getAmount()));
+        if (tvReceiptAmountInWords != null) tvReceiptAmountInWords.setText(convertAmountToMarathiWords(tx.getAmount()));
 
-        btnDownload.setOnClickListener(v -> downloadReceiptBitmap(layoutReceiptCard, receiptNo));
-        btnShare.setOnClickListener(v -> shareReceiptBitmap(layoutReceiptCard, tx));
+        final String finalReceiptNo = cleanReceiptNo;
+        btnDownload.setOnClickListener(v -> downloadReceiptBitmap(layoutReceiptCard, finalReceiptNo));
+        btnShare.setOnClickListener(v -> shareReceiptBitmap(layoutReceiptCard, tx, finalReceiptNo));
 
         dialog.show();
     }
 
+    private String convertAmountToMarathiWords(double amount) {
+        long n = (long) amount;
+        if (n == 0) return "शून्य रुपये फक्त";
+
+        StringBuilder words = new StringBuilder();
+
+        if (n >= 100000) {
+            long lakh = n / 100000;
+            words.append(getMarathiNumberString((int) lakh)).append(" लाख ");
+            n %= 100000;
+        }
+        if (n >= 1000) {
+            long thousand = n / 1000;
+            words.append(getMarathiNumberString((int) thousand)).append(" हजार ");
+            n %= 1000;
+        }
+        if (n >= 100) {
+            long hundred = n / 100;
+            words.append(getMarathiNumberString((int) hundred)).append("शे ");
+            n %= 100;
+        }
+        if (n > 0) {
+            words.append(getMarathiNumberString((int) n)).append(" ");
+        }
+
+        words.append("रुपये फक्त");
+        return words.toString().replaceAll("\\s+", " ").trim();
+    }
+
+    private String getMarathiNumberString(int number) {
+        String[] units = {
+                "", "एक", "दोन", "तीन", "चार", "पाच", "सहा", "सात", "आठ", "ऊऊ",
+                "दहा", "अकरा", "बारा", "तेरा", "चौदा", "पंधरा", "सोळा", "सतरा", "अठरा", "एकोणीस",
+                "वीस", "एकवीस", "बावीस", "तेवीस", "चोवीस", "पंचवीस", "सव्वीस", "सत्तावीस", "अठ्ठावीस", "एकोणतीस",
+                "तीस", "एकतीस", "बत्तीस", "तेहतीस", "चौतीस", "पस्तीस", "छत्तीस", "सायतीस", "अडतीस", "एकोणचाळीस",
+                "चाळीस", "एकचाळीस", "बेचाळीस", "त्रेचाळीस", "चौचाळीस", "पंचेचाळीस", "सहाचाळीस", "सातचाळीस", "अठ्ठाचाळीस", "एकोणपन्नास",
+                "पन्नास", "एकावन्न", "बावन्न", "त्रिपन्न", "चौपन्न", "पंचावन्न", "छप्पन्न", "सत्तावन्न", "अठ्ठावन्न", "एकोणसाठ",
+                "साठ", "एकसाठ", "बासष्ठ", "त्रेसाठ", "चौसाठ", "पासष्ठ", "सहासाठ", "सदुसाठ", "अडसष्ठ", "एकोणत्तर",
+                "सत्तर", "एकहत्तर", "बाहत्तर", "त्र्याहत्तर", "चौऱ्याहत्तर", "पंच्याहत्तर", "शहात्तर", "सत्त्याहत्तर", "अठ्ठ्याहत्तर", "एकोणऐंशी",
+                "ऐंशी", "एक्याऐंशी", "ब्याऐंशी", "त्र्याऐंशी", "चौऱ्याऐंशी", "पंच्याऐंशी", "शहाऐंशी", "सत्त्याऐंशी", "अठ्ठ्याऐंशी", "एकोणनव्वद",
+                "नव्वद", "एक्यानव्वद", "ब्यानव्वद", "त्र्यानव्वद", "चौऱ्यानव्वद", "पंच्यानव्वद", "शहानव्वद", "सत्त्यानव्वद", "अठ्ठ्यानव्वद", "नव्यानव्वद"
+        };
+        if (number >= 0 && number < units.length) {
+            return units[number];
+        }
+        return String.valueOf(number);
+    }
+
     private Bitmap captureViewBitmap(View view) {
-        view.measure(View.MeasureSpec.makeMeasureSpec(view.getWidth(), View.MeasureSpec.EXACTLY),
-                View.MeasureSpec.makeMeasureSpec(0, View.MeasureSpec.UNSPECIFIED));
-        Bitmap bitmap = Bitmap.createBitmap(view.getWidth() > 0 ? view.getWidth() : 800,
-                view.getHeight() > 0 ? view.getHeight() : 1000, Bitmap.Config.ARGB_8888);
+        int width = view.getWidth() > 0 ? view.getWidth() : 900;
+        int height = view.getHeight() > 0 ? view.getHeight() : 1200;
+        Bitmap bitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888);
         Canvas canvas = new Canvas(bitmap);
+        view.layout(0, 0, width, height);
         view.draw(canvas);
         return bitmap;
     }
@@ -289,7 +352,7 @@ public class TransactionsActivity extends AppCompatActivity {
         }).start();
     }
 
-    private void shareReceiptBitmap(View view, Transaction tx) {
+    private void shareReceiptBitmap(View view, Transaction tx, String receiptNo) {
         Toast.makeText(this, "पावती तयार होत आहे...", Toast.LENGTH_SHORT).show();
 
         new Thread(() -> {
@@ -308,12 +371,15 @@ public class TransactionsActivity extends AppCompatActivity {
                         imageFile
                 );
 
-                String shareText = "🚩 *श्री गणेश मित्र मंडळ - गणेशोत्सव जमा पावती* 🌺\n\n" +
+                String shareText = "🚩 *श्री गणेश मित्र मंडळ (माने/ढेरे वस्ती, बाळेवाडी)* 🌺\n" +
+                        "📋 *पावती क्र:* " + receiptNo + "\n\n" +
                         "👤 नाव: " + (tx.getMemberName() != null ? tx.getMemberName() : "सदस्य") + "\n" +
+                        "📍 पत्ता: माने/ढेरे वस्ती, बाळेवाडी\n" +
                         "📱 मोबाईल: " + (tx.getMemberPhone() != null ? tx.getMemberPhone() : "-") + "\n" +
-                        "💰 जमा रक्कम: ₹ " + String.format(Locale.getDefault(), "%.0f", tx.getAmount()) + "/-\n" +
-                        "📝 तपशील: " + (tx.getDetails() != null ? tx.getDetails() : "वर्गणी / देणगी") + "\n" +
+                        "📝 तपशील: " + (tx.getDetails() != null ? tx.getDetails() : "गणपती वर्गणी") + "\n" +
+                        "💰 जमा रक्कम: ₹ " + String.format(Locale.getDefault(), "%.2f", tx.getAmount()) + "/-\n" +
                         "📅 तारीख: " + (tx.getDate() != null ? tx.getDate() : "") + "\n\n" +
+                        "— ❖ — आपल्या सहकार्याबद्दल मनःपूर्वक धन्यवाद! — ❖ —\n" +
                         "गणपती बाप्पा मोरया! मंगलमूर्ती मोरया! 🙏";
 
                 new Handler(Looper.getMainLooper()).post(() -> {
@@ -323,12 +389,11 @@ public class TransactionsActivity extends AppCompatActivity {
                     shareIntent.putExtra(Intent.EXTRA_TEXT, shareText);
                     shareIntent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
 
-                    // If phone number is available, user can select WhatsApp directly
                     startActivity(Intent.createChooser(shareIntent, "व्हाट्सअ‍ॅपवर पावती शेअर करा"));
                 });
             } catch (Exception e) {
                 new Handler(Looper.getMainLooper()).post(() ->
-                        Toast.makeText(TransactionsActivity.this, "पावती शेअर त्रुटी: " + e.getMessage(), Toast.LENGTH_SHORT).show());
+                        Toast.makeText(TransactionsActivity.this, "पावती शेअर त्रुटी: " + e.getMessage(), Toast.LENGTH_SHORT).show();
             }
         }).start();
     }
