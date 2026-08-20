@@ -75,27 +75,52 @@ public class TransactionAdapter extends RecyclerView.Adapter<TransactionAdapter.
             holder.tvAmount.setTextColor(Color.parseColor("#C62828")); // Red
         }
 
-        // Options Button (Three Dots ⋮) -> Click to show PopupMenu (Receipt / Delete)
-        holder.btnOptions.setOnClickListener(v -> {
-            PopupMenu popup = new PopupMenu(v.getContext(), v);
-            popup.getMenu().add(0, 1, 0, "📄 पावती जनरेट करा / पहा");
-            if (isAdmin) {
-                popup.getMenu().add(0, 2, 1, "🗑️ हा व्यवहार हटवा");
-            }
-
-            popup.setOnMenuItemClickListener(item -> {
-                int adapterPos = holder.getAdapterPosition();
-                if (listener != null && adapterPos != RecyclerView.NO_POSITION) {
-                    if (item.getItemId() == 1) {
-                        listener.onReceiptClick(tx);
-                    } else if (item.getItemId() == 2) {
-                        listener.onDeleteClick(tx, adapterPos);
-                    }
+        // Options Button (Three Dots ⋮)
+        // Receipts are ONLY generated for JAMA (income). KHARCH (expenses) do not have receipts.
+        if (tx.isJama()) {
+            holder.btnOptions.setVisibility(View.VISIBLE);
+            holder.btnOptions.setOnClickListener(v -> {
+                PopupMenu popup = new PopupMenu(v.getContext(), v);
+                popup.getMenu().add(0, 1, 0, "📄 पावती जनरेट करा / पहा");
+                if (isAdmin) {
+                    popup.getMenu().add(0, 2, 1, "🗑️ हा व्यवहार हटवा");
                 }
-                return true;
+
+                popup.setOnMenuItemClickListener(item -> {
+                    int adapterPos = holder.getAdapterPosition();
+                    if (listener != null && adapterPos != RecyclerView.NO_POSITION) {
+                        if (item.getItemId() == 1) {
+                            listener.onReceiptClick(tx);
+                        } else if (item.getItemId() == 2) {
+                            listener.onDeleteClick(tx, adapterPos);
+                        }
+                    }
+                    return true;
+                });
+                popup.show();
             });
-            popup.show();
-        });
+        } else {
+            // KHARCH (Expense): No receipt option!
+            if (isAdmin) {
+                holder.btnOptions.setVisibility(View.VISIBLE);
+                holder.btnOptions.setOnClickListener(v -> {
+                    PopupMenu popup = new PopupMenu(v.getContext(), v);
+                    popup.getMenu().add(0, 2, 0, "🗑️ हा व्यवहार हटवा");
+                    popup.setOnMenuItemClickListener(item -> {
+                        int adapterPos = holder.getAdapterPosition();
+                        if (listener != null && adapterPos != RecyclerView.NO_POSITION) {
+                            if (item.getItemId() == 2) {
+                                listener.onDeleteClick(tx, adapterPos);
+                            }
+                        }
+                        return true;
+                    });
+                    popup.show();
+                });
+            } else {
+                holder.btnOptions.setVisibility(View.GONE);
+            }
+        }
     }
 
     @Override
