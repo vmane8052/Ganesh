@@ -393,7 +393,7 @@ public class TransactionsActivity extends AppCompatActivity {
                 });
             } catch (Exception e) {
                 new Handler(Looper.getMainLooper()).post(() ->
-                        Toast.makeText(TransactionsActivity.this, "पावती शेअर त्रुटी: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+                        Toast.makeText(TransactionsActivity.this, "पावती शेअर त्रुटी: " + e.getMessage(), Toast.LENGTH_SHORT).show());
             }
         }).start();
     }
