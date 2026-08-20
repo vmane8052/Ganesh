@@ -210,6 +210,10 @@ public class TransactionsActivity extends AppCompatActivity {
         dialog.setContentView(R.layout.dialog_receipt);
         if (dialog.getWindow() != null) {
             dialog.getWindow().setBackgroundDrawableResource(android.R.color.transparent);
+            dialog.getWindow().setLayout(
+                    android.view.ViewGroup.LayoutParams.MATCH_PARENT,
+                    android.view.ViewGroup.LayoutParams.WRAP_CONTENT
+            );
         }
 
         LinearLayout layoutReceiptCard = dialog.findViewById(R.id.layoutReceiptCard);

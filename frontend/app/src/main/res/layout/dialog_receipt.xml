@@ -3,599 +3,651 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:background="@drawable/card_rounded_bg"
+    android:background="@android:color/transparent"
     android:orientation="vertical"
-    android:padding="12dp">
+    android:padding="8dp">
 
-    <!-- Scrollable container for smaller screens so bottom part is never cut off -->
-    <ScrollView
+    <!-- Container to capture as bitmap for download & sharing -->
+    <LinearLayout
+        android:id="@+id/layoutReceiptCard"
         android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:layout_weight="1"
-        android:scrollbars="vertical">
+        android:layout_height="wrap_content"
+        android:background="@color/white"
+        android:elevation="4dp"
+        android:orientation="vertical"
+        android:padding="16dp">
 
-        <!-- Container to capture as bitmap for download & sharing -->
-        <LinearLayout
-            android:id="@+id/layoutReceiptCard"
+        <!-- Top Header with Ganpati Logo, Mandal Title & Rosette Badge -->
+        <RelativeLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:background="@color/white"
-            android:orientation="vertical"
-            android:padding="12dp">
+            android:layout_marginBottom="12dp">
 
-            <!-- Top Header with Ganpati Logo, Mandal Title & Rosette Badge -->
-            <RelativeLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginBottom="8dp">
+            <!-- Left Ganpati Image Arc Frame -->
+            <FrameLayout
+                android:id="@+id/frameGanpati"
+                android:layout_width="72dp"
+                android:layout_height="72dp"
+                android:layout_alignParentStart="true"
+                android:layout_centerVertical="true"
+                android:background="@drawable/circle_bg"
+                android:backgroundTint="#0B5ED7"
+                android:padding="3dp">
 
-                <!-- Left Ganpati Image Circle -->
                 <ImageView
                     android:id="@+id/ivGanpatiLogo"
-                    android:layout_width="54dp"
-                    android:layout_height="54dp"
-                    android:layout_alignParentStart="true"
-                    android:layout_centerVertical="true"
-                    android:src="@drawable/app_logo" />
-
-                <!-- Right Rosette Badge -->
-                <LinearLayout
-                    android:id="@+id/badgeRosette"
-                    android:layout_width="52dp"
-                    android:layout_height="52dp"
-                    android:layout_alignParentEnd="true"
-                    android:layout_centerVertical="true"
-                    android:background="@drawable/circle_bg"
-                    android:backgroundTint="#0B5ED7"
-                    android:gravity="center"
-                    android:orientation="vertical"
-                    android:padding="2dp">
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:gravity="center"
-                        android:text="गणपती\nबाप्पा\nमोरया!"
-                        android:textColor="@color/white"
-                        android:textSize="8sp"
-                        android:textStyle="bold" />
-                </LinearLayout>
-
-                <!-- Center Mandal Title & Subtitle -->
-                <LinearLayout
                     android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_centerVertical="true"
-                    android:layout_toStartOf="@id/badgeRosette"
-                    android:layout_toEndOf="@id/ivGanpatiLogo"
-                    android:gravity="center_horizontal"
-                    android:orientation="vertical"
-                    android:paddingHorizontal="2dp">
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="॥ श्री गणेशाय नमः ॥"
-                        android:textColor="#0B5ED7"
-                        android:textSize="10sp"
-                        android:textStyle="bold" />
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginTop="1dp"
-                        android:gravity="center"
-                        android:text="श्री गणेश मित्र मंडळ"
-                        android:textColor="#083C9B"
-                        android:textSize="18sp"
-                        android:textStyle="bold" />
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:gravity="center"
-                        android:text="माने/ढेरे वस्ती, बाळेवाडी"
-                        android:textColor="#0B5ED7"
-                        android:textSize="13sp"
-                        android:textStyle="bold" />
-
-                    <!-- Solid Blue Pill Tag -->
-                    <TextView
-                        android:id="@+id/tvReceiptTag"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginTop="4dp"
-                        android:background="@drawable/chip_year_selected"
-                        android:backgroundTint="#0B5ED7"
-                        android:paddingHorizontal="14dp"
-                        android:paddingVertical="3dp"
-                        android:text="गणपती वर्गणी पावती"
-                        android:textColor="@color/white"
-                        android:textSize="11sp"
-                        android:textStyle="bold" />
-                </LinearLayout>
-            </RelativeLayout>
-
-            <!-- Receipt No & Date Box -->
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginBottom="8dp"
-                android:background="#F1F5F9"
-                android:orientation="horizontal"
-                android:padding="8dp">
-
-                <!-- Left: Receipt No -->
-                <LinearLayout
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:gravity="center_vertical"
-                    android:orientation="horizontal">
-
-                    <ImageView
-                        android:layout_width="24dp"
-                        android:layout_height="24dp"
-                        android:layout_marginEnd="6dp"
-                        android:src="@android:drawable/ic_menu_agenda"
-                        app:tint="#0B5ED7" />
-
-                    <LinearLayout
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:orientation="vertical">
-
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="पावती क्रमांक"
-                            android:textColor="@color/text_secondary"
-                            android:textSize="10sp" />
-
-                        <TextView
-                            android:id="@+id/tvReceiptNo"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="0001"
-                            android:textColor="#C2410C"
-                            android:textSize="14sp"
-                            android:textStyle="bold" />
-                    </LinearLayout>
-                </LinearLayout>
-
-                <View
-                    android:layout_width="1dp"
                     android:layout_height="match_parent"
-                    android:layout_marginHorizontal="6dp"
-                    android:background="#CBD5E1" />
+                    android:background="@drawable/circle_bg"
+                    android:clipToOutline="true"
+                    android:scaleType="centerCrop"
+                    android:src="@drawable/app_logo" />
+            </FrameLayout>
 
-                <!-- Right: Date -->
-                <LinearLayout
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:gravity="center_vertical"
-                    android:orientation="horizontal">
-
-                    <ImageView
-                        android:layout_width="24dp"
-                        android:layout_height="24dp"
-                        android:layout_marginEnd="6dp"
-                        android:src="@android:drawable/ic_menu_my_calendar"
-                        app:tint="#0B5ED7" />
-
-                    <LinearLayout
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:orientation="vertical">
-
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="दिनांक"
-                            android:textColor="@color/text_secondary"
-                            android:textSize="10sp" />
-
-                        <TextView
-                            android:id="@+id/tvReceiptDate"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="20/05/2026"
-                            android:textColor="@color/text_primary"
-                            android:textSize="13sp"
-                            android:textStyle="bold" />
-                    </LinearLayout>
-                </LinearLayout>
-            </LinearLayout>
-
-            <!-- Contributor Details Table -->
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginBottom="8dp"
-                android:background="#F8FAFC"
-                android:orientation="vertical"
-                android:padding="10dp">
-
-                <!-- Name Row -->
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginBottom="6dp"
-                    android:gravity="center_vertical"
-                    android:orientation="horizontal">
-
-                    <ImageView
-                        android:layout_width="18dp"
-                        android:layout_height="18dp"
-                        android:layout_marginEnd="6dp"
-                        android:src="@android:drawable/ic_menu_myplaces"
-                        app:tint="#0B5ED7" />
-
-                    <TextView
-                        android:layout_width="85dp"
-                        android:layout_height="wrap_content"
-                        android:text="नाव"
-                        android:textColor="@color/text_primary"
-                        android:textSize="12sp"
-                        android:textStyle="bold" />
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginEnd="6dp"
-                        android:text=":"
-                        android:textColor="@color/text_primary"
-                        android:textStyle="bold" />
-
-                    <TextView
-                        android:id="@+id/tvReceiptName"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:text="रोहित राजेश माने"
-                        android:textColor="@color/text_primary"
-                        android:textSize="13sp"
-                        android:textStyle="bold" />
-                </LinearLayout>
-
-                <!-- Address Row -->
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginBottom="6dp"
-                    android:gravity="center_vertical"
-                    android:orientation="horizontal">
-
-                    <ImageView
-                        android:layout_width="18dp"
-                        android:layout_height="18dp"
-                        android:layout_marginEnd="6dp"
-                        android:src="@android:drawable/ic_menu_mapmode"
-                        app:tint="#0B5ED7" />
-
-                    <TextView
-                        android:layout_width="85dp"
-                        android:layout_height="wrap_content"
-                        android:text="पत्ता"
-                        android:textColor="@color/text_primary"
-                        android:textSize="12sp"
-                        android:textStyle="bold" />
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginEnd="6dp"
-                        android:text=":"
-                        android:textColor="@color/text_primary"
-                        android:textStyle="bold" />
-
-                    <TextView
-                        android:id="@+id/tvReceiptAddress"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:text="माने/ढेरे वस्ती, बाळेवाडी"
-                        android:textColor="@color/text_secondary"
-                        android:textSize="12sp" />
-                </LinearLayout>
-
-                <!-- Mobile Row -->
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:gravity="center_vertical"
-                    android:orientation="horizontal">
-
-                    <ImageView
-                        android:layout_width="18dp"
-                        android:layout_height="18dp"
-                        android:layout_marginEnd="6dp"
-                        android:src="@android:drawable/ic_menu_call"
-                        app:tint="#0B5ED7" />
-
-                    <TextView
-                        android:layout_width="85dp"
-                        android:layout_height="wrap_content"
-                        android:text="मोबाईल नंबर"
-                        android:textColor="@color/text_primary"
-                        android:textSize="12sp"
-                        android:textStyle="bold" />
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginEnd="6dp"
-                        android:text=":"
-                        android:textColor="@color/text_primary"
-                        android:textStyle="bold" />
-
-                    <TextView
-                        android:id="@+id/tvReceiptPhone"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:text="9876543210"
-                        android:textColor="@color/text_primary"
-                        android:textSize="13sp" />
-                </LinearLayout>
-            </LinearLayout>
-
-            <!-- Items & Amount Table -->
-            <TableLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginBottom="8dp"
-                android:background="#CBD5E1"
-                android:padding="1dp">
-
-                <!-- Table Header -->
-                <TableRow
-                    android:background="#0B5ED7"
-                    android:paddingVertical="6dp">
-
-                    <TextView
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_weight="0.2"
-                        android:gravity="center"
-                        android:text="अ. क्र."
-                        android:textColor="@color/white"
-                        android:textSize="11sp"
-                        android:textStyle="bold" />
-
-                    <TextView
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_weight="0.55"
-                        android:gravity="center"
-                        android:text="तपशील"
-                        android:textColor="@color/white"
-                        android:textSize="11sp"
-                        android:textStyle="bold" />
-
-                    <TextView
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_weight="0.25"
-                        android:gravity="center"
-                        android:text="रक्कम (₹)"
-                        android:textColor="@color/white"
-                        android:textSize="11sp"
-                        android:textStyle="bold" />
-                </TableRow>
-
-                <!-- Table Body Row -->
-                <TableRow
-                    android:background="@color/white"
-                    android:paddingVertical="8dp">
-
-                    <TextView
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_weight="0.2"
-                        android:gravity="center"
-                        android:text="1"
-                        android:textColor="@color/text_primary"
-                        android:textSize="12sp" />
-
-                    <TextView
-                        android:id="@+id/tvReceiptDetails"
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_weight="0.55"
-                        android:paddingStart="6dp"
-                        android:text="गणपती वर्गणी"
-                        android:textColor="@color/text_primary"
-                        android:textSize="12sp"
-                        android:textStyle="bold" />
-
-                    <TextView
-                        android:id="@+id/tvReceiptRowAmount"
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_weight="0.25"
-                        android:gravity="end"
-                        android:paddingEnd="10dp"
-                        android:text="500.00"
-                        android:textColor="@color/text_primary"
-                        android:textSize="12sp" />
-                </TableRow>
-
-                <!-- Table Total Row -->
-                <TableRow
-                    android:background="#F1F5F9"
-                    android:paddingVertical="8dp">
-
-                    <TextView
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_weight="0.75"
-                        android:gravity="end"
-                        android:paddingEnd="10dp"
-                        android:text="एकूण रक्कम"
-                        android:textColor="#083C9B"
-                        android:textSize="13sp"
-                        android:textStyle="bold" />
-
-                    <TextView
-                        android:id="@+id/tvReceiptTotalAmount"
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_weight="0.25"
-                        android:gravity="end"
-                        android:paddingEnd="10dp"
-                        android:text="₹ 500.00"
-                        android:textColor="#083C9B"
-                        android:textSize="14sp"
-                        android:textStyle="bold" />
-                </TableRow>
-            </TableLayout>
-
-            <!-- Amount in Words Row -->
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginBottom="8dp"
-                android:background="#F8FAFC"
-                android:gravity="center_vertical"
-                android:orientation="horizontal"
-                android:padding="8dp">
+            <!-- Right Rosette Badge -->
+            <FrameLayout
+                android:id="@+id/badgeRosette"
+                android:layout_width="64dp"
+                android:layout_height="64dp"
+                android:layout_alignParentEnd="true"
+                android:layout_centerVertical="true"
+                android:background="@drawable/circle_bg"
+                android:backgroundTint="#083C9B"
+                android:padding="4dp">
 
                 <TextView
-                    android:layout_width="26dp"
-                    android:layout_height="26dp"
-                    android:layout_marginEnd="6dp"
-                    android:background="@drawable/circle_bg"
-                    android:backgroundTint="#0B5ED7"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center"
                     android:gravity="center"
-                    android:text="₹"
+                    android:text="गणपती\nबाप्पा\nमोरया!"
                     android:textColor="@color/white"
-                    android:textSize="13sp"
+                    android:textSize="9sp"
+                    android:textStyle="bold" />
+            </FrameLayout>
+
+            <!-- Center Mandal Title & Subtitle -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_centerVertical="true"
+                android:layout_toStartOf="@id/badgeRosette"
+                android:layout_toEndOf="@id/frameGanpati"
+                android:gravity="center_horizontal"
+                android:orientation="vertical"
+                android:paddingHorizontal="4dp">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="॥ श्री गणेशाय नमः ॥"
+                    android:textColor="#0B5ED7"
+                    android:textSize="11sp"
                     android:textStyle="bold" />
 
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="2dp"
+                    android:gravity="center"
+                    android:text="श्री गणेश मित्र मंडळ"
+                    android:textColor="#083C9B"
+                    android:textSize="21sp"
+                    android:textStyle="bold" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:gravity="center"
+                    android:text="माने/ढेरे वस्ती, बाळेवाडी"
+                    android:textColor="#0B5ED7"
+                    android:textSize="14sp"
+                    android:textStyle="bold" />
+
+                <!-- Solid Blue Pill Tag -->
+                <TextView
+                    android:id="@+id/tvReceiptTag"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="6dp"
+                    android:background="@drawable/chip_year_selected"
+                    android:backgroundTint="#0B5ED7"
+                    android:paddingHorizontal="16dp"
+                    android:paddingVertical="4dp"
+                    android:text="गणपती वर्गणी पावती"
+                    android:textColor="@color/white"
+                    android:textSize="12sp"
+                    android:textStyle="bold" />
+            </LinearLayout>
+        </RelativeLayout>
+
+        <!-- Receipt No & Date Box -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="12dp"
+            android:background="#F1F5F9"
+            android:orientation="horizontal"
+            android:padding="10dp">
+
+            <!-- Left: Receipt No -->
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:gravity="center_vertical"
+                android:orientation="horizontal">
+
+                <ImageView
+                    android:layout_width="28dp"
+                    android:layout_height="28dp"
+                    android:layout_marginEnd="8dp"
+                    android:src="@android:drawable/ic_menu_agenda"
+                    app:tint="#0B5ED7" />
+
                 <LinearLayout
-                    android:layout_width="match_parent"
+                    android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:orientation="vertical">
 
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="रक्कम शब्दात"
+                        android:text="पावती क्रमांक"
                         android:textColor="@color/text_secondary"
-                        android:textSize="10sp" />
+                        android:textSize="11sp" />
 
                     <TextView
-                        android:id="@+id/tvReceiptAmountInWords"
+                        android:id="@+id/tvReceiptNo"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="पाचशे रुपये फक्त"
-                        android:textColor="@color/text_primary"
-                        android:textSize="12sp"
+                        android:text="0001"
+                        android:textColor="#C2410C"
+                        android:textSize="16sp"
                         android:textStyle="bold" />
                 </LinearLayout>
             </LinearLayout>
 
-            <!-- Thanks Message -->
+            <View
+                android:layout_width="1dp"
+                android:layout_height="match_parent"
+                android:layout_marginHorizontal="8dp"
+                android:background="#CBD5E1" />
+
+            <!-- Right: Date -->
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:gravity="center_vertical"
+                android:orientation="horizontal">
+
+                <ImageView
+                    android:layout_width="28dp"
+                    android:layout_height="28dp"
+                    android:layout_marginEnd="8dp"
+                    android:src="@android:drawable/ic_menu_my_calendar"
+                    app:tint="#0B5ED7" />
+
+                <LinearLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="दिनांक"
+                        android:textColor="@color/text_secondary"
+                        android:textSize="11sp" />
+
+                    <TextView
+                        android:id="@+id/tvReceiptDate"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="20/05/2026"
+                        android:textColor="@color/text_primary"
+                        android:textSize="15sp"
+                        android:textStyle="bold" />
+                </LinearLayout>
+            </LinearLayout>
+        </LinearLayout>
+
+        <!-- Contributor Details Card -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="12dp"
+            android:background="#F8FAFC"
+            android:orientation="vertical"
+            android:padding="12dp">
+
+            <!-- Name Row -->
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:gravity="center"
-                android:orientation="vertical">
+                android:layout_marginBottom="8dp"
+                android:gravity="center_vertical"
+                android:orientation="horizontal">
+
+                <ImageView
+                    android:layout_width="20dp"
+                    android:layout_height="20dp"
+                    android:layout_marginEnd="8dp"
+                    android:src="@android:drawable/ic_menu_myplaces"
+                    app:tint="#0B5ED7" />
+
+                <TextView
+                    android:layout_width="95dp"
+                    android:layout_height="wrap_content"
+                    android:text="नाव"
+                    android:textColor="@color/text_primary"
+                    android:textSize="13sp"
+                    android:textStyle="bold" />
 
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="— ❖ —   आपल्या सहकार्याबद्दल मनःपूर्वक धन्यवाद!   — ❖ —"
-                    android:textColor="#0B5ED7"
+                    android:layout_marginEnd="8dp"
+                    android:text=":"
+                    android:textColor="@color/text_primary"
+                    android:textStyle="bold" />
+
+                <TextView
+                    android:id="@+id/tvReceiptName"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="रोहित राजेश माने"
+                    android:textColor="@color/text_primary"
+                    android:textSize="14sp"
+                    android:textStyle="bold" />
+            </LinearLayout>
+
+            <!-- Address Row -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="8dp"
+                android:gravity="center_vertical"
+                android:orientation="horizontal">
+
+                <ImageView
+                    android:layout_width="20dp"
+                    android:layout_height="20dp"
+                    android:layout_marginEnd="8dp"
+                    android:src="@android:drawable/ic_menu_mapmode"
+                    app:tint="#0B5ED7" />
+
+                <TextView
+                    android:layout_width="95dp"
+                    android:layout_height="wrap_content"
+                    android:text="पत्ता"
+                    android:textColor="@color/text_primary"
+                    android:textSize="13sp"
+                    android:textStyle="bold" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginEnd="8dp"
+                    android:text=":"
+                    android:textColor="@color/text_primary"
+                    android:textStyle="bold" />
+
+                <TextView
+                    android:id="@+id/tvReceiptAddress"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="माने/ढेरे वस्ती, बाळेवाडी"
+                    android:textColor="@color/text_secondary"
+                    android:textSize="13sp" />
+            </LinearLayout>
+
+            <!-- Mobile Row -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:gravity="center_vertical"
+                android:orientation="horizontal">
+
+                <ImageView
+                    android:layout_width="20dp"
+                    android:layout_height="20dp"
+                    android:layout_marginEnd="8dp"
+                    android:src="@android:drawable/ic_menu_call"
+                    app:tint="#0B5ED7" />
+
+                <TextView
+                    android:layout_width="95dp"
+                    android:layout_height="wrap_content"
+                    android:text="मोबाईल नंबर"
+                    android:textColor="@color/text_primary"
+                    android:textSize="13sp"
+                    android:textStyle="bold" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginEnd="8dp"
+                    android:text=":"
+                    android:textColor="@color/text_primary"
+                    android:textStyle="bold" />
+
+                <TextView
+                    android:id="@+id/tvReceiptPhone"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="9876543210"
+                    android:textColor="@color/text_primary"
+                    android:textSize="14sp" />
+            </LinearLayout>
+        </LinearLayout>
+
+        <!-- Items & Amount Table (Matching Reference Image 2) -->
+        <TableLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="12dp"
+            android:background="#CBD5E1"
+            android:padding="1dp">
+
+            <!-- Table Header -->
+            <TableRow
+                android:background="#0B5ED7"
+                android:paddingVertical="8dp">
+
+                <TextView
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="0.18"
+                    android:gravity="center"
+                    android:text="अ. क्र."
+                    android:textColor="@color/white"
                     android:textSize="12sp"
                     android:textStyle="bold" />
 
                 <TextView
-                    android:layout_width="wrap_content"
+                    android:layout_width="0dp"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="1dp"
-                    android:text="आपले सहकार्य, आमची ताकद – बाप्पाची सेवा, आपली भावना!"
-                    android:textColor="@color/text_secondary"
-                    android:textSize="10sp" />
-            </LinearLayout>
-
-            <!-- Center Mandal Official Stamp ONLY -->
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="8dp"
-                android:layout_marginBottom="4dp"
-                android:gravity="center"
-                android:orientation="vertical">
-
-                <!-- Official Mandal Round Seal -->
-                <LinearLayout
-                    android:layout_width="76dp"
-                    android:layout_height="76dp"
-                    android:background="@drawable/circle_bg"
-                    android:backgroundTint="#0B5ED7"
+                    android:layout_weight="0.57"
                     android:gravity="center"
-                    android:padding="2dp">
+                    android:text="तपशील"
+                    android:textColor="@color/white"
+                    android:textSize="12sp"
+                    android:textStyle="bold" />
 
-                    <LinearLayout
-                        android:layout_width="72dp"
-                        android:layout_height="72dp"
-                        android:background="@drawable/circle_bg"
-                        android:backgroundTint="@color/white"
-                        android:gravity="center"
-                        android:orientation="vertical">
+                <TextView
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="0.25"
+                    android:gravity="center"
+                    android:text="रक्कम (₹)"
+                    android:textColor="@color/white"
+                    android:textSize="12sp"
+                    android:textStyle="bold" />
+            </TableRow>
 
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="★ श्री गणेश मित्र मंडळ ★"
-                            android:textColor="#0B5ED7"
-                            android:textSize="5.5sp"
-                            android:textStyle="bold" />
+            <!-- Table Row 1 -->
+            <TableRow
+                android:background="@color/white"
+                android:paddingVertical="10dp">
 
-                        <ImageView
-                            android:layout_width="24dp"
-                            android:layout_height="24dp"
-                            android:layout_marginVertical="1dp"
-                            android:src="@drawable/app_logo" />
+                <TextView
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="0.18"
+                    android:gravity="center"
+                    android:text="1"
+                    android:textColor="@color/text_primary"
+                    android:textSize="13sp" />
 
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="माने/ढेरे वस्ती, बाळेवाडी"
-                            android:textColor="#0B5ED7"
-                            android:textSize="5.5sp"
-                            android:textStyle="bold" />
-                    </LinearLayout>
-                </LinearLayout>
-            </LinearLayout>
+                <TextView
+                    android:id="@+id/tvReceiptDetails"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="0.57"
+                    android:paddingStart="8dp"
+                    android:text="गणपती वर्गणी"
+                    android:textColor="@color/text_primary"
+                    android:textSize="13sp"
+                    android:textStyle="bold" />
 
-            <!-- Bottom Contact Ribbon -->
+                <TextView
+                    android:id="@+id/tvReceiptRowAmount"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="0.25"
+                    android:gravity="end"
+                    android:paddingEnd="12dp"
+                    android:text="500.00"
+                    android:textColor="@color/text_primary"
+                    android:textSize="13sp" />
+            </TableRow>
+
+            <!-- Table Row 2 (Empty Grid Line) -->
+            <TableRow
+                android:background="@color/white"
+                android:paddingVertical="10dp">
+
+                <TextView
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="0.18"
+                    android:text="" />
+
+                <TextView
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="0.57"
+                    android:text="" />
+
+                <TextView
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="0.25"
+                    android:text="" />
+            </TableRow>
+
+            <!-- Table Row 3 (Empty Grid Line) -->
+            <TableRow
+                android:background="@color/white"
+                android:paddingVertical="10dp">
+
+                <TextView
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="0.18"
+                    android:text="" />
+
+                <TextView
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="0.57"
+                    android:text="" />
+
+                <TextView
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="0.25"
+                    android:text="" />
+            </TableRow>
+
+            <!-- Table Total Row -->
+            <TableRow
+                android:background="#F1F5F9"
+                android:paddingVertical="10dp">
+
+                <TextView
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="0.75"
+                    android:gravity="end"
+                    android:paddingEnd="12dp"
+                    android:text="एकूण रक्कम"
+                    android:textColor="#083C9B"
+                    android:textSize="14sp"
+                    android:textStyle="bold" />
+
+                <TextView
+                    android:id="@+id/tvReceiptTotalAmount"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="0.25"
+                    android:gravity="end"
+                    android:paddingEnd="12dp"
+                    android:text="₹ 500.00"
+                    android:textColor="#083C9B"
+                    android:textSize="15sp"
+                    android:textStyle="bold" />
+            </TableRow>
+        </TableLayout>
+
+        <!-- Amount in Words Row -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="12dp"
+            android:background="#F8FAFC"
+            android:gravity="center_vertical"
+            android:orientation="horizontal"
+            android:padding="10dp">
+
+            <TextView
+                android:layout_width="32dp"
+                android:layout_height="32dp"
+                android:layout_marginEnd="8dp"
+                android:background="@drawable/circle_bg"
+                android:backgroundTint="#0B5ED7"
+                android:gravity="center"
+                android:text="₹"
+                android:textColor="@color/white"
+                android:textSize="16sp"
+                android:textStyle="bold" />
+
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="6dp"
-                android:background="#0B5ED7"
-                android:gravity="center"
-                android:orientation="horizontal"
-                android:paddingVertical="6dp">
+                android:orientation="vertical">
 
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="📍 माने/ढेरे वस्ती, बाळेवाडी"
-                    android:textColor="@color/white"
-                    android:textSize="10.5sp"
+                    android:text="रक्कम शब्दात"
+                    android:textColor="@color/text_secondary"
+                    android:textSize="11sp" />
+
+                <TextView
+                    android:id="@+id/tvReceiptAmountInWords"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="पाचशे रुपये फक्त"
+                    android:textColor="@color/text_primary"
+                    android:textSize="13sp"
                     android:textStyle="bold" />
             </LinearLayout>
-
         </LinearLayout>
-    </ScrollView>
+
+        <!-- Thanks Message -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            android:orientation="vertical">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="— ❖ —   आपल्या सहकार्याबद्दल मनःपूर्वक धन्यवाद!   — ❖ —"
+                android:textColor="#0B5ED7"
+                android:textSize="13sp"
+                android:textStyle="bold" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="2dp"
+                android:text="आपले सहकार्य, आमची ताकद – बाप्पाची सेवा, आपली भावना!"
+                android:textColor="@color/text_secondary"
+                android:textSize="11sp" />
+        </LinearLayout>
+
+        <!-- Center Mandal Official Stamp ONLY -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="12dp"
+            android:layout_marginBottom="6dp"
+            android:gravity="center"
+            android:orientation="vertical">
+
+            <!-- Official Mandal Round Seal -->
+            <LinearLayout
+                android:layout_width="84dp"
+                android:layout_height="84dp"
+                android:background="@drawable/circle_bg"
+                android:backgroundTint="#0B5ED7"
+                android:gravity="center"
+                android:padding="2dp">
+
+                <LinearLayout
+                    android:layout_width="80dp"
+                    android:layout_height="80dp"
+                    android:background="@drawable/circle_bg"
+                    android:backgroundTint="@color/white"
+                    android:gravity="center"
+                    android:orientation="vertical">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="★ श्री गणेश मित्र मंडळ ★"
+                        android:textColor="#0B5ED7"
+                        android:textSize="6sp"
+                        android:textStyle="bold" />
+
+                    <ImageView
+                        android:layout_width="26dp"
+                        android:layout_height="26dp"
+                        android:layout_marginVertical="1dp"
+                        android:src="@drawable/app_logo" />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="माने/ढेरे वस्ती, बाळेवाडी"
+                        android:textColor="#0B5ED7"
+                        android:textSize="6sp"
+                        android:textStyle="bold" />
+                </LinearLayout>
+            </LinearLayout>
+        </LinearLayout>
+
+        <!-- Bottom Contact Ribbon -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:background="#0B5ED7"
+            android:gravity="center"
+            android:orientation="horizontal"
+            android:paddingVertical="8dp">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="📍 माने/ढेरे वस्ती, बाळेवाडी"
+                android:textColor="@color/white"
+                android:textSize="11sp"
+                android:textStyle="bold" />
+        </LinearLayout>
+
+    </LinearLayout>
 
     <!-- Action Buttons (Download & WhatsApp Share) -->
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="10dp"
+        android:layout_marginTop="12dp"
         android:orientation="horizontal">
 
         <!-- Download Button -->
@@ -603,25 +655,25 @@
             android:id="@+id/btnDownloadReceipt"
             style="@style/Widget.MaterialComponents.Button.OutlinedButton"
             android:layout_width="0dp"
-            android:layout_height="44dp"
-            android:layout_marginEnd="4dp"
+            android:layout_height="48dp"
+            android:layout_marginEnd="6dp"
             android:layout_weight="1"
             android:text="📥 डाऊनलोड"
             android:textColor="#0B5ED7"
-            app:cornerRadius="8dp"
+            app:cornerRadius="10dp"
             app:strokeColor="#0B5ED7" />
 
         <!-- WhatsApp Share Button -->
         <com.google.android.material.button.MaterialButton
             android:id="@+id/btnShareReceipt"
             android:layout_width="0dp"
-            android:layout_height="44dp"
-            android:layout_marginStart="4dp"
+            android:layout_height="48dp"
+            android:layout_marginStart="6dp"
             android:layout_weight="1.2"
             android:backgroundTint="#25D366"
             android:text="📲 WhatsApp पावती"
             android:textColor="@color/white"
-            app:cornerRadius="8dp" />
+            app:cornerRadius="10dp" />
     </LinearLayout>
 
 </LinearLayout>
