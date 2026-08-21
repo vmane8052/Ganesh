@@ -88,8 +88,9 @@ public class EventsActivity extends AppCompatActivity {
     }
 
     private void fetchEvents() {
+        String mandalId = prefs.getString("MANDAL_ID", "M001");
         // 100% Strict Real-Time Cloud MongoDB Atlas Fetch
-        ApiClient.getService().getEvents().enqueue(new Callback<EventListResponse>() {
+        ApiClient.getService().getEvents(mandalId).enqueue(new Callback<EventListResponse>() {
             @Override
             public void onResponse(Call<EventListResponse> call, Response<EventListResponse> response) {
                 if (response.isSuccessful() && response.body() != null && response.body().isSuccess()) {

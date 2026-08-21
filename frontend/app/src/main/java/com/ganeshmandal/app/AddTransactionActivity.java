@@ -115,7 +115,8 @@ public class AddTransactionActivity extends AppCompatActivity {
     }
 
     private void fetchMembersForDropdown() {
-        ApiClient.getService().getUsers().enqueue(new Callback<UserListResponse>() {
+        String mandalId = getSharedPreferences("MandalPrefs", MODE_PRIVATE).getString("MANDAL_ID", "M001");
+        ApiClient.getService().getUsers(mandalId).enqueue(new Callback<UserListResponse>() {
             @Override
             public void onResponse(Call<UserListResponse> call, Response<UserListResponse> response) {
                 if (response.isSuccessful() && response.body() != null && response.body().isSuccess()) {
@@ -219,6 +220,8 @@ public class AddTransactionActivity extends AppCompatActivity {
                 memberPhone,
                 receiptNo
         );
+        String mandalId = getSharedPreferences("MandalPrefs", MODE_PRIVATE).getString("MANDAL_ID", "M001");
+        tx.setMandalId(mandalId);
 
         // Send directly to MongoDB Atlas Cloud API (100% Strict Cloud Saving)
         ApiClient.getService().addTransaction(tx).enqueue(new Callback<SingleTransactionResponse>() {

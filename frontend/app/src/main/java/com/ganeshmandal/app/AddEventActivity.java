@@ -129,6 +129,8 @@ public class AddEventActivity extends AppCompatActivity {
         btnSaveEvent.setText("डेटाबेसमध्ये साठवत आहे...");
 
         MandalEvent ev = new MandalEvent(dayTitle, date, morningAarti, eveningAarti, lunchHost, modakHost, cultural, notes);
+        String mandalId = getSharedPreferences("MandalPrefs", MODE_PRIVATE).getString("MANDAL_ID", "M001");
+        ev.setMandalId(mandalId);
 
         if (editingEvent != null && editingEvent.getId() != null) {
             // Update Existing Event

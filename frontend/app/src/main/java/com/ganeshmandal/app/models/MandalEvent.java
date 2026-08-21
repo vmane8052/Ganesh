@@ -31,6 +31,9 @@ public class MandalEvent implements Serializable {
     @SerializedName("specialNotes")
     private String specialNotes; // विशेष सूचना / टीप
 
+    @SerializedName("mandalId")
+    private String mandalId;
+
     public MandalEvent() {
     }
 
@@ -116,4 +119,7 @@ public class MandalEvent implements Serializable {
     public void setSpecialNotes(String specialNotes) {
         this.specialNotes = specialNotes;
     }
+
+    public String getMandalId() { return mandalId; }
+    public void setMandalId(String mandalId) { this.mandalId = mandalId; }
 }

@@ -115,8 +115,10 @@ public class DonationsActivity extends AppCompatActivity {
     }
 
     private void fetchDonations() {
+        SharedPreferences prefs = getSharedPreferences("MandalPrefs", MODE_PRIVATE);
+        String mandalId = prefs.getString("MANDAL_ID", "M001");
         // 100% Strict Real-Time Cloud MongoDB Atlas Fetch
-        ApiClient.getService().getDonations().enqueue(new Callback<DonationListResponse>() {
+        ApiClient.getService().getDonations(mandalId).enqueue(new Callback<DonationListResponse>() {
             @Override
             public void onResponse(Call<DonationListResponse> call, Response<DonationListResponse> response) {
                 if (response.isSuccessful() && response.body() != null && response.body().isSuccess()) {

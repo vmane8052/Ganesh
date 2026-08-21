@@ -30,6 +30,9 @@ public class Transaction {
     @SerializedName("receiptNo")
     private String receiptNo;
 
+    @SerializedName("mandalId")
+    private String mandalId;
+
     public Transaction(String type, double amount, String details, String date, String category, String memberName, String memberPhone) {
         this.type = type;
         this.amount = amount;
@@ -54,5 +57,7 @@ public class Transaction {
     public String getMemberName() { return memberName; }
     public String getMemberPhone() { return memberPhone; }
     public String getReceiptNo() { return receiptNo; }
+    public String getMandalId() { return mandalId; }
+    public void setMandalId(String mandalId) { this.mandalId = mandalId; }
     public boolean isJama() { return "JAMA".equalsIgnoreCase(type); }
 }

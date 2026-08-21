@@ -118,6 +118,8 @@ public class AddMemberActivity extends AppCompatActivity {
         btnSaveMember.setText("डेटाबेसमध्ये साठवत आहे...");
 
         User newUser = new User(name, phone, pin, "USER", roleInMandal, selectedPhotoBase64);
+        String mandalId = getSharedPreferences("MandalPrefs", MODE_PRIVATE).getString("MANDAL_ID", "M001");
+        newUser.setMandalId(mandalId);
 
         // Send directly to MongoDB Atlas Cloud API (100% Strict Cloud Saving)
         ApiClient.getService().addUser(newUser).enqueue(new Callback<LoginResponse>() {

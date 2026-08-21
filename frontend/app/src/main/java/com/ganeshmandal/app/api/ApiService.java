@@ -41,7 +41,7 @@ public interface ApiService {
     Call<LoginResponse> login(@Body Map<String, String> credentials);
 
     @GET("api/transactions")
-    Call<TransactionResponse> getTransactions(@Query("type") String type);
+    Call<TransactionResponse> getTransactions(@Query("type") String type, @Query("mandalId") String mandalId);
 
     @POST("api/transactions")
     Call<SingleTransactionResponse> addTransaction(@Body Transaction transaction);
@@ -56,7 +56,7 @@ public interface ApiService {
     Call<LoginResponse> changePassword(@Body Map<String, String> payload);
 
     @GET("api/users")
-    Call<UserListResponse> getUsers();
+    Call<UserListResponse> getUsers(@Query("mandalId") String mandalId);
 
     @PUT("api/users/phone/{phone}")
     Call<LoginResponse> updateUser(@Path("phone") String phone, @Body User user);
@@ -66,7 +66,7 @@ public interface ApiService {
 
     // --- Daily Events & Aarti Schedule ---
     @GET("api/events")
-    Call<EventListResponse> getEvents();
+    Call<EventListResponse> getEvents(@Query("mandalId") String mandalId);
 
     @POST("api/events")
     Call<SingleEventResponse> addEvent(@Body MandalEvent event);
@@ -79,7 +79,7 @@ public interface ApiService {
 
     // --- Donations (देणगीदार - रोख व वस्तू देणगी) ---
     @GET("api/donations")
-    Call<DonationListResponse> getDonations();
+    Call<DonationListResponse> getDonations(@Query("mandalId") String mandalId);
 
     @POST("api/donations")
     Call<SingleDonationResponse> addDonation(@Body Donation donation);
@@ -96,7 +96,7 @@ public interface ApiService {
 
     // --- Photo Gallery (मंडळ फोटो गॅलरी) ---
     @GET("api/gallery")
-    Call<GalleryListResponse> getGallery(@Query("year") String year);
+    Call<GalleryListResponse> getGallery(@Query("year") String year, @Query("mandalId") String mandalId);
 
     @POST("api/gallery")
     Call<SingleGalleryResponse> addGalleryPhoto(@Body GalleryPhoto photo);

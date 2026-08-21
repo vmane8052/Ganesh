@@ -125,8 +125,9 @@ public class TransactionsActivity extends AppCompatActivity {
     }
 
     private void fetchTransactions() {
+        String mandalId = prefs.getString("MANDAL_ID", "M001");
         // 100% Strict Real-Time Fetch directly from MongoDB Atlas Cloud API
-        ApiClient.getService().getTransactions(null).enqueue(new Callback<TransactionResponse>() {
+        ApiClient.getService().getTransactions(null, mandalId).enqueue(new Callback<TransactionResponse>() {
             @Override
             public void onResponse(Call<TransactionResponse> call, Response<TransactionResponse> response) {
                 if (response.isSuccessful() && response.body() != null && response.body().isSuccess()) {

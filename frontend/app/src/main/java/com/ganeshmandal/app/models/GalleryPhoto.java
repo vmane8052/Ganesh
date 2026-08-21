@@ -21,6 +21,9 @@ public class GalleryPhoto {
     @SerializedName("createdAt")
     private String createdAt;
 
+    @SerializedName("mandalId")
+    private String mandalId;
+
     public GalleryPhoto() {}
 
     public GalleryPhoto(String title, String imageUrl, String uploadedBy, String year) {
@@ -77,4 +80,7 @@ public class GalleryPhoto {
     public void setCreatedAt(String createdAt) {
         this.createdAt = createdAt;
     }
+
+    public String getMandalId() { return mandalId; }
+    public void setMandalId(String mandalId) { this.mandalId = mandalId; }
 }

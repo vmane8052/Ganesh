@@ -31,6 +31,9 @@ public class Donation implements Serializable {
     @SerializedName("receiptNo")
     private String receiptNo; // पावती क्रमांक
 
+    @SerializedName("mandalId")
+    private String mandalId;
+
     public Donation() {
     }
 
@@ -120,4 +123,7 @@ public class Donation implements Serializable {
     public boolean isItem() {
         return "ITEM".equalsIgnoreCase(donationType);
     }
+
+    public String getMandalId() { return mandalId; }
+    public void setMandalId(String mandalId) { this.mandalId = mandalId; }
 }

@@ -166,6 +166,8 @@ public class AddDonationActivity extends AppCompatActivity {
         btnSaveDonation.setText("डेटाबेसमध्ये साठवत आहे...");
 
         Donation donation = new Donation(donorName, phone, selectedType, amount, itemDetails, date, address, receiptNo);
+        String mandalId = getSharedPreferences("MandalPrefs", MODE_PRIVATE).getString("MANDAL_ID", "M001");
+        donation.setMandalId(mandalId);
 
         if (editingDonation != null && editingDonation.getId() != null) {
             // Update Existing Donation

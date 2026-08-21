@@ -97,8 +97,9 @@ public class MembersActivity extends AppCompatActivity {
         SharedPreferences prefs = getSharedPreferences("MandalPrefs", MODE_PRIVATE);
         Set<String> deletedPhones = prefs.getStringSet("DELETED_PHONES", new HashSet<>());
 
+        String mandalId = prefs.getString("MANDAL_ID", "M001");
         // 100% Strict Real-Time Fetch directly from MongoDB Atlas Cloud API
-        ApiClient.getService().getUsers().enqueue(new Callback<UserListResponse>() {
+        ApiClient.getService().getUsers(mandalId).enqueue(new Callback<UserListResponse>() {
             @Override
             public void onResponse(Call<UserListResponse> call, Response<UserListResponse> response) {
                 if (response.isSuccessful() && response.body() != null && response.body().getData() != null) {
