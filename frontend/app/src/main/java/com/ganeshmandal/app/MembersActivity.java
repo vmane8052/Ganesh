@@ -52,7 +52,7 @@ public class MembersActivity extends AppCompatActivity {
 
         SharedPreferences prefs = getSharedPreferences("MandalPrefs", MODE_PRIVATE);
         String role = prefs.getString("USER_ROLE", "USER");
-        boolean isAdmin = "ADMIN".equalsIgnoreCase(role);
+        boolean isAdmin = "ADMIN".equalsIgnoreCase(role) || "SUPER_ADMIN".equalsIgnoreCase(role);
 
         if (isAdmin) {
             btnAddMemberFab.setVisibility(View.VISIBLE);

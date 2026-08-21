@@ -73,7 +73,8 @@ public class TransactionsActivity extends AppCompatActivity {
 
         // Check if user is Admin
         SharedPreferences prefs = getSharedPreferences("MandalPrefs", MODE_PRIVATE);
-        boolean isAdmin = "ADMIN".equalsIgnoreCase(prefs.getString("USER_ROLE", "USER"));
+        String userRole = prefs.getString("USER_ROLE", "USER");
+        boolean isAdmin = "ADMIN".equalsIgnoreCase(userRole) || "SUPER_ADMIN".equalsIgnoreCase(userRole);
 
         layoutAdminActions.setVisibility(isAdmin ? View.VISIBLE : View.GONE);
         adapter.setAdmin(isAdmin);

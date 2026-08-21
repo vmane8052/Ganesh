@@ -43,7 +43,8 @@ public class EventsActivity extends AppCompatActivity {
         fabAddEvent = findViewById(R.id.fabAddEvent);
 
         SharedPreferences prefs = getSharedPreferences("MandalPrefs", MODE_PRIVATE);
-        isAdmin = "ADMIN".equalsIgnoreCase(prefs.getString("USER_ROLE", "USER"));
+        String userRole = prefs.getString("USER_ROLE", "USER");
+        isAdmin = "ADMIN".equalsIgnoreCase(userRole) || "SUPER_ADMIN".equalsIgnoreCase(userRole);
 
         fabAddEvent.setVisibility(isAdmin ? View.VISIBLE : View.GONE);
 

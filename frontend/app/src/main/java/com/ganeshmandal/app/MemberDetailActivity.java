@@ -82,7 +82,7 @@ public class MemberDetailActivity extends AppCompatActivity {
         prefs = getSharedPreferences("MandalPrefs", MODE_PRIVATE);
         String userRole = prefs.getString("USER_ROLE", "USER");
         String loggedInPhone = prefs.getString("USER_PHONE", "");
-        isAdmin = "ADMIN".equalsIgnoreCase(userRole);
+        isAdmin = "ADMIN".equalsIgnoreCase(userRole) || "SUPER_ADMIN".equalsIgnoreCase(userRole);
 
         // Get member data from Intent
         Intent intent = getIntent();

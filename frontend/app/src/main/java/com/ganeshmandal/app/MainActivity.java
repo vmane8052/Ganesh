@@ -57,7 +57,7 @@ public class MainActivity extends AppCompatActivity {
         String name = prefs.getString("USER_NAME", "सदस्य");
         String photoUrl = prefs.getString("USER_PHOTO_URL", "");
 
-        boolean isAdmin = "ADMIN".equalsIgnoreCase(role);
+        boolean isAdmin = "ADMIN".equalsIgnoreCase(role) || "SUPER_ADMIN".equalsIgnoreCase(role);
 
         if (tvDrawerUserName != null) {
             tvDrawerUserName.setText(name);

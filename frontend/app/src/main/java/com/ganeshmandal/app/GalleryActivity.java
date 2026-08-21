@@ -106,7 +106,7 @@ public class GalleryActivity extends AppCompatActivity {
         SharedPreferences prefs = getSharedPreferences("MandalPrefs", MODE_PRIVATE);
         String role = prefs.getString("USER_ROLE", "USER");
         loggedInUserName = prefs.getString("USER_NAME", "सदस्य");
-        isAdmin = "ADMIN".equalsIgnoreCase(role);
+        isAdmin = "ADMIN".equalsIgnoreCase(role) || "SUPER_ADMIN".equalsIgnoreCase(role);
 
         btnBack.setOnClickListener(v -> finish());
 

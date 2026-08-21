@@ -52,7 +52,8 @@ public class DonationsActivity extends AppCompatActivity {
         fabAddDonation = findViewById(R.id.fabAddDonation);
 
         SharedPreferences prefs = getSharedPreferences("MandalPrefs", MODE_PRIVATE);
-        isAdmin = "ADMIN".equalsIgnoreCase(prefs.getString("USER_ROLE", "USER"));
+        String userRole = prefs.getString("USER_ROLE", "USER");
+        isAdmin = "ADMIN".equalsIgnoreCase(userRole) || "SUPER_ADMIN".equalsIgnoreCase(userRole);
 
         fabAddDonation.setVisibility(isAdmin ? View.VISIBLE : View.GONE);
 
