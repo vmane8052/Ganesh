@@ -3,7 +3,7 @@ const express = require('express');
 const cors = require('cors');
 const mongoose = require('mongoose');
 const cloudinary = require('cloudinary').v2;
-const { User, Transaction, Member, Event, Donation, Gallery } = require('../models');
+const { Mandal, User, Transaction, Member, Event, Donation, Gallery } = require('../models');
 
 // Configure Cloudinary
 cloudinary.config({
@@ -40,6 +40,23 @@ async function connectDB() {
       serverSelectionTimeoutMS: 8000,
     }).then(async (db) => {
       console.log('Connected to MongoDB Atlas successfully');
+      
+      // Auto-initialize default Mandal M001 if empty
+      try {
+        const count = await Mandal.countDocuments();
+        if (count === 0) {
+          await Mandal.create({
+            mandalId: 'M001',
+            mandalName: 'श्री गणेश मित्र मंडळ',
+            address: 'माने/ढेरे वस्ती, बाळेवाडी',
+            status: 'active'
+          });
+          console.log('Created default Mandal M001');
+        }
+      } catch (mErr) {
+        console.error('Error auto-creating default mandal:', mErr);
+      }
+
       return db;
     }).catch(err => {
       cachedPromise = null;
@@ -63,19 +80,76 @@ app.use(async (req, res, next) => {
 
 // Health check endpoint
 app.get('/api/health', (req, res) => {
-  res.json({ status: 'OK', message: 'श्री गणेश मित्र मंडळ API is running smoothly!' });
+  res.json({ status: 'OK', message: 'श्री गणेश मित्र मंडळ Multi-Mandal API is running smoothly!' });
+});
+
+// --- MANDALS MANAGEMENT (Multi-Tenant Endpoints) ---
+app.get('/api/mandals', async (req, res) => {
+  try {
+    const mandals = await Mandal.find().sort({ createdAt: 1 });
+    res.json({ success: true, data: mandals });
+  } catch (err) {
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
+
+app.post('/api/mandals', async (req, res) => {
+  try {
+    const { mandalName, address, contactPhone } = req.body;
+    if (!mandalName) {
+      return res.status(400).json({ success: false, message: 'मंडळाचे नाव आवश्यक आहे' });
+    }
+
+    const count = await Mandal.countDocuments();
+    const nextIdNum = count + 1;
+    const mandalId = 'M' + String(nextIdNum).padStart(3, '0');
+
+    const mandal = await Mandal.create({
+      mandalId,
+      mandalName,
+      address: address || '',
+      contactPhone: contactPhone || '',
+      status: 'active'
+    });
+
+    res.status(201).json({ success: true, message: 'नवीन मंडळ यशस्वीरीत्या तयार केले!', data: mandal });
+  } catch (err) {
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
+
+app.put('/api/mandals/:mandalId', async (req, res) => {
+  try {
+    const { mandalId } = req.params;
+    const { mandalName, address, contactPhone, status } = req.body;
+
+    const updatedMandal = await Mandal.findOneAndUpdate(
+      { mandalId },
+      { mandalName, address, contactPhone, status },
+      { new: true }
+    );
+
+    if (!updatedMandal) {
+      return res.status(404).json({ success: false, message: 'मंडळ सापडले नाही' });
+    }
+
+    res.json({ success: true, message: 'मंडळाची माहिती यशस्वीरीत्या अपडेट केली', data: updatedMandal });
+  } catch (err) {
+    res.status(500).json({ success: false, error: err.message });
+  }
 });
 
 // --- AUTH / LOGIN ---
 app.post('/api/login', async (req, res) => {
   try {
-    const { phone, pin } = req.body || {};
+    const { phone, pin, mandalId } = req.body || {};
     if (!phone || !pin) {
       return res.status(400).json({ success: false, message: 'कृपया मोबाईल नंबर आणि पिन टाका' });
     }
     const cleanPhone = String(phone).replace(/\D/g, '');
     const cleanPin = String(pin).trim();
-    const user = await User.findOne({
+
+    const queryFilter = {
       $or: [
         { phone: cleanPhone },
         { phone: String(phone).trim() },
@@ -83,10 +157,19 @@ app.post('/api/login', async (req, res) => {
         { phone: cleanPhone.length === 10 ? cleanPhone.slice(0, 9) : cleanPhone }
       ],
       pin: cleanPin
-    });
+    };
+    if (mandalId) {
+      queryFilter.mandalId = mandalId;
+    }
+
+    const user = await User.findOne(queryFilter);
     if (!user) {
       return res.status(401).json({ success: false, message: 'चुकीचा मोबाईल नंबर किंवा पिन' });
     }
+
+    const userMandalId = user.mandalId || 'M001';
+    const mandalInfo = await Mandal.findOne({ mandalId: userMandalId });
+
     res.json({
       success: true,
       user: {
@@ -95,7 +178,10 @@ app.post('/api/login', async (req, res) => {
         phone: user.phone,
         role: user.role,
         roleInMandal: user.roleInMandal || (user.role === 'ADMIN' ? 'मुख्य व्यवस्थापक' : 'सामान्य सदस्य'),
-        photoUrl: user.photoUrl || ''
+        photoUrl: user.photoUrl || '',
+        mandalId: userMandalId,
+        mandalName: mandalInfo ? mandalInfo.mandalName : 'श्री गणेश मित्र मंडळ',
+        mandalAddress: mandalInfo ? mandalInfo.address : 'माने/ढेरे वस्ती, बाळेवाडी'
       }
     });
   } catch (err) {
@@ -103,13 +189,24 @@ app.post('/api/login', async (req, res) => {
   }
 });
 
-// --- USERS / MEMBERS (सदस्य ॲड करणे) ---
+// --- USERS / MEMBERS ---
+app.get('/api/users', async (req, res) => {
+  try {
+    const targetMandalId = req.query.mandalId || 'M001';
+    const users = await User.find({ mandalId: targetMandalId }).sort({ createdAt: -1 });
+    res.json({ success: true, data: users });
+  } catch (err) {
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
+
 app.post('/api/users', async (req, res) => {
   try {
-    const { name, phone, pin, role, roleInMandal, photoUrl } = req.body;
+    const { name, phone, pin, role, roleInMandal, photoUrl, mandalId } = req.body;
     if (!name || !phone || !pin) {
       return res.status(400).json({ success: false, message: 'नाव, मोबाईल नंबर आणि पासवर्ड आवश्यक आहेत' });
     }
+    const targetMandalId = mandalId || 'M001';
 
     let finalPhotoUrl = photoUrl || '';
     if (photoUrl && photoUrl.startsWith('data:image')) {
@@ -125,17 +222,19 @@ app.post('/api/users', async (req, res) => {
     }
 
     const user = await User.findOneAndUpdate(
-      { phone },
+      { phone, mandalId: targetMandalId },
       {
         name,
         phone,
         pin,
         role: role || 'USER',
         roleInMandal: roleInMandal || 'सामान्य सदस्य',
-        photoUrl: finalPhotoUrl
+        photoUrl: finalPhotoUrl,
+        mandalId: targetMandalId
       },
       { upsert: true, new: true, setDefaultsOnInsert: true }
     );
+
     res.status(201).json({
       success: true,
       user: {
@@ -145,7 +244,8 @@ app.post('/api/users', async (req, res) => {
         pin: user.pin,
         role: user.role,
         roleInMandal: user.roleInMandal,
-        photoUrl: user.photoUrl
+        photoUrl: user.photoUrl,
+        mandalId: user.mandalId
       }
     });
   } catch (err) {
@@ -155,33 +255,24 @@ app.post('/api/users', async (req, res) => {
 
 app.post('/api/users/change-password', async (req, res) => {
   try {
-    const { phone, currentPin, newPin } = req.body;
+    const { phone, currentPin, newPin, mandalId } = req.body;
     if (!phone || !newPin) {
       return res.status(400).json({ success: false, message: 'मोबाईल नंबर आणि नवीन पासवर्ड आवश्यक आहे' });
     }
+    const targetMandalId = mandalId || 'M001';
 
-    const user = await User.findOne({ phone: phone.trim() });
+    const user = await User.findOne({ phone, mandalId: targetMandalId });
     if (!user) {
       return res.status(404).json({ success: false, message: 'सदस्य सापडला नाही' });
     }
-
-    if (currentPin && user.pin && user.pin.trim() !== currentPin.trim()) {
-      return res.status(400).json({ success: false, message: 'सध्याचा जुना पासवर्ड चुकीचा आहे' });
+    if (currentPin && user.pin !== currentPin) {
+      return res.status(400).json({ success: false, message: 'जुना पासवर्ड चुकीचा आहे' });
     }
 
-    user.pin = newPin.trim();
+    user.pin = newPin;
     await user.save();
 
-    res.json({ success: true, message: 'पासवर्ड यशस्वीरीत्या बदलला आहे! कृपया पुन्हा नवीन पासवर्डने लॉगिन करा.' });
-  } catch (err) {
-    res.status(500).json({ success: false, error: err.message });
-  }
-});
-
-app.get('/api/users', async (req, res) => {
-  try {
-    const users = await User.find().sort({ createdAt: -1 });
-    res.json({ success: true, data: users });
+    res.json({ success: true, message: 'पासवर्ड यशस्वीरीत्या बदलला!' });
   } catch (err) {
     res.status(500).json({ success: false, error: err.message });
   }
@@ -190,9 +281,10 @@ app.get('/api/users', async (req, res) => {
 app.put('/api/users/phone/:phone', async (req, res) => {
   try {
     const { phone } = req.params;
-    const { name, pin, role, roleInMandal, photoUrl } = req.body;
+    const { name, pin, role, roleInMandal, photoUrl, mandalId } = req.body;
+    const targetMandalId = mandalId || req.query.mandalId || 'M001';
 
-    let finalPhotoUrl = photoUrl;
+    let finalPhotoUrl = photoUrl || '';
     if (photoUrl && photoUrl.startsWith('data:image')) {
       try {
         const uploadRes = await cloudinary.uploader.upload(photoUrl, {
@@ -206,7 +298,7 @@ app.put('/api/users/phone/:phone', async (req, res) => {
     }
 
     const updatedUser = await User.findOneAndUpdate(
-      { phone },
+      { phone, mandalId: targetMandalId },
       { name, pin, role, roleInMandal, photoUrl: finalPhotoUrl },
       { new: true }
     );
@@ -222,7 +314,8 @@ app.put('/api/users/phone/:phone', async (req, res) => {
 app.delete('/api/users/phone/:phone', async (req, res) => {
   try {
     const { phone } = req.params;
-    const deletedUser = await User.findOneAndDelete({ phone });
+    const targetMandalId = req.query.mandalId || 'M001';
+    const deletedUser = await User.findOneAndDelete({ phone, mandalId: targetMandalId });
     if (!deletedUser) {
       return res.status(404).json({ success: false, message: 'सदस्य सापडला नाही' });
     }
@@ -235,8 +328,11 @@ app.delete('/api/users/phone/:phone', async (req, res) => {
 // --- TRANSACTIONS (जमा-खर्च) ---
 app.get('/api/transactions', async (req, res) => {
   try {
-    const { type } = req.query; // optional filter by JAMA or KHARCH
-    const query = type ? { type } : {};
+    const { type, mandalId } = req.query;
+    const targetMandalId = mandalId || 'M001';
+    const query = { mandalId: targetMandalId };
+    if (type) query.type = type;
+
     const transactions = await Transaction.find(query).sort({ createdAt: -1 });
     res.json({ success: true, data: transactions });
   } catch (err) {
@@ -246,13 +342,15 @@ app.get('/api/transactions', async (req, res) => {
 
 app.post('/api/transactions', async (req, res) => {
   try {
-    const { type, amount, details, date, category, memberName, memberPhone, addedBy, receiptNo } = req.body;
+    const { type, amount, details, date, category, memberName, memberPhone, addedBy, receiptNo, mandalId } = req.body;
     if (!type || !amount || !details || !date) {
       return res.status(400).json({ success: false, message: 'सर्व आवश्यक माहिती भरा' });
     }
+    const targetMandalId = mandalId || 'M001';
     const finalReceiptNo = receiptNo || (`REC-${new Date().getFullYear()}-${Math.floor(1000 + Math.random() * 9000)}`);
+    
     const newTx = await Transaction.create({
-      type, amount, details, date, category, memberName, memberPhone: memberPhone || '', addedBy, receiptNo: finalReceiptNo
+      type, amount, details, date, category, memberName, memberPhone: memberPhone || '', addedBy, receiptNo: finalReceiptNo, mandalId: targetMandalId
     });
     res.status(201).json({ success: true, data: newTx });
   } catch (err) {
@@ -283,7 +381,8 @@ app.delete('/api/transactions/:id', async (req, res) => {
 // --- SUMMARY (एकूण जमा, खर्च आणि शिल्लक) ---
 app.get('/api/summary', async (req, res) => {
   try {
-    const all = await Transaction.find();
+    const targetMandalId = req.query.mandalId || 'M001';
+    const all = await Transaction.find({ mandalId: targetMandalId });
     let totalJama = 0;
     let totalKharch = 0;
     all.forEach(tx => {
@@ -306,7 +405,8 @@ app.get('/api/summary', async (req, res) => {
 // --- MEMBERS (सदस्य) ---
 app.get('/api/members', async (req, res) => {
   try {
-    const members = await Member.find().sort({ createdAt: -1 });
+    const targetMandalId = req.query.mandalId || 'M001';
+    const members = await Member.find({ mandalId: targetMandalId }).sort({ createdAt: -1 });
     res.json({ success: true, data: members });
   } catch (err) {
     res.status(500).json({ success: false, error: err.message });
@@ -315,8 +415,9 @@ app.get('/api/members', async (req, res) => {
 
 app.post('/api/members', async (req, res) => {
   try {
-    const { name, roleInMandal, phone, photoUrl } = req.body;
-    const member = await Member.create({ name, roleInMandal, phone, photoUrl });
+    const { name, roleInMandal, phone, photoUrl, mandalId } = req.body;
+    const targetMandalId = mandalId || 'M001';
+    const member = await Member.create({ name, roleInMandal, phone, photoUrl, mandalId: targetMandalId });
     res.status(201).json({ success: true, data: member });
   } catch (err) {
     res.status(500).json({ success: false, error: err.message });
@@ -326,7 +427,8 @@ app.post('/api/members', async (req, res) => {
 // --- EVENTS (कार्यक्रम व्यवस्थापन) ---
 app.get('/api/events', async (req, res) => {
   try {
-    const events = await Event.find().sort({ createdAt: 1 });
+    const targetMandalId = req.query.mandalId || 'M001';
+    const events = await Event.find({ mandalId: targetMandalId }).sort({ createdAt: 1 });
     res.json({ success: true, data: events });
   } catch (err) {
     res.status(500).json({ success: false, error: err.message });
@@ -335,10 +437,11 @@ app.get('/api/events', async (req, res) => {
 
 app.post('/api/events', async (req, res) => {
   try {
-    const { dayTitle, date, morningAarti, eveningAarti, lunchHost, modakHost, culturalProgram, specialNotes } = req.body;
+    const { dayTitle, date, morningAarti, eveningAarti, lunchHost, modakHost, culturalProgram, specialNotes, mandalId } = req.body;
     if (!dayTitle || !date) {
       return res.status(400).json({ success: false, message: 'दिवस आणि तारीख आवश्यक आहे' });
     }
+    const targetMandalId = mandalId || 'M001';
     const event = await Event.create({
       dayTitle,
       date,
@@ -347,7 +450,8 @@ app.post('/api/events', async (req, res) => {
       lunchHost: lunchHost || '',
       modakHost: modakHost || '',
       culturalProgram: culturalProgram || '',
-      specialNotes: specialNotes || ''
+      specialNotes: specialNotes || '',
+      mandalId: targetMandalId
     });
     res.status(201).json({ success: true, message: 'कार्यक्रम यशस्वीरीत्या जोडला गेला', data: event });
   } catch (err) {
@@ -378,10 +482,11 @@ app.delete('/api/events/:id', async (req, res) => {
   }
 });
 
-// --- DONATIONS (देणगी व्यवस्थापन - रोख रक्कम व वस्तू देणगी) ---
+// --- DONATIONS (देणगी व्यवस्थापन) ---
 app.get('/api/donations', async (req, res) => {
   try {
-    const donations = await Donation.find().sort({ createdAt: -1 });
+    const targetMandalId = req.query.mandalId || 'M001';
+    const donations = await Donation.find({ mandalId: targetMandalId }).sort({ createdAt: -1 });
     res.json({ success: true, data: donations });
   } catch (err) {
     res.status(500).json({ success: false, error: err.message });
@@ -390,10 +495,11 @@ app.get('/api/donations', async (req, res) => {
 
 app.post('/api/donations', async (req, res) => {
   try {
-    const { donorName, donorPhone, donationType, amount, itemDetails, date, address, receiptNo } = req.body;
+    const { donorName, donorPhone, donationType, amount, itemDetails, date, address, receiptNo, mandalId } = req.body;
     if (!donorName || !date) {
       return res.status(400).json({ success: false, message: 'देणगीदाराचे नाव आणि तारीख आवश्यक आहे' });
     }
+    const targetMandalId = mandalId || 'M001';
     const donation = await Donation.create({
       donorName,
       donorPhone: donorPhone || '',
@@ -402,7 +508,8 @@ app.post('/api/donations', async (req, res) => {
       itemDetails: itemDetails || '',
       date,
       address: address || '',
-      receiptNo: receiptNo || ''
+      receiptNo: receiptNo || '',
+      mandalId: targetMandalId
     });
     res.status(201).json({ success: true, message: 'देणगी यशस्वीरीत्या नोंदवली गेली', data: donation });
   } catch (err) {
@@ -410,40 +517,16 @@ app.post('/api/donations', async (req, res) => {
   }
 });
 
-app.put('/api/donations/:id', async (req, res) => {
-  try {
-    const { id } = req.params;
-    const updated = await Donation.findByIdAndUpdate(id, req.body, { new: true });
-    if (!updated) {
-      return res.status(404).json({ success: false, message: 'देणगी नोंद सापडली नाही' });
-    }
-    res.json({ success: true, message: 'देणगी यशस्वीरीत्या अपडेट केली', data: updated });
-  } catch (err) {
-    res.status(500).json({ success: false, error: err.message });
-  }
-});
-
-app.delete('/api/donations/:id', async (req, res) => {
-  try {
-    const { id } = req.params;
-    await Donation.findByIdAndDelete(id);
-    res.json({ success: true, message: 'देणगी यशस्वीरीत्या हटवली गेली' });
-  } catch (err) {
-    res.status(500).json({ success: false, error: err.message });
-  }
-});
-
-// --- PHOTO UPLOAD (Cloudinary & Base64 Fallback) ---
+// --- PHOTO UPLOAD ---
 app.post('/api/upload', async (req, res) => {
   try {
-    const { image, phone } = req.body;
+    const { image, phone, mandalId } = req.body;
     if (!image) {
       return res.status(400).json({ success: false, message: 'फोटो डेटा आवश्यक आहे' });
     }
-
+    const targetMandalId = mandalId || 'M001';
     let finalUrl = image;
 
-    // If Cloudinary environment variables are present, upload to Cloudinary
     if (process.env.CLOUDINARY_CLOUD_NAME && process.env.CLOUDINARY_API_KEY && process.env.CLOUDINARY_API_SECRET) {
       const uploadRes = await cloudinary.uploader.upload(image, {
         folder: 'ganesh_mandal_profiles',
@@ -452,9 +535,8 @@ app.post('/api/upload', async (req, res) => {
       finalUrl = uploadRes.secure_url;
     }
 
-    // If phone is supplied, automatically update the user's profile photo in MongoDB
     if (phone) {
-      await User.findOneAndUpdate({ phone }, { photoUrl: finalUrl });
+      await User.findOneAndUpdate({ phone, mandalId: targetMandalId }, { photoUrl: finalUrl });
     }
 
     res.json({ success: true, message: 'फोटो यशस्वीरीत्या सेव्ह झाला', photoUrl: finalUrl });
@@ -466,8 +548,9 @@ app.post('/api/upload', async (req, res) => {
 // --- GALLERY (फोटो गॅलरी) ---
 app.get('/api/gallery', async (req, res) => {
   try {
-    const { year } = req.query;
-    const filter = {};
+    const { year, mandalId } = req.query;
+    const targetMandalId = mandalId || 'M001';
+    const filter = { mandalId: targetMandalId };
     if (year && year !== 'ALL' && year !== 'सर्व' && year !== 'सर्व वर्षे') {
       filter.year = year;
     }
@@ -480,10 +563,11 @@ app.get('/api/gallery', async (req, res) => {
 
 app.post('/api/gallery', async (req, res) => {
   try {
-    const { title, imageUrl, uploadedBy, year } = req.body;
+    const { title, imageUrl, uploadedBy, year, mandalId } = req.body;
     if (!imageUrl) {
       return res.status(400).json({ success: false, message: 'फोटो आवश्यक आहे' });
     }
+    const targetMandalId = mandalId || 'M001';
 
     let finalImageUrl = imageUrl;
     if (imageUrl.startsWith('data:image')) {
@@ -501,7 +585,8 @@ app.post('/api/gallery', async (req, res) => {
       title: title || '',
       imageUrl: finalImageUrl,
       uploadedBy: uploadedBy || 'मंडळ सदस्य',
-      year: year || '2026'
+      year: year || '2026',
+      mandalId: targetMandalId
     });
     res.status(201).json({ success: true, message: 'फोटो गॅलरीमध्ये जोडला गेला!', data: photo });
   } catch (err) {
@@ -511,11 +596,12 @@ app.post('/api/gallery', async (req, res) => {
 
 app.post('/api/gallery/batch', async (req, res) => {
   try {
-    const { photos, year } = req.body;
+    const { photos, year, mandalId } = req.body;
     if (!photos || !Array.isArray(photos) || photos.length === 0) {
       return res.status(400).json({ success: false, message: 'फोटो आवश्यक आहेत' });
     }
 
+    const targetMandalId = mandalId || 'M001';
     const targetYear = year || '2026';
     const createdList = [];
     for (const item of photos) {
@@ -535,7 +621,8 @@ app.post('/api/gallery/batch', async (req, res) => {
         title: item.title || '',
         imageUrl: finalImageUrl,
         uploadedBy: item.uploadedBy || 'मंडळ सदस्य',
-        year: item.year || targetYear
+        year: item.year || targetYear,
+        mandalId: targetMandalId
       });
       createdList.push(p);
     }

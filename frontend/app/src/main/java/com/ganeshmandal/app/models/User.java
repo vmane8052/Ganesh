@@ -16,13 +16,22 @@ public class User {
     private String pin;
 
     @SerializedName("role")
-    private String role; // "ADMIN" or "USER"
+    private String role; // "SUPER_ADMIN", "ADMIN" or "USER"
 
     @SerializedName("roleInMandal")
     private String roleInMandal; // e.g. "सामान्य सदस्य", "उपाध्यक्ष"
 
     @SerializedName("photoUrl")
     private String photoUrl; // Base64 or Image URI string
+
+    @SerializedName("mandalId")
+    private String mandalId; // e.g. "M001"
+
+    @SerializedName("mandalName")
+    private String mandalName;
+
+    @SerializedName("mandalAddress")
+    private String mandalAddress;
 
     public User() {}
 
@@ -42,7 +51,12 @@ public class User {
     public String getRole() { return role; }
     public String getRoleInMandal() { return roleInMandal != null && !roleInMandal.isEmpty() ? roleInMandal : ("ADMIN".equalsIgnoreCase(role) ? "मुख्य व्यवस्थापक" : "सामान्य सदस्य"); }
     public String getPhotoUrl() { return photoUrl; }
-    public boolean isAdmin() { return "ADMIN".equalsIgnoreCase(role); }
+    public String getMandalId() { return mandalId != null ? mandalId : "M001"; }
+    public String getMandalName() { return mandalName != null ? mandalName : "श्री गणेश मित्र मंडळ"; }
+    public String getMandalAddress() { return mandalAddress != null ? mandalAddress : "माने/ढेरे वस्ती, बाळेवाडी"; }
+    
+    public boolean isAdmin() { return "ADMIN".equalsIgnoreCase(role) || "SUPER_ADMIN".equalsIgnoreCase(role); }
+    public boolean isSuperAdmin() { return "SUPER_ADMIN".equalsIgnoreCase(role); }
 
     public void setName(String name) { this.name = name; }
     public void setPhone(String phone) { this.phone = phone; }
@@ -50,4 +64,7 @@ public class User {
     public void setRole(String role) { this.role = role; }
     public void setRoleInMandal(String roleInMandal) { this.roleInMandal = roleInMandal; }
     public void setPhotoUrl(String photoUrl) { this.photoUrl = photoUrl; }
+    public void setMandalId(String mandalId) { this.mandalId = mandalId; }
+    public void setMandalName(String mandalName) { this.mandalName = mandalName; }
+    public void setMandalAddress(String mandalAddress) { this.mandalAddress = mandalAddress; }
 }

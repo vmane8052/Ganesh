@@ -120,6 +120,9 @@ public class LoginActivity extends AppCompatActivity {
                             .putString("USER_PIN", pin) // Store PIN to detect password changes
                             .putString("USER_ROLE_IN_MANDAL", u.getRoleInMandal())
                             .putString("USER_PHOTO_URL", u.getPhotoUrl() != null ? u.getPhotoUrl() : "")
+                            .putString("MANDAL_ID", u.getMandalId())
+                            .putString("MANDAL_NAME", u.getMandalName())
+                            .putString("MANDAL_ADDRESS", u.getMandalAddress())
                             .apply();
 
                     String welcome = "स्वागत आहे, " + u.getName();
