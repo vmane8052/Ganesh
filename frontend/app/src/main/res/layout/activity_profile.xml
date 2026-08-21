@@ -210,6 +210,20 @@
                 </LinearLayout>
             </androidx.cardview.widget.CardView>
 
+            <!-- Super Admin Panel Button (Visible for Super Admin / Admin) -->
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btnSuperAdminPanel"
+                android:layout_width="match_parent"
+                android:layout_height="54dp"
+                android:layout_marginBottom="14dp"
+                android:backgroundTint="#0B5ED7"
+                android:text="👑 Super Admin Panel (सर्व मंडळे)"
+                android:textColor="@color/white"
+                android:textSize="16sp"
+                android:textStyle="bold"
+                android:visibility="gone"
+                app:cornerRadius="12dp" />
+
             <!-- Change Password Button -->
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/btnChangePassword"

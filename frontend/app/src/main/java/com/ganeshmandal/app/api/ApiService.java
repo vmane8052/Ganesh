@@ -28,6 +28,15 @@ import retrofit2.http.Path;
 import retrofit2.http.Query;
 
 public interface ApiService {
+    @GET("api/mandals")
+    Call<com.ganeshmandal.app.models.MandalListResponse> getMandals();
+
+    @POST("api/mandals")
+    Call<com.ganeshmandal.app.models.SingleMandalResponse> addMandal(@Body com.ganeshmandal.app.models.Mandal mandal);
+
+    @PUT("api/mandals/{mandalId}")
+    Call<com.ganeshmandal.app.models.SingleMandalResponse> updateMandal(@Path("mandalId") String mandalId, @Body com.ganeshmandal.app.models.Mandal mandal);
+
     @POST("api/login")
     Call<LoginResponse> login(@Body Map<String, String> credentials);
 

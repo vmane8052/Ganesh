@@ -58,6 +58,7 @@ public class ProfileActivity extends AppCompatActivity {
         tvProfileRole = findViewById(R.id.tvProfileRole);
         btnChangePassword = findViewById(R.id.btnChangePassword);
         btnLogout = findViewById(R.id.btnLogout);
+        MaterialButton btnSuperAdminPanel = findViewById(R.id.btnSuperAdminPanel);
 
         prefs = getSharedPreferences("MandalPrefs", MODE_PRIVATE);
         String name = prefs.getString("USER_NAME", "सदस्य");
@@ -69,7 +70,14 @@ public class ProfileActivity extends AppCompatActivity {
         tvProfileName.setText(name);
         tvProfilePhone.setText(userPhone);
         tvProfileRoleInMandal.setText(roleInMandal);
-        tvProfileRole.setText("ADMIN".equalsIgnoreCase(role) ? "व्यवस्थापक (Admin)" : "सामान्य सदस्य (User)");
+        tvProfileRole.setText("ADMIN".equalsIgnoreCase(role) ? "व्यवस्थापक (Admin)" : ("SUPER_ADMIN".equalsIgnoreCase(role) ? "👑 Super Admin" : "सामान्य सदस्य (User)"));
+
+        if ("ADMIN".equalsIgnoreCase(role) || "SUPER_ADMIN".equalsIgnoreCase(role)) {
+            btnSuperAdminPanel.setVisibility(View.VISIBLE);
+            btnSuperAdminPanel.setOnClickListener(v -> {
+                startActivity(new Intent(ProfileActivity.this, SuperAdminActivity.class));
+            });
+        }
 
         loadProfilePhoto(photoUrl);
 
