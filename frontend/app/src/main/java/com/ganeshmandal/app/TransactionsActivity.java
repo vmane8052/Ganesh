@@ -125,7 +125,7 @@ public class TransactionsActivity extends AppCompatActivity {
     }
 
     private void fetchTransactions() {
-        String mandalId = prefs.getString("MANDAL_ID", "M001");
+        String mandalId = getSharedPreferences("MandalPrefs", MODE_PRIVATE).getString("MANDAL_ID", "M001");
         // 100% Strict Real-Time Fetch directly from MongoDB Atlas Cloud API
         ApiClient.getService().getTransactions(null, mandalId).enqueue(new Callback<TransactionResponse>() {
             @Override

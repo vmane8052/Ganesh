@@ -226,7 +226,7 @@ public class GalleryActivity extends AppCompatActivity {
 
     private void fetchGalleryPhotos() {
         swipeRefresh.setRefreshing(true);
-        String mandalId = prefs.getString("MANDAL_ID", "M001");
+        String mandalId = getSharedPreferences("MandalPrefs", MODE_PRIVATE).getString("MANDAL_ID", "M001");
         ApiClient.getService().getGallery(selectedFilterYear, mandalId).enqueue(new Callback<GalleryListResponse>() {
             @Override
             public void onResponse(Call<GalleryListResponse> call, Response<GalleryListResponse> response) {
@@ -371,7 +371,7 @@ public class GalleryActivity extends AppCompatActivity {
 
                 String base64 = decodeAndCompressUri(uri);
                 if (base64 != null && !base64.isEmpty()) {
-                    String mandalId = prefs.getString("MANDAL_ID", "M001");
+                    String mandalId = getSharedPreferences("MandalPrefs", MODE_PRIVATE).getString("MANDAL_ID", "M001");
                     GalleryPhoto photo = new GalleryPhoto("", base64, loggedInUserName, selectedUploadYear);
                     photo.setMandalId(mandalId);
                     try {
