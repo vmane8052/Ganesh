@@ -117,24 +117,49 @@ public class DonationsActivity extends AppCompatActivity {
     private void fetchDonations() {
         SharedPreferences prefs = getSharedPreferences("MandalPrefs", MODE_PRIVATE);
         String mandalId = prefs.getString("MANDAL_ID", "M001");
-        // 100% Strict Real-Time Cloud MongoDB Atlas Fetch
+        String cacheKey = "CACHE_DONATION_" + mandalId;
+
+        // Load offline cached donations first if empty
+        if (allDonations.isEmpty()) {
+            List<Donation> cached = com.ganeshmandal.app.utils.CacheManager.getCache(
+                    this, cacheKey, new com.google.gson.reflect.TypeToken<List<Donation>>(){}.getType());
+            if (cached != null && !cached.isEmpty()) {
+                allDonations = cached;
+                applyFilter();
+            }
+        }
+
+        // Fetch latest from server
         ApiClient.getService().getDonations(mandalId).enqueue(new Callback<DonationListResponse>() {
             @Override
             public void onResponse(Call<DonationListResponse> call, Response<DonationListResponse> response) {
                 if (response.isSuccessful() && response.body() != null && response.body().isSuccess()) {
                     List<Donation> list = response.body().getData();
                     allDonations = list != null ? list : new ArrayList<>();
+                    com.ganeshmandal.app.utils.CacheManager.saveCache(DonationsActivity.this, cacheKey, allDonations);
                     applyFilter();
                 } else {
-                    Toast.makeText(DonationsActivity.this, "डेटाबेसमधून देणग्या लोड करू शकलो नाही", Toast.LENGTH_SHORT).show();
+                    loadDonationsFromCacheFallback(cacheKey);
                 }
             }
 
             @Override
             public void onFailure(Call<DonationListResponse> call, Throwable t) {
-                Toast.makeText(DonationsActivity.this, "डेटाबेस नेटवर्क एरर: " + t.getMessage(), Toast.LENGTH_SHORT).show();
+                loadDonationsFromCacheFallback(cacheKey);
             }
         });
+    }
+
+    private void loadDonationsFromCacheFallback(String cacheKey) {
+        List<Donation> cached = com.ganeshmandal.app.utils.CacheManager.getCache(
+                this, cacheKey, new com.google.gson.reflect.TypeToken<List<Donation>>(){}.getType());
+        if (cached != null && !cached.isEmpty()) {
+            allDonations = cached;
+            applyFilter();
+            Toast.makeText(this, "📶 ऑफलाईन मोड: साठवलेल्या देणगी नोंदी दाखवत आहोत", Toast.LENGTH_SHORT).show();
+        } else {
+            Toast.makeText(this, "डेटाबेस नेटवर्क एरर. कृपया इंटरनेट सुरू करा.", Toast.LENGTH_SHORT).show();
+        }
     }
 
     private void applyFilter() {

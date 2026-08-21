@@ -227,6 +227,21 @@ public class GalleryActivity extends AppCompatActivity {
     private void fetchGalleryPhotos() {
         swipeRefresh.setRefreshing(true);
         String mandalId = getSharedPreferences("MandalPrefs", MODE_PRIVATE).getString("MANDAL_ID", "M001");
+        String cacheKey = "CACHE_GALLERY_" + mandalId + "_" + selectedFilterYear;
+
+        // Load offline cached photos first if empty
+        if (photoList.isEmpty()) {
+            List<GalleryPhoto> cached = com.ganeshmandal.app.utils.CacheManager.getCache(
+                    this, cacheKey, new com.google.gson.reflect.TypeToken<List<GalleryPhoto>>(){}.getType());
+            if (cached != null && !cached.isEmpty()) {
+                photoList.clear();
+                photoList.addAll(cached);
+                adapter.updateData(photoList);
+                updateEmptyState();
+            }
+        }
+
+        // Fetch latest from server
         ApiClient.getService().getGallery(selectedFilterYear, mandalId).enqueue(new Callback<GalleryListResponse>() {
             @Override
             public void onResponse(Call<GalleryListResponse> call, Response<GalleryListResponse> response) {
@@ -236,21 +251,35 @@ public class GalleryActivity extends AppCompatActivity {
                     if (response.body().getData() != null) {
                         photoList.addAll(response.body().getData());
                     }
+                    com.ganeshmandal.app.utils.CacheManager.saveCache(GalleryActivity.this, cacheKey, photoList);
                     adapter.updateData(photoList);
                     updateEmptyState();
                 } else {
-                    Toast.makeText(GalleryActivity.this, "फोटो लोड करण्यात अडचण आली", Toast.LENGTH_SHORT).show();
-                    updateEmptyState();
+                    loadGalleryFromCacheFallback(cacheKey);
                 }
             }
 
             @Override
             public void onFailure(Call<GalleryListResponse> call, Throwable t) {
                 swipeRefresh.setRefreshing(false);
-                Toast.makeText(GalleryActivity.this, "नेटवर्क एरर: " + t.getMessage(), Toast.LENGTH_SHORT).show();
-                updateEmptyState();
+                loadGalleryFromCacheFallback(cacheKey);
             }
         });
+    }
+
+    private void loadGalleryFromCacheFallback(String cacheKey) {
+        List<GalleryPhoto> cached = com.ganeshmandal.app.utils.CacheManager.getCache(
+                this, cacheKey, new com.google.gson.reflect.TypeToken<List<GalleryPhoto>>(){}.getType());
+        if (cached != null && !cached.isEmpty()) {
+            photoList.clear();
+            photoList.addAll(cached);
+            adapter.updateData(photoList);
+            updateEmptyState();
+            Toast.makeText(this, "📶 ऑफलाईन मोड: साठवलेले गॅलरी फोटो दाखवत आहोत", Toast.LENGTH_SHORT).show();
+        } else {
+            Toast.makeText(this, "नेटवर्क एरर. कृपया इंटरनेट सुरू करा.", Toast.LENGTH_SHORT).show();
+            updateEmptyState();
+        }
     }
 
     private void updateEmptyState() {

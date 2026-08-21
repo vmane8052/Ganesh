@@ -135,24 +135,49 @@ public class TransactionsActivity extends AppCompatActivity {
 
     private void fetchTransactions() {
         String mandalId = getSharedPreferences("MandalPrefs", MODE_PRIVATE).getString("MANDAL_ID", "M001");
-        // 100% Strict Real-Time Fetch directly from MongoDB Atlas Cloud API
+        String cacheKey = "CACHE_TX_" + mandalId;
+
+        // Load offline cached transactions first if empty
+        if (allTransactions.isEmpty()) {
+            List<Transaction> cached = com.ganeshmandal.app.utils.CacheManager.getCache(
+                    this, cacheKey, new com.google.gson.reflect.TypeToken<List<Transaction>>(){}.getType());
+            if (cached != null && !cached.isEmpty()) {
+                allTransactions = cached;
+                applyFilter();
+            }
+        }
+
+        // Fetch latest from server
         ApiClient.getService().getTransactions(null, mandalId).enqueue(new Callback<TransactionResponse>() {
             @Override
             public void onResponse(Call<TransactionResponse> call, Response<TransactionResponse> response) {
                 if (response.isSuccessful() && response.body() != null && response.body().isSuccess()) {
                     List<Transaction> serverList = response.body().getData();
                     allTransactions = serverList != null ? serverList : new ArrayList<>();
+                    com.ganeshmandal.app.utils.CacheManager.saveCache(TransactionsActivity.this, cacheKey, allTransactions);
                     applyFilter();
                 } else {
-                    Toast.makeText(TransactionsActivity.this, "डेटाबेसमधून व्यवहार लोड करू शकलो नाही", Toast.LENGTH_SHORT).show();
+                    loadTransactionsFromCacheFallback(cacheKey);
                 }
             }
 
             @Override
             public void onFailure(Call<TransactionResponse> call, Throwable t) {
-                Toast.makeText(TransactionsActivity.this, "डेटाबेस नेटवर्क एरर: " + t.getMessage(), Toast.LENGTH_SHORT).show();
+                loadTransactionsFromCacheFallback(cacheKey);
             }
         });
+    }
+
+    private void loadTransactionsFromCacheFallback(String cacheKey) {
+        List<Transaction> cached = com.ganeshmandal.app.utils.CacheManager.getCache(
+                this, cacheKey, new com.google.gson.reflect.TypeToken<List<Transaction>>(){}.getType());
+        if (cached != null && !cached.isEmpty()) {
+            allTransactions = cached;
+            applyFilter();
+            Toast.makeText(this, "📶 ऑफलाईन मोड: इंटरनेट बंद असल्यामुळे साठवलेली माहिती दाखवत आहोत", Toast.LENGTH_SHORT).show();
+        } else {
+            Toast.makeText(this, "डेटाबेस नेटवर्क एरर. कृपया इंटरनेट सुरू करा.", Toast.LENGTH_SHORT).show();
+        }
     }
 
     private void filterTransactions(String type) {

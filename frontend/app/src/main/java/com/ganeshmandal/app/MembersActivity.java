@@ -98,7 +98,19 @@ public class MembersActivity extends AppCompatActivity {
         Set<String> deletedPhones = prefs.getStringSet("DELETED_PHONES", new HashSet<>());
 
         String mandalId = prefs.getString("MANDAL_ID", "M001");
-        // 100% Strict Real-Time Fetch directly from MongoDB Atlas Cloud API
+        String cacheKey = "CACHE_MEMBERS_" + mandalId;
+
+        // Load offline cached members first if empty
+        if (allMembersList.isEmpty()) {
+            List<User> cached = com.ganeshmandal.app.utils.CacheManager.getCache(
+                    this, cacheKey, new com.google.gson.reflect.TypeToken<List<User>>(){}.getType());
+            if (cached != null && !cached.isEmpty()) {
+                allMembersList = cached;
+                updateListAndCount();
+            }
+        }
+
+        // Fetch latest from server
         ApiClient.getService().getUsers(mandalId).enqueue(new Callback<UserListResponse>() {
             @Override
             public void onResponse(Call<UserListResponse> call, Response<UserListResponse> response) {
@@ -111,17 +123,30 @@ public class MembersActivity extends AppCompatActivity {
                         }
                     }
                     allMembersList = filteredList;
+                    com.ganeshmandal.app.utils.CacheManager.saveCache(MembersActivity.this, cacheKey, allMembersList);
                     updateListAndCount();
                 } else {
-                    Toast.makeText(MembersActivity.this, "MongoDB डेटाबेसमधून माहिती लोड करू शकलो नाही", Toast.LENGTH_SHORT).show();
+                    loadMembersFromCacheFallback(cacheKey);
                 }
             }
 
             @Override
             public void onFailure(Call<UserListResponse> call, Throwable t) {
-                Toast.makeText(MembersActivity.this, "डेटाबेस नेटवर्क एरर: " + t.getMessage(), Toast.LENGTH_SHORT).show();
+                loadMembersFromCacheFallback(cacheKey);
             }
         });
+    }
+
+    private void loadMembersFromCacheFallback(String cacheKey) {
+        List<User> cached = com.ganeshmandal.app.utils.CacheManager.getCache(
+                this, cacheKey, new com.google.gson.reflect.TypeToken<List<User>>(){}.getType());
+        if (cached != null && !cached.isEmpty()) {
+            allMembersList = cached;
+            updateListAndCount();
+            Toast.makeText(this, "📶 ऑफलाईन मोड: साठवलेली सदस्य यादी दाखवत आहोत", Toast.LENGTH_SHORT).show();
+        } else {
+            Toast.makeText(this, "डेटाबेस नेटवर्क एरर. कृपया इंटरनेट सुरू करा.", Toast.LENGTH_SHORT).show();
+        }
     }
 
     private void updateListAndCount() {

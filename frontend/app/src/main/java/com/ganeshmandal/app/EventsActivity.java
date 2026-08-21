@@ -89,25 +89,52 @@ public class EventsActivity extends AppCompatActivity {
 
     private void fetchEvents() {
         String mandalId = getSharedPreferences("MandalPrefs", MODE_PRIVATE).getString("MANDAL_ID", "M001");
-        // 100% Strict Real-Time Cloud MongoDB Atlas Fetch
+        String cacheKey = "CACHE_EVENTS_" + mandalId;
+
+        // Load offline cached events first if empty
+        if (allEvents.isEmpty()) {
+            List<MandalEvent> cached = com.ganeshmandal.app.utils.CacheManager.getCache(
+                    this, cacheKey, new com.google.gson.reflect.TypeToken<List<MandalEvent>>(){}.getType());
+            if (cached != null && !cached.isEmpty()) {
+                allEvents = cached;
+                adapter.setEvents(allEvents);
+                tvEmpty.setVisibility(allEvents.isEmpty() ? View.VISIBLE : View.GONE);
+            }
+        }
+
+        // Fetch latest from server
         ApiClient.getService().getEvents(mandalId).enqueue(new Callback<EventListResponse>() {
             @Override
             public void onResponse(Call<EventListResponse> call, Response<EventListResponse> response) {
                 if (response.isSuccessful() && response.body() != null && response.body().isSuccess()) {
                     List<MandalEvent> list = response.body().getData();
                     allEvents = list != null ? list : new ArrayList<>();
+                    com.ganeshmandal.app.utils.CacheManager.saveCache(EventsActivity.this, cacheKey, allEvents);
                     adapter.setEvents(allEvents);
                     tvEmpty.setVisibility(allEvents.isEmpty() ? View.VISIBLE : View.GONE);
                 } else {
-                    Toast.makeText(EventsActivity.this, "डेटाबेसमधून कार्यक्रम लोड करू शकलो नाही", Toast.LENGTH_SHORT).show();
+                    loadEventsFromCacheFallback(cacheKey);
                 }
             }
 
             @Override
             public void onFailure(Call<EventListResponse> call, Throwable t) {
-                Toast.makeText(EventsActivity.this, "डेटाबेस नेटवर्क एरर: " + t.getMessage(), Toast.LENGTH_SHORT).show();
+                loadEventsFromCacheFallback(cacheKey);
             }
         });
+    }
+
+    private void loadEventsFromCacheFallback(String cacheKey) {
+        List<MandalEvent> cached = com.ganeshmandal.app.utils.CacheManager.getCache(
+                this, cacheKey, new com.google.gson.reflect.TypeToken<List<MandalEvent>>(){}.getType());
+        if (cached != null && !cached.isEmpty()) {
+            allEvents = cached;
+            adapter.setEvents(allEvents);
+            tvEmpty.setVisibility(allEvents.isEmpty() ? View.VISIBLE : View.GONE);
+            Toast.makeText(this, "📶 ऑफलाईन मोड: साठवलेले कार्यक्रम दाखवत आहोत", Toast.LENGTH_SHORT).show();
+        } else {
+            Toast.makeText(this, "डेटाबेस नेटवर्क एरर. कृपया इंटरनेट सुरू करा.", Toast.LENGTH_SHORT).show();
+        }
     }
 
     private void deleteEventRemote(MandalEvent event, int pos) {
