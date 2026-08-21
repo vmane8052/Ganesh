@@ -76,6 +76,14 @@ public class TransactionsActivity extends AppCompatActivity {
         String userRole = prefs.getString("USER_ROLE", "USER");
         boolean isAdmin = "ADMIN".equalsIgnoreCase(userRole) || "SUPER_ADMIN".equalsIgnoreCase(userRole);
 
+        String mandalName = prefs.getString("MANDAL_NAME", getString(R.string.app_name));
+        String mandalAddress = prefs.getString("MANDAL_ADDRESS", getString(R.string.mandal_subtitle));
+
+        TextView tvMandalName = findViewById(R.id.tvMandalName);
+        TextView tvMandalAddress = findViewById(R.id.tvMandalAddress);
+        if (tvMandalName != null) tvMandalName.setText(mandalName);
+        if (tvMandalAddress != null) tvMandalAddress.setText(mandalAddress);
+
         layoutAdminActions.setVisibility(isAdmin ? View.VISIBLE : View.GONE);
         adapter.setAdmin(isAdmin);
 
@@ -225,8 +233,19 @@ public class TransactionsActivity extends AppCompatActivity {
         TextView tvReceiptPhone = dialog.findViewById(R.id.tvReceiptPhone);
         TextView tvReceiptDetails = dialog.findViewById(R.id.tvReceiptDetails);
         TextView tvReceiptAmount = dialog.findViewById(R.id.tvReceiptAmount);
+        TextView tvReceiptMandalName = dialog.findViewById(R.id.tvReceiptMandalName);
+        ImageView ivReceiptLogo = dialog.findViewById(R.id.ivReceiptLogo);
         MaterialButton btnDownload = dialog.findViewById(R.id.btnDownloadReceipt);
         MaterialButton btnShare = dialog.findViewById(R.id.btnShareReceipt);
+
+        SharedPreferences prefs = getSharedPreferences("MandalPrefs", MODE_PRIVATE);
+        String mandalName = prefs.getString("MANDAL_NAME", "श्री गणेश मित्र मंडळ");
+        String mandalLogoUrl = prefs.getString("MANDAL_LOGO_URL", "");
+
+        if (tvReceiptMandalName != null) tvReceiptMandalName.setText("🚩 " + mandalName);
+        if (ivReceiptLogo != null && mandalLogoUrl != null && !mandalLogoUrl.trim().isEmpty()) {
+            Glide.with(this).load(mandalLogoUrl).placeholder(R.drawable.app_logo).error(R.drawable.app_logo).into(ivReceiptLogo);
+        }
 
         String rawReceiptNo = tx.getReceiptNo() != null && !tx.getReceiptNo().isEmpty()
                 ? tx.getReceiptNo() : ("REC-2026-" + Math.abs(tx.hashCode() % 9000 + 1000));

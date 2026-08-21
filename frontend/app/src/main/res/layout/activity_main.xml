@@ -428,6 +428,16 @@
                 android:textStyle="bold" />
 
             <TextView
+                android:id="@+id/tvDrawerMandalName"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="2dp"
+                android:text="श्री गणेश मित्र मंडळ"
+                android:textColor="#FFE082"
+                android:textSize="13sp"
+                android:textStyle="bold" />
+
+            <TextView
                 android:id="@+id/tvRoleTitle"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"

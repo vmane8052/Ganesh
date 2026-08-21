@@ -24,6 +24,7 @@
             android:orientation="horizontal">
 
             <ImageView
+                android:id="@+id/ivReceiptLogo"
                 android:layout_width="56dp"
                 android:layout_height="56dp"
                 android:src="@drawable/app_logo" />
@@ -35,6 +36,7 @@
                 android:orientation="vertical">
 
                 <TextView
+                    android:id="@+id/tvReceiptMandalName"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="🚩 श्री गणेश मित्र मंडळ"

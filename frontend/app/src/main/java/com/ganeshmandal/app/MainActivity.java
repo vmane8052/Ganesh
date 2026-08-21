@@ -73,12 +73,20 @@ public class MainActivity extends AppCompatActivity {
 
         boolean isAdmin = "ADMIN".equalsIgnoreCase(role) || "SUPER_ADMIN".equalsIgnoreCase(role);
 
+        TextView tvDrawerMandalName = findViewById(R.id.tvDrawerMandalName);
+
         if (tvDrawerUserName != null) {
             tvDrawerUserName.setText(name);
         }
 
+        if (tvDrawerMandalName != null) {
+            tvDrawerMandalName.setText(mandalName);
+        }
+
         if (ivDrawerLogo != null) {
-            if (photoUrl != null && !photoUrl.trim().isEmpty() && (photoUrl.startsWith("http://") || photoUrl.startsWith("https://"))) {
+            if (mandalLogoUrl != null && !mandalLogoUrl.trim().isEmpty()) {
+                Glide.with(this).load(mandalLogoUrl).circleCrop().placeholder(R.drawable.app_logo).error(R.drawable.app_logo).into(ivDrawerLogo);
+            } else if (photoUrl != null && !photoUrl.trim().isEmpty() && (photoUrl.startsWith("http://") || photoUrl.startsWith("https://"))) {
                 Glide.with(this).load(photoUrl).circleCrop().placeholder(R.drawable.app_logo).into(ivDrawerLogo);
             } else {
                 Glide.with(this).load(R.drawable.app_logo).circleCrop().into(ivDrawerLogo);
