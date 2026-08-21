@@ -154,8 +154,8 @@ public class MemberDetailActivity extends AppCompatActivity {
                 Glide.with(this)
                         .load(urlOrBase64)
                         .circleCrop()
-                        .placeholder(R.drawable.app_logo)
-                        .error(R.drawable.app_logo)
+                        .placeholder(R.drawable.ic_default_avatar)
+                        .error(R.drawable.ic_default_avatar)
                         .into(targetView);
             } else {
                 try {
@@ -168,14 +168,14 @@ public class MemberDetailActivity extends AppCompatActivity {
                     if (bitmap != null) {
                         Glide.with(this).load(bitmap).circleCrop().into(targetView);
                     } else {
-                        Glide.with(this).load(R.drawable.app_logo).circleCrop().into(targetView);
+                        Glide.with(this).load(R.drawable.ic_default_avatar).circleCrop().into(targetView);
                     }
                 } catch (Exception e) {
-                    Glide.with(this).load(R.drawable.app_logo).circleCrop().into(targetView);
+                    Glide.with(this).load(R.drawable.ic_default_avatar).circleCrop().into(targetView);
                 }
             }
         } else {
-            Glide.with(this).load(R.drawable.app_logo).circleCrop().into(targetView);
+            Glide.with(this).load(R.drawable.ic_default_avatar).circleCrop().into(targetView);
         }
     }
 

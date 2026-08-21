@@ -85,8 +85,8 @@ public class MemberAdapter extends RecyclerView.Adapter<MemberAdapter.MemberView
                 com.bumptech.glide.Glide.with(context)
                         .load(user.getPhotoUrl())
                         .circleCrop()
-                        .placeholder(R.drawable.app_logo)
-                        .error(R.drawable.app_logo)
+                        .placeholder(R.drawable.ic_default_avatar)
+                        .error(R.drawable.ic_default_avatar)
                         .into(holder.ivMemberPhoto);
             } else {
                 try {
@@ -99,14 +99,14 @@ public class MemberAdapter extends RecyclerView.Adapter<MemberAdapter.MemberView
                     if (bitmap != null) {
                         com.bumptech.glide.Glide.with(context).load(bitmap).circleCrop().into(holder.ivMemberPhoto);
                     } else {
-                        com.bumptech.glide.Glide.with(context).load(R.drawable.app_logo).circleCrop().into(holder.ivMemberPhoto);
+                        com.bumptech.glide.Glide.with(context).load(R.drawable.ic_default_avatar).circleCrop().into(holder.ivMemberPhoto);
                     }
                 } catch (Exception e) {
-                    com.bumptech.glide.Glide.with(context).load(R.drawable.app_logo).circleCrop().into(holder.ivMemberPhoto);
+                    com.bumptech.glide.Glide.with(context).load(R.drawable.ic_default_avatar).circleCrop().into(holder.ivMemberPhoto);
                 }
             }
         } else {
-            com.bumptech.glide.Glide.with(context).load(R.drawable.app_logo).circleCrop().into(holder.ivMemberPhoto);
+            com.bumptech.glide.Glide.with(context).load(R.drawable.ic_default_avatar).circleCrop().into(holder.ivMemberPhoto);
         }
 
         // Call member dialer

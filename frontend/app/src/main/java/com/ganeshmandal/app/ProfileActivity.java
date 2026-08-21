@@ -191,8 +191,8 @@ public class ProfileActivity extends AppCompatActivity {
                 Glide.with(this)
                         .load(photoUrl)
                         .circleCrop()
-                        .placeholder(R.drawable.app_logo)
-                        .error(R.drawable.app_logo)
+                        .placeholder(R.drawable.ic_default_avatar)
+                        .error(R.drawable.ic_default_avatar)
                         .into(ivProfilePhoto);
             } else {
                 try {
@@ -205,14 +205,14 @@ public class ProfileActivity extends AppCompatActivity {
                     if (bitmap != null) {
                         Glide.with(this).load(bitmap).circleCrop().into(ivProfilePhoto);
                     } else {
-                        Glide.with(this).load(R.drawable.app_logo).circleCrop().into(ivProfilePhoto);
+                        Glide.with(this).load(R.drawable.ic_default_avatar).circleCrop().into(ivProfilePhoto);
                     }
                 } catch (Exception e) {
-                    Glide.with(this).load(R.drawable.app_logo).circleCrop().into(ivProfilePhoto);
+                    Glide.with(this).load(R.drawable.ic_default_avatar).circleCrop().into(ivProfilePhoto);
                 }
             }
         } else {
-            Glide.with(this).load(R.drawable.app_logo).circleCrop().into(ivProfilePhoto);
+            Glide.with(this).load(R.drawable.ic_default_avatar).circleCrop().into(ivProfilePhoto);
         }
     }
 

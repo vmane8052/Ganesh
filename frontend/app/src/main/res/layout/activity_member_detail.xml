@@ -67,7 +67,7 @@
                         android:background="@drawable/circle_bg"
                         android:padding="3dp"
                         android:scaleType="centerCrop"
-                        android:src="@drawable/app_logo" />
+                        android:src="@drawable/ic_default_avatar" />
 
                     <TextView
                         android:id="@+id/tvName"

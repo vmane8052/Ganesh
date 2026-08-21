@@ -39,7 +39,7 @@ public class AddMemberActivity extends AppCompatActivity {
             "सचिव",
             "खजिनदार",
             "कार्यकर्ते",
-            "सामान्य सदस्य"
+            "सदस्य"
     };
 
     private final ActivityResultLauncher<String> photoPickerLauncher =
