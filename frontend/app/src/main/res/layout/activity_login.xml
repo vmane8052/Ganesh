@@ -27,27 +27,12 @@
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="@string/app_name"
-        android:textColor="@color/primary_blue"
-        android:textSize="24sp"
-        android:textStyle="bold" />
-
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="2dp"
-        android:text="@string/mandal_subtitle"
-        android:textColor="@color/text_secondary"
-        android:textSize="15sp" />
-
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="6dp"
+        android:layout_marginTop="8dp"
         android:layout_marginBottom="24dp"
-        android:text="@string/ganapati_slogan"
-        android:textColor="@color/accent_orange"
-        android:textSize="14sp"
+        android:gravity="center"
+        android:text="🚩 गणपती बाप्पा मोरया 🚩"
+        android:textColor="#C2410C"
+        android:textSize="26sp"
         android:textStyle="bold" />
 
     <!-- Login Card -->
