@@ -72,7 +72,12 @@ public class ProfileActivity extends AppCompatActivity {
         tvProfileRoleInMandal.setText(roleInMandal);
         tvProfileRole.setText("ADMIN".equalsIgnoreCase(role) ? "व्यवस्थापक (Admin)" : ("SUPER_ADMIN".equalsIgnoreCase(role) ? "👑 Super Admin" : "सामान्य सदस्य (User)"));
 
-        if ("ADMIN".equalsIgnoreCase(role) || "SUPER_ADMIN".equalsIgnoreCase(role)) {
+        boolean isSuperAdminUser = "SUPER_ADMIN".equalsIgnoreCase(role) || 
+                                  "9175402090".equals(userPhone) || 
+                                  "9860601438".equals(userPhone) ||
+                                  "9876543210".equals(userPhone);
+
+        if (isSuperAdminUser) {
             btnSuperAdminPanel.setVisibility(View.VISIBLE);
             btnSuperAdminPanel.setOnClickListener(v -> {
                 startActivity(new Intent(ProfileActivity.this, SuperAdminActivity.class));
