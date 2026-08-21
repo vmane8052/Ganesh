@@ -95,9 +95,21 @@ app.get('/api/mandals', async (req, res) => {
 
 app.post('/api/mandals', async (req, res) => {
   try {
-    const { mandalName, address, contactPhone } = req.body;
+    const { mandalName, address, contactPhone, logoUrl } = req.body;
     if (!mandalName) {
       return res.status(400).json({ success: false, message: 'मंडळाचे नाव आवश्यक आहे' });
+    }
+
+    let finalLogoUrl = logoUrl || '';
+    if (logoUrl && logoUrl.startsWith('data:image')) {
+      try {
+        const uploadRes = await cloudinary.uploader.upload(logoUrl, {
+          folder: 'ganesh_mandal_logos'
+        });
+        finalLogoUrl = uploadRes.secure_url;
+      } catch (uploadErr) {
+        console.error('Cloudinary logo upload error:', uploadErr);
+      }
     }
 
     const count = await Mandal.countDocuments();
@@ -109,6 +121,7 @@ app.post('/api/mandals', async (req, res) => {
       mandalName,
       address: address || '',
       contactPhone: contactPhone || '',
+      logoUrl: finalLogoUrl,
       status: 'active'
     });
 
@@ -121,11 +134,26 @@ app.post('/api/mandals', async (req, res) => {
 app.put('/api/mandals/:mandalId', async (req, res) => {
   try {
     const { mandalId } = req.params;
-    const { mandalName, address, contactPhone, status } = req.body;
+    const { mandalName, address, contactPhone, logoUrl, status } = req.body;
+
+    let finalLogoUrl = logoUrl;
+    if (logoUrl && logoUrl.startsWith('data:image')) {
+      try {
+        const uploadRes = await cloudinary.uploader.upload(logoUrl, {
+          folder: 'ganesh_mandal_logos'
+        });
+        finalLogoUrl = uploadRes.secure_url;
+      } catch (uploadErr) {
+        console.error('Cloudinary logo upload error:', uploadErr);
+      }
+    }
+
+    const updateFields = { mandalName, address, contactPhone, status };
+    if (finalLogoUrl !== undefined) updateFields.logoUrl = finalLogoUrl;
 
     const updatedMandal = await Mandal.findOneAndUpdate(
       { mandalId },
-      { mandalName, address, contactPhone, status },
+      updateFields,
       { new: true }
     );
 
@@ -181,7 +209,8 @@ app.post('/api/login', async (req, res) => {
         photoUrl: user.photoUrl || '',
         mandalId: userMandalId,
         mandalName: mandalInfo ? mandalInfo.mandalName : 'श्री गणेश मित्र मंडळ',
-        mandalAddress: mandalInfo ? mandalInfo.address : 'माने/ढेरे वस्ती, बाळेवाडी'
+        mandalAddress: mandalInfo ? mandalInfo.address : 'माने/ढेरे वस्ती, बाळेवाडी',
+        mandalLogoUrl: mandalInfo ? (mandalInfo.logoUrl || '') : ''
       }
     });
   } catch (err) {

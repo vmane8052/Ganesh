@@ -33,6 +33,9 @@ public class User {
     @SerializedName("mandalAddress")
     private String mandalAddress;
 
+    @SerializedName("mandalLogoUrl")
+    private String mandalLogoUrl;
+
     public User() {}
 
     public User(String name, String phone, String pin, String role, String roleInMandal, String photoUrl) {
@@ -54,6 +57,7 @@ public class User {
     public String getMandalId() { return mandalId != null ? mandalId : "M001"; }
     public String getMandalName() { return mandalName != null ? mandalName : "श्री गणेश मित्र मंडळ"; }
     public String getMandalAddress() { return mandalAddress != null ? mandalAddress : "माने/ढेरे वस्ती, बाळेवाडी"; }
+    public String getMandalLogoUrl() { return mandalLogoUrl != null ? mandalLogoUrl : ""; }
     
     public boolean isAdmin() { return "ADMIN".equalsIgnoreCase(role) || "SUPER_ADMIN".equalsIgnoreCase(role); }
     public boolean isSuperAdmin() { return "SUPER_ADMIN".equalsIgnoreCase(role); }
@@ -67,4 +71,5 @@ public class User {
     public void setMandalId(String mandalId) { this.mandalId = mandalId; }
     public void setMandalName(String mandalName) { this.mandalName = mandalName; }
     public void setMandalAddress(String mandalAddress) { this.mandalAddress = mandalAddress; }
+    public void setMandalLogoUrl(String mandalLogoUrl) { this.mandalLogoUrl = mandalLogoUrl; }
 }

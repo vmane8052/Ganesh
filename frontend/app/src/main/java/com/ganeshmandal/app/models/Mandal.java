@@ -18,6 +18,9 @@ public class Mandal {
     @SerializedName("contactPhone")
     private String contactPhone;
 
+    @SerializedName("logoUrl")
+    private String logoUrl;
+
     @SerializedName("status")
     private String status; // "active" or "inactive"
 
@@ -35,11 +38,13 @@ public class Mandal {
     public String getMandalName() { return mandalName; }
     public String getAddress() { return address; }
     public String getContactPhone() { return contactPhone; }
+    public String getLogoUrl() { return logoUrl; }
     public String getStatus() { return status; }
 
     public void setMandalId(String mandalId) { this.mandalId = mandalId; }
     public void setMandalName(String mandalName) { this.mandalName = mandalName; }
     public void setAddress(String address) { this.address = address; }
     public void setContactPhone(String contactPhone) { this.contactPhone = contactPhone; }
+    public void setLogoUrl(String logoUrl) { this.logoUrl = logoUrl; }
     public void setStatus(String status) { this.status = status; }
 }

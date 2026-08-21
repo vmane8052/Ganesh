@@ -1,17 +1,24 @@
 package com.ganeshmandal.app;
 
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.net.Uri;
 import android.os.Bundle;
 import android.text.InputType;
+import android.util.Base64;
 import android.view.View;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
+import com.bumptech.glide.Glide;
 import com.ganeshmandal.app.adapters.MandalAdapter;
 import com.ganeshmandal.app.api.ApiClient;
 import com.ganeshmandal.app.models.LoginResponse;
@@ -20,6 +27,8 @@ import com.ganeshmandal.app.models.MandalListResponse;
 import com.ganeshmandal.app.models.SingleMandalResponse;
 import com.ganeshmandal.app.models.User;
 import com.google.android.material.button.MaterialButton;
+import java.io.ByteArrayOutputStream;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
 import retrofit2.Call;
@@ -34,6 +43,14 @@ public class SuperAdminActivity extends AppCompatActivity {
     private RecyclerView rvMandals;
     private MandalAdapter adapter;
     private List<Mandal> mandalList = new ArrayList<>();
+
+    private String tempLogoBase64 = "";
+    private ImageView tempDialogLogoIv = null;
+
+    private final ActivityResultLauncher<String> logoPickerLauncher = registerForActivityResult(
+            new ActivityResultContracts.GetContent(),
+            this::handleSelectedLogo
+    );
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -67,6 +84,33 @@ public class SuperAdminActivity extends AppCompatActivity {
         fetchMandals();
     }
 
+    private void handleSelectedLogo(Uri uri) {
+        if (uri == null) return;
+        try {
+            InputStream is = getContentResolver().openInputStream(uri);
+            Bitmap originalBitmap = BitmapFactory.decodeStream(is);
+            if (is != null) is.close();
+
+            if (originalBitmap == null) return;
+
+            int width = originalBitmap.getWidth();
+            int height = originalBitmap.getHeight();
+            float scale = Math.min(400f / width, 400f / height);
+            Bitmap scaledBitmap = Bitmap.createScaledBitmap(originalBitmap, Math.round(width * scale), Math.round(height * scale), true);
+
+            ByteArrayOutputStream baos = new ByteArrayOutputStream();
+            scaledBitmap.compress(Bitmap.CompressFormat.JPEG, 80, baos);
+            byte[] imageBytes = baos.toByteArray();
+            tempLogoBase64 = "data:image/jpeg;base64," + Base64.encodeToString(imageBytes, Base64.NO_WRAP);
+
+            if (tempDialogLogoIv != null) {
+                Glide.with(this).load(scaledBitmap).circleCrop().into(tempDialogLogoIv);
+            }
+        } catch (Exception e) {
+            Toast.makeText(this, "फोटो लोड करताना एरर: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+        }
+    }
+
     private void fetchMandals() {
         ApiClient.getService().getMandals().enqueue(new Callback<MandalListResponse>() {
             @Override
@@ -88,12 +132,33 @@ public class SuperAdminActivity extends AppCompatActivity {
     }
 
     private void showAddMandalDialog() {
+        tempLogoBase64 = "";
+
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
         builder.setTitle("➕ नवीन मंडळ जोडा");
 
         LinearLayout layout = new LinearLayout(this);
         layout.setOrientation(LinearLayout.VERTICAL);
         layout.setPadding(40, 20, 40, 20);
+
+        // Logo Picker Section
+        LinearLayout logoLayout = new LinearLayout(this);
+        logoLayout.setOrientation(LinearLayout.HORIZONTAL);
+        logoLayout.setGravity(android.view.Gravity.CENTER_VERTICAL);
+        logoLayout.setPadding(0, 0, 0, 20);
+
+        tempDialogLogoIv = new ImageView(this);
+        LinearLayout.LayoutParams logoParams = new LinearLayout.LayoutParams(120, 120);
+        tempDialogLogoIv.setLayoutParams(logoParams);
+        Glide.with(this).load(R.drawable.app_logo).circleCrop().into(tempDialogLogoIv);
+
+        MaterialButton btnPickLogo = new MaterialButton(this, null, com.google.android.material.R.attr.borderlessButtonStyle);
+        btnPickLogo.setText("🖼️ लोगो निवडा");
+        btnPickLogo.setOnClickListener(v -> logoPickerLauncher.launch("image/*"));
+
+        logoLayout.addView(tempDialogLogoIv);
+        logoLayout.addView(btnPickLogo);
+        layout.addView(logoLayout);
 
         final EditText etName = new EditText(this);
         etName.setHint("मंडळाचे नाव (उदा. जय महाराष्ट्र तरुण मंडळ)");
@@ -121,6 +186,10 @@ public class SuperAdminActivity extends AppCompatActivity {
             }
 
             Mandal newMandal = new Mandal(name, address, phone);
+            if (!tempLogoBase64.isEmpty()) {
+                newMandal.setLogoUrl(tempLogoBase64);
+            }
+
             ApiClient.getService().addMandal(newMandal).enqueue(new Callback<SingleMandalResponse>() {
                 @Override
                 public void onResponse(Call<SingleMandalResponse> call, Response<SingleMandalResponse> response) {
@@ -145,13 +214,38 @@ public class SuperAdminActivity extends AppCompatActivity {
 
     private void showEditMandalDialog(Mandal mandal) {
         if (mandal == null) return;
+        tempLogoBase64 = "";
 
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
-        builder.setTitle("✏️ मंडळाचे नाव बदला (" + mandal.getMandalId() + ")");
+        builder.setTitle("✏️ मंडळाची माहिती बदला (" + mandal.getMandalId() + ")");
 
         LinearLayout layout = new LinearLayout(this);
         layout.setOrientation(LinearLayout.VERTICAL);
         layout.setPadding(40, 20, 40, 20);
+
+        // Logo Picker Section
+        LinearLayout logoLayout = new LinearLayout(this);
+        logoLayout.setOrientation(LinearLayout.HORIZONTAL);
+        logoLayout.setGravity(android.view.Gravity.CENTER_VERTICAL);
+        logoLayout.setPadding(0, 0, 0, 20);
+
+        tempDialogLogoIv = new ImageView(this);
+        LinearLayout.LayoutParams logoParams = new LinearLayout.LayoutParams(120, 120);
+        tempDialogLogoIv.setLayoutParams(logoParams);
+
+        if (mandal.getLogoUrl() != null && !mandal.getLogoUrl().trim().isEmpty()) {
+            Glide.with(this).load(mandal.getLogoUrl()).circleCrop().placeholder(R.drawable.app_logo).into(tempDialogLogoIv);
+        } else {
+            Glide.with(this).load(R.drawable.app_logo).circleCrop().into(tempDialogLogoIv);
+        }
+
+        MaterialButton btnPickLogo = new MaterialButton(this, null, com.google.android.material.R.attr.borderlessButtonStyle);
+        btnPickLogo.setText("🖼️ लोगो बदला");
+        btnPickLogo.setOnClickListener(v -> logoPickerLauncher.launch("image/*"));
+
+        logoLayout.addView(tempDialogLogoIv);
+        logoLayout.addView(btnPickLogo);
+        layout.addView(logoLayout);
 
         final EditText etName = new EditText(this);
         etName.setHint("मंडळाचे नाव");
@@ -176,6 +270,9 @@ public class SuperAdminActivity extends AppCompatActivity {
 
             mandal.setMandalName(name);
             mandal.setAddress(address);
+            if (!tempLogoBase64.isEmpty()) {
+                mandal.setLogoUrl(tempLogoBase64);
+            }
 
             ApiClient.getService().updateMandal(mandal.getMandalId(), mandal).enqueue(new Callback<SingleMandalResponse>() {
                 @Override
@@ -242,7 +339,7 @@ public class SuperAdminActivity extends AppCompatActivity {
                 @Override
                 public void onResponse(Call<LoginResponse> call, Response<LoginResponse> response) {
                     if (response.isSuccessful() && response.body() != null && response.body().isSuccess()) {
-                        Toast.makeText(SuperAdminActivity.this, "मंडळाचा ॲडमिन यशस्वीरीत्या जोडला गेला!", Toast.LENGTH_LONG).show();
+                        Toast.makeText(SuperAdminActivity.this, "मंडळाचा ॲडमिन यशस्वीरीत्या जोडला गेला! (ID: " + mandal.getMandalId() + ")", Toast.LENGTH_LONG).show();
                     } else {
                         Toast.makeText(SuperAdminActivity.this, "ॲडमिन जोडताना एरर आला", Toast.LENGTH_SHORT).show();
                     }

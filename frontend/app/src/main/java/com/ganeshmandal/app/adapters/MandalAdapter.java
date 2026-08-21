@@ -3,9 +3,11 @@ package com.ganeshmandal.app.adapters;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
 import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
+import com.bumptech.glide.Glide;
 import com.ganeshmandal.app.R;
 import com.ganeshmandal.app.models.Mandal;
 import com.google.android.material.button.MaterialButton;
@@ -46,6 +48,20 @@ public class MandalAdapter extends RecyclerView.Adapter<MandalAdapter.ViewHolder
         holder.tvMandalAddress.setText(m.getAddress() != null && !m.getAddress().isEmpty() ? ("📍 " + m.getAddress()) : "📍 पत्ता उपलब्ध नाही");
         holder.tvStatus.setText("ACTIVE");
 
+        if (m.getLogoUrl() != null && !m.getLogoUrl().trim().isEmpty()) {
+            Glide.with(holder.itemView.getContext())
+                    .load(m.getLogoUrl())
+                    .circleCrop()
+                    .placeholder(R.drawable.app_logo)
+                    .error(R.drawable.app_logo)
+                    .into(holder.ivMandalLogo);
+        } else {
+            Glide.with(holder.itemView.getContext())
+                    .load(R.drawable.app_logo)
+                    .circleCrop()
+                    .into(holder.ivMandalLogo);
+        }
+
         holder.btnEditMandal.setOnClickListener(v -> {
             if (listener != null) listener.onEditClick(m);
         });
@@ -62,6 +78,7 @@ public class MandalAdapter extends RecyclerView.Adapter<MandalAdapter.ViewHolder
 
     static class ViewHolder extends RecyclerView.ViewHolder {
         TextView tvMandalId, tvMandalName, tvMandalAddress, tvStatus;
+        ImageView ivMandalLogo;
         MaterialButton btnEditMandal, btnAddAdmin;
 
         ViewHolder(@NonNull View itemView) {
@@ -70,6 +87,7 @@ public class MandalAdapter extends RecyclerView.Adapter<MandalAdapter.ViewHolder
             tvMandalName = itemView.findViewById(R.id.tvMandalName);
             tvMandalAddress = itemView.findViewById(R.id.tvMandalAddress);
             tvStatus = itemView.findViewById(R.id.tvStatus);
+            ivMandalLogo = itemView.findViewById(R.id.ivMandalLogo);
             btnEditMandal = itemView.findViewById(R.id.btnEditMandal);
             btnAddAdmin = itemView.findViewById(R.id.btnAddAdmin);
         }

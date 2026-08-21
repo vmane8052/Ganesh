@@ -6,6 +6,7 @@ const mandalSchema = new mongoose.Schema({
   mandalName: { type: String, required: true },
   address: { type: String, default: '' },
   contactPhone: { type: String, default: '' },
+  logoUrl: { type: String, default: '' },
   status: { type: String, enum: ['active', 'inactive'], default: 'active' }
 }, { timestamps: true });
 

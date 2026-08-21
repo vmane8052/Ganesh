@@ -123,6 +123,7 @@ public class LoginActivity extends AppCompatActivity {
                             .putString("MANDAL_ID", u.getMandalId())
                             .putString("MANDAL_NAME", u.getMandalName())
                             .putString("MANDAL_ADDRESS", u.getMandalAddress())
+                            .putString("MANDAL_LOGO_URL", u.getMandalLogoUrl())
                             .apply();
 
                     String welcome = "स्वागत आहे, " + u.getName();

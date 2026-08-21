@@ -53,26 +53,50 @@
                 android:textStyle="bold" />
         </RelativeLayout>
 
-        <!-- Mandal Name -->
-        <TextView
-            android:id="@+id/tvMandalName"
+        <!-- Mandal Name & Logo Row -->
+        <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="10dp"
-            android:text="श्री गणेश मित्र मंडळ"
-            android:textColor="@color/text_primary"
-            android:textSize="17sp"
-            android:textStyle="bold" />
+            android:gravity="center_vertical"
+            android:orientation="horizontal">
 
-        <!-- Address -->
-        <TextView
-            android:id="@+id/tvMandalAddress"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="4dp"
-            android:text="📍 माने/ढेरे वस्ती, बाळेवाडी"
-            android:textColor="@color/text_secondary"
-            android:textSize="13sp" />
+            <ImageView
+                android:id="@+id/ivMandalLogo"
+                android:layout_width="44dp"
+                android:layout_height="44dp"
+                android:background="@drawable/circle_bg"
+                android:padding="2dp"
+                android:scaleType="centerCrop"
+                android:src="@drawable/app_logo" />
+
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="12dp"
+                android:layout_weight="1"
+                android:orientation="vertical">
+
+                <TextView
+                    android:id="@+id/tvMandalName"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="श्री गणेश मित्र मंडळ"
+                    android:textColor="@color/text_primary"
+                    android:textSize="17sp"
+                    android:textStyle="bold" />
+
+                <!-- Address -->
+                <TextView
+                    android:id="@+id/tvMandalAddress"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="2dp"
+                    android:text="📍 माने/ढेरे वस्ती, बाळेवाडी"
+                    android:textColor="@color/text_secondary"
+                    android:textSize="13sp" />
+            </LinearLayout>
+        </LinearLayout>
 
         <View
             android:layout_width="match_parent"

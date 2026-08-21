@@ -57,6 +57,20 @@ public class MainActivity extends AppCompatActivity {
         String name = prefs.getString("USER_NAME", "सदस्य");
         String photoUrl = prefs.getString("USER_PHOTO_URL", "");
 
+        String mandalName = prefs.getString("MANDAL_NAME", getString(R.string.app_name));
+        String mandalAddress = prefs.getString("MANDAL_ADDRESS", getString(R.string.mandal_subtitle));
+        String mandalLogoUrl = prefs.getString("MANDAL_LOGO_URL", "");
+
+        TextView tvHeaderMandalName = findViewById(R.id.tvHeaderMandalName);
+        TextView tvHeaderMandalSubtitle = findViewById(R.id.tvHeaderMandalSubtitle);
+        ImageView ivHeaderMandalLogo = findViewById(R.id.ivHeaderMandalLogo);
+
+        if (tvHeaderMandalName != null) tvHeaderMandalName.setText(mandalName);
+        if (tvHeaderMandalSubtitle != null) tvHeaderMandalSubtitle.setText(mandalAddress);
+        if (ivHeaderMandalLogo != null && mandalLogoUrl != null && !mandalLogoUrl.trim().isEmpty()) {
+            Glide.with(this).load(mandalLogoUrl).placeholder(R.drawable.app_logo).error(R.drawable.app_logo).into(ivHeaderMandalLogo);
+        }
+
         boolean isAdmin = "ADMIN".equalsIgnoreCase(role) || "SUPER_ADMIN".equalsIgnoreCase(role);
 
         if (tvDrawerUserName != null) {
