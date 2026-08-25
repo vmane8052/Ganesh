@@ -300,7 +300,7 @@ public class SuperAdminActivity extends AppCompatActivity {
         if (mandal == null) return;
 
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
-        builder.setTitle("👤 ॲडमिन जोडा (" + mandal.getMandalName() + ")");
+        builder.setTitle("👤 ॲडमिन माहिती (" + mandal.getMandalName() + ")");
 
         LinearLayout layout = new LinearLayout(this);
         layout.setOrientation(LinearLayout.VERTICAL);
@@ -308,21 +308,24 @@ public class SuperAdminActivity extends AppCompatActivity {
 
         final EditText etName = new EditText(this);
         etName.setHint("ॲडमिनचे नाव (उदा. राहुल माने)");
+        if (mandal.getAdminName() != null) etName.setText(mandal.getAdminName());
         layout.addView(etName);
 
         final EditText etPhone = new EditText(this);
         etPhone.setHint("मोबाईल नंबर");
         etPhone.setInputType(InputType.TYPE_CLASS_PHONE);
+        if (mandal.getAdminPhone() != null) etPhone.setText(mandal.getAdminPhone());
         layout.addView(etPhone);
 
         final EditText etPin = new EditText(this);
         etPin.setHint("पासवर्ड / पिन (उदा. 1234)");
-        etPin.setInputType(InputType.TYPE_CLASS_NUMBER | InputType.TYPE_NUMBER_VARIATION_PASSWORD);
+        etPin.setInputType(InputType.TYPE_CLASS_NUMBER);
+        if (mandal.getAdminPin() != null) etPin.setText(mandal.getAdminPin());
         layout.addView(etPin);
 
         builder.setView(layout);
 
-        builder.setPositiveButton("ॲडमिन नियुक्त करा", (dialog, which) -> {
+        builder.setPositiveButton("ॲडमिन साठवा", (dialog, which) -> {
             String name = etName.getText().toString().trim();
             String phone = etPhone.getText().toString().trim();
             String pin = etPin.getText().toString().trim();
@@ -339,9 +342,10 @@ public class SuperAdminActivity extends AppCompatActivity {
                 @Override
                 public void onResponse(Call<LoginResponse> call, Response<LoginResponse> response) {
                     if (response.isSuccessful() && response.body() != null && response.body().isSuccess()) {
-                        Toast.makeText(SuperAdminActivity.this, "मंडळाचा ॲडमिन यशस्वीरीत्या जोडला गेला! (ID: " + mandal.getMandalId() + ")", Toast.LENGTH_LONG).show();
+                        Toast.makeText(SuperAdminActivity.this, "मंडळाचा ॲडमिन यशस्वीरीत्या साठवला गेला! (ID: " + mandal.getMandalId() + ")", Toast.LENGTH_LONG).show();
+                        fetchMandals();
                     } else {
-                        Toast.makeText(SuperAdminActivity.this, "ॲडमिन जोडताना एरर आला", Toast.LENGTH_SHORT).show();
+                        Toast.makeText(SuperAdminActivity.this, "ॲडमिन साठवताना एरर आला", Toast.LENGTH_SHORT).show();
                     }
                 }
 

@@ -4,6 +4,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
@@ -62,6 +63,22 @@ public class MandalAdapter extends RecyclerView.Adapter<MandalAdapter.ViewHolder
                     .into(holder.ivMandalLogo);
         }
 
+        // Bind Admin Information
+        boolean hasAdmin = m.getAdminPhone() != null && !m.getAdminPhone().trim().isEmpty();
+        if (hasAdmin) {
+            holder.layoutAdminInfo.setVisibility(View.VISIBLE);
+            holder.tvAdminName.setText("👑 ॲडमिन: " + (m.getAdminName() != null ? m.getAdminName() : "अज्ञात"));
+            holder.tvAdminPhone.setText("📱 मोबाईल: " + m.getAdminPhone());
+            holder.tvAdminPin.setText("🔑 पिन: " + (m.getAdminPin() != null ? m.getAdminPin() : "1234"));
+            holder.btnAddAdmin.setText("✏️ ॲडमिन बदला");
+        } else {
+            holder.layoutAdminInfo.setVisibility(View.VISIBLE);
+            holder.tvAdminName.setText("⚠️ ॲडमिन नियुक्त केलेला नाही");
+            holder.tvAdminPhone.setText("📱 मोबाईल: -");
+            holder.tvAdminPin.setText("🔑 पिन: -");
+            holder.btnAddAdmin.setText("👤 ॲडमिन जोडा");
+        }
+
         holder.btnEditMandal.setOnClickListener(v -> {
             if (listener != null) listener.onEditClick(m);
         });
@@ -78,6 +95,8 @@ public class MandalAdapter extends RecyclerView.Adapter<MandalAdapter.ViewHolder
 
     static class ViewHolder extends RecyclerView.ViewHolder {
         TextView tvMandalId, tvMandalName, tvMandalAddress, tvStatus;
+        TextView tvAdminName, tvAdminPhone, tvAdminPin;
+        LinearLayout layoutAdminInfo;
         ImageView ivMandalLogo;
         MaterialButton btnEditMandal, btnAddAdmin;
 
@@ -87,6 +106,10 @@ public class MandalAdapter extends RecyclerView.Adapter<MandalAdapter.ViewHolder
             tvMandalName = itemView.findViewById(R.id.tvMandalName);
             tvMandalAddress = itemView.findViewById(R.id.tvMandalAddress);
             tvStatus = itemView.findViewById(R.id.tvStatus);
+            layoutAdminInfo = itemView.findViewById(R.id.layoutAdminInfo);
+            tvAdminName = itemView.findViewById(R.id.tvAdminName);
+            tvAdminPhone = itemView.findViewById(R.id.tvAdminPhone);
+            tvAdminPin = itemView.findViewById(R.id.tvAdminPin);
             ivMandalLogo = itemView.findViewById(R.id.ivMandalLogo);
             btnEditMandal = itemView.findViewById(R.id.btnEditMandal);
             btnAddAdmin = itemView.findViewById(R.id.btnAddAdmin);

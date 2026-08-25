@@ -24,6 +24,15 @@ public class Mandal {
     @SerializedName("status")
     private String status; // "active" or "inactive"
 
+    @SerializedName("adminName")
+    private String adminName;
+
+    @SerializedName("adminPhone")
+    private String adminPhone;
+
+    @SerializedName("adminPin")
+    private String adminPin;
+
     public Mandal() {}
 
     public Mandal(String mandalName, String address, String contactPhone) {
@@ -40,6 +49,9 @@ public class Mandal {
     public String getContactPhone() { return contactPhone; }
     public String getLogoUrl() { return logoUrl; }
     public String getStatus() { return status; }
+    public String getAdminName() { return adminName; }
+    public String getAdminPhone() { return adminPhone; }
+    public String getAdminPin() { return adminPin; }
 
     public void setMandalId(String mandalId) { this.mandalId = mandalId; }
     public void setMandalName(String mandalName) { this.mandalName = mandalName; }
@@ -47,4 +59,7 @@ public class Mandal {
     public void setContactPhone(String contactPhone) { this.contactPhone = contactPhone; }
     public void setLogoUrl(String logoUrl) { this.logoUrl = logoUrl; }
     public void setStatus(String status) { this.status = status; }
+    public void setAdminName(String adminName) { this.adminName = adminName; }
+    public void setAdminPhone(String adminPhone) { this.adminPhone = adminPhone; }
+    public void setAdminPin(String adminPin) { this.adminPin = adminPin; }
 }

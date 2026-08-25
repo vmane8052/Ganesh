@@ -86,7 +86,13 @@ app.get('/api/health', (req, res) => {
 // --- MANDALS MANAGEMENT (Multi-Tenant Endpoints) ---
 app.get('/api/mandals', async (req, res) => {
   try {
-    const mandals = await Mandal.find().sort({ createdAt: 1 });
+    const mandals = await Mandal.find().sort({ createdAt: 1 }).lean();
+    for (let m of mandals) {
+      const adminUser = await User.findOne({ mandalId: m.mandalId, role: 'ADMIN' }).select('name phone pin roleInMandal').lean();
+      m.adminName = adminUser ? adminUser.name : '';
+      m.adminPhone = adminUser ? adminUser.phone : '';
+      m.adminPin = adminUser ? adminUser.pin : '';
+    }
     res.json({ success: true, data: mandals });
   } catch (err) {
     res.status(500).json({ success: false, error: err.message });
