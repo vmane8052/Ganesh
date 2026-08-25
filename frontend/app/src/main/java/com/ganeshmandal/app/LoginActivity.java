@@ -25,7 +25,6 @@ public class LoginActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        ApiClient.init(getApplicationContext());
 
         prefs = getSharedPreferences("MandalPrefs", MODE_PRIVATE);
         boolean isLoggedIn = prefs.getBoolean("IS_LOGGED_IN", false);
@@ -61,28 +60,21 @@ public class LoginActivity extends AppCompatActivity {
             public void onResponse(Call<LoginResponse> call, Response<LoginResponse> response) {
                 if (response.isSuccessful() && response.body() != null && response.body().isSuccess() && response.body().getUser() != null) {
                     User u = response.body().getUser();
-                    String token = response.body().getToken();
                     prefs.edit()
                             .putString("USER_ROLE", u.getRole())
                             .putString("USER_NAME", u.getName())
-                            .putString("USER_PHONE", u.getPhone())
-                            .putString("USER_PIN", pin)
                             .putString("USER_ROLE_IN_MANDAL", u.getRoleInMandal())
                             .putString("USER_PHOTO_URL", u.getPhotoUrl() != null ? u.getPhotoUrl() : "")
-                            .putString("MANDAL_ID", u.getMandalId())
-                            .putString("MANDAL_NAME", u.getMandalName())
-                            .putString("MANDAL_ADDRESS", u.getMandalAddress())
-                            .putString("MANDAL_LOGO_URL", u.getMandalLogoUrl())
-                            .putString("JWT_TOKEN", token != null ? token : "")
                             .apply();
 
                     Intent intent = new Intent(LoginActivity.this, MainActivity.class);
                     startActivity(intent);
                     finish();
                 } else {
+                    // Password was changed! Cancel auto-login and ask to login again with new password
                     prefs.edit().clear().apply();
+                    Toast.makeText(LoginActivity.this, "पासवर्ड बदलला आहे, कृपया नवीन पासवर्डने पुन्हा लॉगिन करा.", Toast.LENGTH_LONG).show();
                     initLoginUi();
-                    Toast.makeText(LoginActivity.this, "सत्र संपले आहे. कृपया पुन्हा लॉगिन करा.", Toast.LENGTH_LONG).show();
                 }
             }
 
@@ -120,7 +112,6 @@ public class LoginActivity extends AppCompatActivity {
 
                 if (response.isSuccessful() && response.body() != null && response.body().isSuccess() && response.body().getUser() != null) {
                     User u = response.body().getUser();
-                    String token = response.body().getToken();
                     prefs.edit()
                             .putBoolean("IS_LOGGED_IN", true)
                             .putString("USER_ROLE", u.getRole())
@@ -133,7 +124,6 @@ public class LoginActivity extends AppCompatActivity {
                             .putString("MANDAL_NAME", u.getMandalName())
                             .putString("MANDAL_ADDRESS", u.getMandalAddress())
                             .putString("MANDAL_LOGO_URL", u.getMandalLogoUrl())
-                            .putString("JWT_TOKEN", token != null ? token : "")
                             .apply();
 
                     String welcome = "स्वागत आहे, " + u.getName();

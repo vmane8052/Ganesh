@@ -82,16 +82,6 @@ const gallerySchema = new mongoose.Schema({
   mandalId: { type: String, default: 'M001' }
 }, { timestamps: true });
 
-// Audit Log Schema (Security Tracking)
-const auditLogSchema = new mongoose.Schema({
-  userId: { type: String, default: '' },
-  userName: { type: String, default: '' },
-  mandalId: { type: String, default: '' },
-  action: { type: String, required: true },
-  details: { type: String, default: '' },
-  ip: { type: String, default: '' }
-}, { timestamps: true });
-
 module.exports = {
   Mandal: mongoose.models.Mandal || mongoose.model('Mandal', mandalSchema),
   User: mongoose.models.User || mongoose.model('User', userSchema),
@@ -99,6 +89,5 @@ module.exports = {
   Member: mongoose.models.Member || mongoose.model('Member', memberSchema),
   Event: mongoose.models.Event || mongoose.model('Event', eventSchema),
   Donation: mongoose.models.Donation || mongoose.model('Donation', donationSchema),
-  Gallery: mongoose.models.Gallery || mongoose.model('Gallery', gallerySchema),
-  AuditLog: mongoose.models.AuditLog || mongoose.model('AuditLog', auditLogSchema)
+  Gallery: mongoose.models.Gallery || mongoose.model('Gallery', gallerySchema)
 };
