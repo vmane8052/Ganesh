@@ -333,6 +333,100 @@ app.post('/api/login', loginRateLimiter, async (req, res) => {
   }
 });
 
+// --- FORGOT PIN & RESET PIN VIA MOBILE OTP ---
+app.post('/api/auth/forgot-pin', async (req, res) => {
+  try {
+    const { phone } = req.body || {};
+    if (!phone) {
+      return res.status(400).json({ success: false, message: 'कृपया मोबाईल नंबर टाका' });
+    }
+
+    const cleanPhone = String(phone).replace(/\D/g, '');
+    const user = await User.findOne({
+      $or: [
+        { phone: cleanPhone },
+        { phone: String(phone).trim() },
+        { phone: cleanPhone.length === 9 ? cleanPhone + cleanPhone.slice(-1) : cleanPhone },
+        { phone: cleanPhone.length === 10 ? cleanPhone.slice(0, 9) : cleanPhone }
+      ]
+    });
+
+    if (!user) {
+      return res.status(404).json({ success: false, message: 'हा मोबाईल नंबर नोंदणीकृत नाही!' });
+    }
+
+    // Generate 6-digit random OTP & 5-minute expiry
+    const otp = Math.floor(100000 + Math.random() * 900000).toString();
+    const otpExpires = new Date(Date.now() + 5 * 60 * 1000);
+
+    user.resetOtp = otp;
+    user.resetOtpExpires = otpExpires;
+    await user.save();
+
+    console.log(`[OTP DEBUG] Mobile: ${cleanPhone}, Reset OTP: ${otp}`);
+
+    await logAuditAction(user._id, user.name, user.mandalId, 'FORGOT_PIN_REQUEST', `OTP generated for phone ${cleanPhone}`, req);
+
+    res.json({
+      success: true,
+      message: 'OTP तुमच्या मोबाईल नंबरवर पाठवला आहे!',
+      debugOtp: otp
+    });
+  } catch (err) {
+    console.error('Forgot PIN error:', err);
+    res.status(500).json({ success: false, message: 'OTP पाठवताना समस्या आली' });
+  }
+});
+
+app.post('/api/auth/reset-pin', async (req, res) => {
+  try {
+    const { phone, otp, newPin } = req.body || {};
+    if (!phone || !otp || !newPin) {
+      return res.status(400).json({ success: false, message: 'कृपया मोबाईल नंबर, OTP आणि नवा PIN टाका' });
+    }
+
+    const cleanPhone = String(phone).replace(/\D/g, '');
+    const cleanOtp = String(otp).trim();
+    const cleanNewPin = String(newPin).trim();
+
+    const user = await User.findOne({
+      $or: [
+        { phone: cleanPhone },
+        { phone: String(phone).trim() }
+      ]
+    });
+
+    if (!user) {
+      return res.status(404).json({ success: false, message: 'युझर सापडला नाही' });
+    }
+
+    if (!user.resetOtp || user.resetOtp !== cleanOtp) {
+      return res.status(400).json({ success: false, message: 'चुकीचा (Invalid) OTP टाकला आहे!' });
+    }
+
+    if (new Date() > user.resetOtpExpires) {
+      return res.status(400).json({ success: false, message: 'OTP ची मुदत संपली आहे. कृपया पुन्हा OTP मागवा.' });
+    }
+
+    // Hash the new PIN securely using bcrypt
+    const hashedPin = await bcrypt.hash(cleanNewPin, 10);
+    user.pin = hashedPin;
+    user.resetOtp = null;
+    user.resetOtpExpires = null;
+    await user.save();
+
+    await logAuditAction(user._id, user.name, user.mandalId, 'RESET_PIN_SUCCESS', `PIN reset successfully for phone ${cleanPhone}`, req);
+
+    res.json({
+      success: true,
+      message: 'तुमचा PIN यशस्वीरीत्या बदलला आहे! आता नव्या PIN ने लॉगिन करा.'
+    });
+  } catch (err) {
+    console.error('Reset PIN error:', err);
+    res.status(500).json({ success: false, message: 'PIN बदलताना समस्या आली' });
+  }
+});
+
 // --- USERS / MEMBERS (Strict Tenant Isolation) ---
 app.get('/api/users', async (req, res) => {
   try {

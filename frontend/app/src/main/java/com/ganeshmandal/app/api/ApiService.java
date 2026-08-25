@@ -40,6 +40,12 @@ public interface ApiService {
     @POST("api/login")
     Call<LoginResponse> login(@Body Map<String, String> credentials);
 
+    @POST("api/auth/forgot-pin")
+    Call<com.ganeshmandal.app.models.GenericResponse> forgotPin(@Body Map<String, String> payload);
+
+    @POST("api/auth/reset-pin")
+    Call<com.ganeshmandal.app.models.GenericResponse> resetPin(@Body Map<String, String> payload);
+
     @GET("api/transactions")
     Call<TransactionResponse> getTransactions(@Query("type") String type, @Query("mandalId") String mandalId);
 
