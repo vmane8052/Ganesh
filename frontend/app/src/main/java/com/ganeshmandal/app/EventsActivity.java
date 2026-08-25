@@ -97,6 +97,7 @@ public class EventsActivity extends AppCompatActivity {
                     this, cacheKey, new com.google.gson.reflect.TypeToken<List<MandalEvent>>(){}.getType());
             if (cached != null && !cached.isEmpty()) {
                 allEvents = cached;
+                sortEventsByDay(allEvents);
                 adapter.setEvents(allEvents);
                 tvEmpty.setVisibility(allEvents.isEmpty() ? View.VISIBLE : View.GONE);
             }
@@ -109,6 +110,7 @@ public class EventsActivity extends AppCompatActivity {
                 if (response.isSuccessful() && response.body() != null && response.body().isSuccess()) {
                     List<MandalEvent> list = response.body().getData();
                     allEvents = list != null ? list : new ArrayList<>();
+                    sortEventsByDay(allEvents);
                     com.ganeshmandal.app.utils.CacheManager.saveCache(EventsActivity.this, cacheKey, allEvents);
                     adapter.setEvents(allEvents);
                     tvEmpty.setVisibility(allEvents.isEmpty() ? View.VISIBLE : View.GONE);
@@ -129,12 +131,41 @@ public class EventsActivity extends AppCompatActivity {
                 this, cacheKey, new com.google.gson.reflect.TypeToken<List<MandalEvent>>(){}.getType());
         if (cached != null && !cached.isEmpty()) {
             allEvents = cached;
+            sortEventsByDay(allEvents);
             adapter.setEvents(allEvents);
             tvEmpty.setVisibility(allEvents.isEmpty() ? View.VISIBLE : View.GONE);
             Toast.makeText(this, "📶 ऑफलाईन मोड: साठवलेले कार्यक्रम दाखवत आहोत", Toast.LENGTH_SHORT).show();
         } else {
             Toast.makeText(this, "डेटाबेस नेटवर्क एरर. कृपया इंटरनेट सुरू करा.", Toast.LENGTH_SHORT).show();
         }
+    }
+
+    private void sortEventsByDay(List<MandalEvent> list) {
+        if (list == null || list.isEmpty()) return;
+        java.util.Collections.sort(list, (e1, e2) -> {
+            int d1 = extractDayNumber(e1.getDayTitle());
+            int d2 = extractDayNumber(e2.getDayTitle());
+            if (d1 != d2) return Integer.compare(d1, d2);
+            if (e1.getDate() != null && e2.getDate() != null) {
+                return e1.getDate().compareTo(e2.getDate());
+            }
+            return 0;
+        });
+    }
+
+    private int extractDayNumber(String title) {
+        if (title == null || title.trim().isEmpty()) return 999;
+        String clean = title.replace('१', '1').replace('२', '2').replace('३', '3')
+                            .replace('४', '4').replace('५', '5').replace('६', '6')
+                            .replace('७', '7').replace('८', '8').replace('९', '9')
+                            .replace('०', '0');
+        java.util.regex.Matcher matcher = java.util.regex.Pattern.compile("\\d+").matcher(clean);
+        if (matcher.find()) {
+            try {
+                return Integer.parseInt(matcher.group());
+            } catch (Exception ignored) {}
+        }
+        return 999;
     }
 
     private void deleteEventRemote(MandalEvent event, int pos) {

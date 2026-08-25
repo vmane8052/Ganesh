@@ -463,7 +463,25 @@ app.post('/api/members', async (req, res) => {
 app.get('/api/events', async (req, res) => {
   try {
     const targetMandalId = req.query.mandalId || 'M001';
-    const events = await Event.find({ mandalId: targetMandalId }).sort({ createdAt: 1 });
+    const events = await Event.find({ mandalId: targetMandalId }).lean();
+
+    events.sort((a, b) => {
+      const getDayNum = (title) => {
+        if (!title) return 999;
+        const clean = title.replace(/[१1]/g, '1').replace(/[२2]/g, '2').replace(/[३3]/g, '3')
+                           .replace(/[४4]/g, '4').replace(/[५5]/g, '5').replace(/[६6]/g, '6')
+                           .replace(/[७7]/g, '7').replace(/[८8]/g, '8').replace(/[९9]/g, '9')
+                           .replace(/[०0]/g, '0');
+        const match = clean.match(/\d+/);
+        return match ? parseInt(match[0], 10) : 999;
+      };
+
+      const numA = getDayNum(a.dayTitle);
+      const numB = getDayNum(b.dayTitle);
+      if (numA !== numB) return numA - numB;
+      return (a.date || '').localeCompare(b.date || '');
+    });
+
     res.json({ success: true, data: events });
   } catch (err) {
     res.status(500).json({ success: false, error: err.message });
