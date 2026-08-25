@@ -18,9 +18,7 @@ const userSchema = new mongoose.Schema({
   role: { type: String, enum: ['SUPER_ADMIN', 'ADMIN', 'USER'], default: 'USER' },
   roleInMandal: { type: String, default: 'सामान्य सदस्य' },
   photoUrl: { type: String, default: '' },
-  mandalId: { type: String, default: 'M001' },
-  resetOtp: { type: String, default: null },
-  resetOtpExpires: { type: Date, default: null }
+  mandalId: { type: String, default: 'M001' }
 }, { timestamps: true });
 
 // Compound unique index for phone + mandalId so same phone can belong to different mandals if needed
