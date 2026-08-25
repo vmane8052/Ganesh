@@ -363,14 +363,33 @@ app.post('/api/auth/forgot-pin', async (req, res) => {
     user.resetOtpExpires = otpExpires;
     await user.save();
 
-    console.log(`[OTP DEBUG] Mobile: ${cleanPhone}, Reset OTP: ${otp}`);
+    // Send SMS via Fast2SMS if FAST2SMS_API_KEY is set in environment
+    const fast2smsApiKey = process.env.FAST2SMS_API_KEY;
+    if (fast2smsApiKey) {
+      try {
+        const axios = require('axios');
+        await axios.post('https://www.fast2sms.com/dev/bulkV2', {
+          route: 'otp',
+          variables_values: otp,
+          numbers: cleanPhone
+        }, {
+          headers: {
+            'authorization': fast2smsApiKey
+          }
+        });
+        console.log(`[SMS SENT] Fast2SMS OTP sent successfully to ${cleanPhone}`);
+      } catch (smsErr) {
+        console.error('[SMS ERROR] Fast2SMS error:', smsErr?.response?.data || smsErr.message);
+      }
+    } else {
+      console.log(`[OTP CONSOLE LOG] Mobile: ${cleanPhone}, Reset OTP: ${otp} (Set FAST2SMS_API_KEY in .env for real SMS)`);
+    }
 
     await logAuditAction(user._id, user.name, user.mandalId, 'FORGOT_PIN_REQUEST', `OTP generated for phone ${cleanPhone}`, req);
 
     res.json({
       success: true,
-      message: 'OTP तुमच्या मोबाईल नंबरवर पाठवला आहे!',
-      debugOtp: otp
+      message: 'OTP तुमच्या मोबाईल नंबरवर पाठवला आहे!'
     });
   } catch (err) {
     console.error('Forgot PIN error:', err);

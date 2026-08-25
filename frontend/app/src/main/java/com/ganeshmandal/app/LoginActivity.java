@@ -222,10 +222,8 @@ public class LoginActivity extends AppCompatActivity {
                     public void onResponse(Call<GenericResponse> call, Response<GenericResponse> response) {
                         if (response.isSuccessful() && response.body() != null && response.body().isSuccess()) {
                             Toast.makeText(LoginActivity.this, response.body().getMessage(), Toast.LENGTH_LONG).show();
-                            if (response.body().getDebugOtp() != null) {
-                                inputOtp.setText(response.body().getDebugOtp());
-                            }
                             inputPhone.setEnabled(false);
+                            inputOtp.setText("");
                             inputOtp.setVisibility(View.VISIBLE);
                             inputNewPin.setVisibility(View.VISIBLE);
                             dialog.getButton(AlertDialog.BUTTON_POSITIVE).setText("PIN रीसेट करा");
