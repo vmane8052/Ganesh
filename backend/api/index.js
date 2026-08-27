@@ -589,7 +589,30 @@ app.post('/api/upload', async (req, res) => {
     }
 
     if (phone) {
-      await User.findOneAndUpdate({ phone, mandalId: targetMandalId }, { photoUrl: finalUrl });
+      const cleanPhone = String(phone).replace(/\D/g, '');
+      const filter = {
+        $or: [
+          { phone: cleanPhone },
+          { phone: String(phone).trim() }
+        ]
+      };
+      if (mandalId) {
+        filter.mandalId = mandalId;
+      }
+      
+      let updatedUser = await User.findOneAndUpdate(filter, { photoUrl: finalUrl }, { new: true });
+      if (!updatedUser) {
+        // Fallback: update by phone alone so M002, M003, etc. always succeed
+        await User.findOneAndUpdate(
+          {
+            $or: [
+              { phone: cleanPhone },
+              { phone: String(phone).trim() }
+            ]
+          },
+          { photoUrl: finalUrl }
+        );
+      }
     }
 
     res.json({ success: true, message: 'फोटो यशस्वीरीत्या सेव्ह झाला', photoUrl: finalUrl });

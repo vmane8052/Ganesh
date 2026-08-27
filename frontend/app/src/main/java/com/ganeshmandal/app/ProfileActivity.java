@@ -246,6 +246,7 @@ public class ProfileActivity extends AppCompatActivity {
             Map<String, String> payload = new HashMap<>();
             payload.put("image", base64Image);
             payload.put("phone", userPhone);
+            payload.put("mandalId", prefs.getString("MANDAL_ID", "M001"));
 
             // Upload to Cloudinary / Backend API
             ApiClient.getService().uploadPhoto(payload).enqueue(new Callback<UploadResponse>() {
