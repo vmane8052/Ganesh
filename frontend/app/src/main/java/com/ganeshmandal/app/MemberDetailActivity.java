@@ -262,6 +262,7 @@ public class MemberDetailActivity extends AppCompatActivity {
                     Toast.makeText(MemberDetailActivity.this, "डेटाबेस व Cloudinary वर सेव्ह होत आहे...", Toast.LENGTH_SHORT).show();
 
                     User updatedUser = new User(name, phone, pin, role, roleInMandal, newPhoto);
+                    updatedUser.setMandalId(prefs.getString("MANDAL_ID", "M001"));
 
                     // Sync update directly with MongoDB Atlas & Cloudinary via API
                     ApiClient.getService().updateUser(oldPhone, updatedUser).enqueue(new Callback<LoginResponse>() {

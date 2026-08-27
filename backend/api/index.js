@@ -316,27 +316,53 @@ app.post('/api/users/change-password', async (req, res) => {
 app.put('/api/users/phone/:phone', async (req, res) => {
   try {
     const { phone } = req.params;
-    const { name, pin, role, roleInMandal, photoUrl, mandalId } = req.body;
-    const targetMandalId = mandalId || req.query.mandalId || 'M001';
+    const { name, pin, role, roleInMandal, photoUrl, mandalId } = req.body || {};
+    const targetMandalId = mandalId || req.query.mandalId || null;
 
-    let finalPhotoUrl = photoUrl || '';
+    let updateFields = {};
+    if (name) updateFields.name = name;
+    if (pin) updateFields.pin = pin;
+    if (role) updateFields.role = role;
+    if (roleInMandal) updateFields.roleInMandal = roleInMandal;
+
     if (photoUrl && photoUrl.startsWith('data:image')) {
       try {
         const uploadRes = await cloudinary.uploader.upload(photoUrl, {
           folder: 'ganesh_mandal_profiles',
           transformation: [{ width: 500, height: 500, crop: 'fill', gravity: 'face' }]
         });
-        finalPhotoUrl = uploadRes.secure_url;
+        updateFields.photoUrl = uploadRes.secure_url;
       } catch (uploadErr) {
         console.error('Cloudinary upload error:', uploadErr);
       }
+    } else if (photoUrl) {
+      updateFields.photoUrl = photoUrl;
     }
 
-    const updatedUser = await User.findOneAndUpdate(
-      { phone, mandalId: targetMandalId },
-      { name, pin, role, roleInMandal, photoUrl: finalPhotoUrl },
-      { new: true }
-    );
+    const cleanPhone = String(phone).replace(/\D/g, '');
+    let filter = {
+      $or: [
+        { phone: cleanPhone },
+        { phone: String(phone).trim() }
+      ]
+    };
+    if (targetMandalId) filter.mandalId = targetMandalId;
+
+    let updatedUser = await User.findOneAndUpdate(filter, updateFields, { new: true });
+    if (!updatedUser && targetMandalId) {
+      // Fallback: search by phone alone if mandalId didn't match
+      updatedUser = await User.findOneAndUpdate(
+        {
+          $or: [
+            { phone: cleanPhone },
+            { phone: String(phone).trim() }
+          ]
+        },
+        updateFields,
+        { new: true }
+      );
+    }
+
     if (!updatedUser) {
       return res.status(404).json({ success: false, message: 'सदस्य सापडला नाही' });
     }
@@ -349,8 +375,27 @@ app.put('/api/users/phone/:phone', async (req, res) => {
 app.delete('/api/users/phone/:phone', async (req, res) => {
   try {
     const { phone } = req.params;
-    const targetMandalId = req.query.mandalId || 'M001';
-    const deletedUser = await User.findOneAndDelete({ phone, mandalId: targetMandalId });
+    const targetMandalId = req.query.mandalId || req.body?.mandalId || null;
+    const cleanPhone = String(phone).replace(/\D/g, '');
+
+    let filter = {
+      $or: [
+        { phone: cleanPhone },
+        { phone: String(phone).trim() }
+      ]
+    };
+    if (targetMandalId) filter.mandalId = targetMandalId;
+
+    let deletedUser = await User.findOneAndDelete(filter);
+    if (!deletedUser && targetMandalId) {
+      deletedUser = await User.findOneAndDelete({
+        $or: [
+          { phone: cleanPhone },
+          { phone: String(phone).trim() }
+        ]
+      });
+    }
+
     if (!deletedUser) {
       return res.status(404).json({ success: false, message: 'सदस्य सापडला नाही' });
     }
